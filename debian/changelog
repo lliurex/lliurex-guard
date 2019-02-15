@@ -1,3 +1,9 @@
+lliurex-guard (4.4.16) bionic; urgency=medium
+
+  * Initial release for bionic
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 15 Feb 2019 10:41:32 +0100
+
 lliurex-guard (4.4.6) xenial; urgency=high
 
   * Adding sudo group
