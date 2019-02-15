@@ -2,8 +2,8 @@ Source: lliurex-guard
 Section: admin
 Priority: extra
 Maintainer: David Montalva Furio <montalva_dav@gva.es> 
-Build-Depends: debhelper (>= 8.0.0), zero-dev, llxcfg-dev
-Standards-Version: 3.9.3
+Build-Depends: debhelper (>= 10), zero-dev, llxcfg-dev
+Standards-Version: 4.1.2
 Homepage: http://www.lliurex.net
 #Vcs-Git: git://git.debian.org/collab-maint/lliurex-guard.git
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/lliurex-guard.git;a=summary
