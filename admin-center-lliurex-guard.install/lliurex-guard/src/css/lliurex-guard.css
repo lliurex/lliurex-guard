@@ -1,0 +1,28 @@
+
+#llx-guard-main-header{
+  margin: 0px;
+  padding: 0px;
+  width: auto;
+  height: 300px;
+  background: url(images/headerbackground.png);
+}
+
+#llx-guard-lite-header{
+  margin: 0px;
+  padding: 0px;
+  width: auto;
+  height: 100px;
+  background: url(images/headerbackground_lite.png);
+}
+
+
+#llx-guard-main-description{
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.radiodescription{
+    margin-left: 50px;
+    font-size: 0.9em;
+}
+

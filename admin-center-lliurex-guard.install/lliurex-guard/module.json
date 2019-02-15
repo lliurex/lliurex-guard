@@ -1,0 +1,32 @@
+{
+  "id": "lliurex-guard",
+  "version": "0.1",
+  "name": "LliureX Guard",
+  "description": "lliurex_guard_short_description",
+  "main":"main.html",
+  "icon":"lliurex-guard-content-filter.png",
+  "help":"lliurex-guard.md",
+  "banner":"headerbackground.png",
+  "roles":"teachers",
+  "components":
+    [
+      {
+        "menuEntry":"Set Default Policy",
+        "id":"lliurex-guard_set_policy",
+        "main":"setpolicy.html",
+        "icon":"lliurex-guard-content-filter.png"
+      },
+      {
+        "menuEntry":"Edit Blacklist",
+        "id":"lliurex-guard_edit_blacklist",
+        "main":"blacklist.html",
+        "icon":"blacklist.png"
+      },
+      {
+        "menuEntry":"Edit Whitelist",
+        "id":"lliurex-guard_edit_whitelist",
+        "main":"whitelist.html",
+        "icon":"whitelist.png"
+      }
+    ]
+}
