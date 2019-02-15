@@ -1,0 +1,66 @@
+lliurex-guard (4.4.6) xenial; urgency=high
+
+  * Adding sudo group
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 13 Feb 2019 09:22:35 +0100
+
+lliurex-guard (4.4.4) xenial; urgency=high
+
+  * Trimming elements for Customize list 
+
+ -- Daniel Duran Vecino <daduve@gmail.com>  Tue, 29 May 2018 14:36:08 +0200
+
+lliurex-guard (4.4.3) xenial; urgency=high
+
+  * Added teachers role for module
+
+ -- Jose A. Murcia <joamuran@gmail.com>  Tue, 31 Oct 2017 11:45:23 +0100
+
+lliurex-guard (4.4.2) xenial; urgency=high
+
+  * Fixed js asyncronous n4d call
+  * Fixed i18n
+
+ --  <joamuran@gmail.com>  Wed, 18 Jan 2017 14:47:36 +0100
+
+lliurex-guard (4.4.1) xenial; urgency=high
+
+  * Added short module description
+
+ --  <joamuran@gmail.com>  Wed, 14 Dec 2016 10:04:22 +0100
+
+lliurex-guard (4.4) xenial; urgency=high
+
+  * Fixed aspect for admin-center
+
+ --  <jose@gmail.com>  Fri, 09 Dec 2016 14:06:18 +0100
+
+lliurex-guard (4.3) xenial; urgency=high
+
+  * Adding foreing langugages
+
+ -- joamuran <joamuran@gmail.com>  Mon, 02 May 2016 14:20:14 +0200
+
+lliurex-guard (4.2) xenial; urgency=high
+
+  * fixed service invocation with invoke-rc.d
+
+ -- joamuran <joamuran@xen>  Mon, 02 May 2016 11:17:23 +0200
+
+lliurex-guard (4-1) xenial; urgency=medium
+
+  * Fix squid3->squid
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Fri, 08 Apr 2016 13:11:45 +0200
+
+lliurex-guard (4) xenial; urgency=medium
+
+  * Updated squid3->squid paths
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Fri, 08 Apr 2016 12:13:37 +0200
+
+lliurex-guard (3) xenial; urgency=high
+
+  * Xenial release of lliurex-guard-easy2
+
+ -- joamuran <joamuran@gmail.com>  Fri, 01 Apr 2016 10:15:21 +0200

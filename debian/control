@@ -1,0 +1,25 @@
+Source: lliurex-guard
+Section: admin
+Priority: extra
+Maintainer: David Montalva Furio <montalva_dav@gva.es> 
+Build-Depends: debhelper (>= 8.0.0), zero-dev, llxcfg-dev
+Standards-Version: 3.9.3
+Homepage: http://www.lliurex.net
+#Vcs-Git: git://git.debian.org/collab-maint/lliurex-guard.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/lliurex-guard.git;a=summary
+
+Package: admin-center-lliurex-guard
+Conflicts: lliurex-guard-easy-gui
+Replaces: lliurex-guard-easy-gui
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, admin-center, lliurex-guard-n4d
+Description: LliureX Guard Module For Admin Center.
+ This interface allows one to edit the configuration
+ filters of squid3 and save it through web Admin Center.
+ 
+Package: lliurex-guard-n4d
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, squid, n4d-lliurex-base ( >= 0.6 ), lliurex-guard-data ( >=0.4 )
+Recommends: admin-center-lliurex-guard
+Description: Easy interface to manage Squid3 filters 
+ N4d methods for lliurex guard easy. 
