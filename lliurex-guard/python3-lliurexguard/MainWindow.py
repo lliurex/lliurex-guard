@@ -49,7 +49,7 @@ class MainWindow:
 		
 		self.main_window=builder.get_object("main_window")
 		self.main_window.set_title("LliureX Guard")
-		self.main_window.resize(800,745)
+		self.main_window.resize(802,745)
 		self.main_box=builder.get_object("main_box")
 		
 		self.banner_box=builder.get_object("banner_box")
