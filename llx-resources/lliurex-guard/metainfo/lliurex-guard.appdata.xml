@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<component type="desktop-application">
+<id>lliurex-guard</id>
+<metadata_license>CC0-1.0</metadata_license>
+<name>Web content filter</name>
+<name xml:lang="es">Filtro de contenidos web</name>
+<name xml:lang="ca_ES.UTF-8@valencia">Filtre de continguts web</name>
+<name xml:lang="ca_ES@valencia">Filtre de continguts web</name>
+<name xml:lang="ca_ES">Filtre de continguts web</name>
+<summary>Allows you to configure the websites that may be accessible</summary>
+<summary xml:lang="es">Permite configurar los contenidos web que podrán ser accesibles</summary>
+<summary xml:lang="ca_ES.UTF-8@valencia">Permet configurar els continguts webs que podran ser accessibles</summary>
+<summary xml:lang="ca_ES@valencia">Permet configurar els continguts webs que podran ser accessibles</summary>
+<summary xml:lang="ca_ES">Permet configurar els continguts webs que podran ser accessibles</summary>
+<description>
+<p>Creación de lugares Web</p>
+<p xml:lang="es">Permite configurar los contenidos web que podrán ser accesibles. Mediante la definición de listas negras y blancas se puede configurar el dnsmasq de forma que se filtre el contenido web que puede ser accesibles</p>
+<p xml:lang="ca_ES.UTF-8@valencia">Permet configurar els continguts webs que podran ser accessibles. Mitjançant la definició de llistes negres i blanques es pot configurar el dnsmasq de manera que es filtre el contingut web que pot ser accessibles.</p>
+<p xml:lang="ca_ES@valencia">Permet configurar els continguts webs que podran ser accessibles. Mitjançant la definició de llistes negres i blanques es pot configurar el dnsmasq de manera que es filtre el contingut web que pot ser accessibles.</p>
+<p xml:lang="ca_ES">Permet configurar els continguts webs que podran ser accessibles. Mitjançant la definició de llistes negres i blanques es pot configurar el dnsmasq de manera que es filtre el contingut web que pot ser accessibles.</p>
+</description>
+<categories>
+<category>System</category>
+</categories>
+<icon type="stock">lliurex-guard</icon>
+<provides><binary>pe</binary></provides>
+<keywords>
+<keyword>lliurex-guard</keyword>
+<keyword>Filtro</keyword>
+<keyword>Contenido</keyword>
+<keyword>Web</keyword>
+<keyword>Filtre</keyword>
+<keyword>continguts</keyword>
+<keyword>dnsmasq</keyword>
+
+</keywords>
+<developer_name> </developer_name>
+</component>
