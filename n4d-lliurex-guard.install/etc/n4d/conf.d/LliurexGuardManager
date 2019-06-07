@@ -1,0 +1,14 @@
+[SETUP]
+type=python
+path=LliurexGuardManager.py
+class=LliurexGuardManager
+[METHODS]
+read_guardmode=*,anonymous
+change_guardmode=sudo,admins
+read_guardmode_headers=*,anonymus
+read_guardmode_list=*,anonymus
+remove_guardmode_list=sudo,admins
+activate_guardmode_list=sudo,admins
+deactivate_guardmode_list=sudo,admins
+restart_dnsmasq=sudo,admins
+remove_tmp_file=sudo,admins

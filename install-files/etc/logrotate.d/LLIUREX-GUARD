@@ -1,0 +1,9 @@
+/var/log/LLIUREX-GUARD.log{
+	monthly
+	missingok
+	rotate 7
+	compress
+	maxsize 10M
+	notifempty
+}
+

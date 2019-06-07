@@ -1,0 +1,246 @@
+	@define-color arc-blue #0062f5;
+	@define-color arc-blue-light #4accf5;
+	@define-color arc-black #2d323d;
+	@define-color arc-red #000000;
+	@define-color arc-blue-hover #629de2;
+	@define-color arc-blue-active #3aa3e2;
+	@define-color default-grey #666666;
+
+
+	GtkLabel {
+		font: 12pt Roboto;
+	}
+	
+	#OPTION_LABEL {
+		color: #707070;
+		font: 11pt Roboto Light;
+
+	}
+
+	
+	#LIST_NAME{
+		color: #3366cc;
+		font: 14pt Roboto Bold;
+
+
+	}
+
+	#LIST_LINE{
+		color: #3366cc;
+		font: 12pt Roboto Bold;
+
+
+	}
+
+	#LIST_DESC{
+		color: #000000;
+		font: 10pt Roboto Bold;
+
+
+	}
+
+
+	#HEADER-LABEL
+	{
+	color: @arc-blue;
+	font: 11pt Quattrocento Sans Bold;
+	font-weight: bold;
+	}	
+
+
+	#SEPARATOR{
+		
+		background-color: #b3b3b3;
+
+	}
+
+	#IMAGE_BANNER{
+		background-color:#000000;
+
+	}
+
+	#CONTENT-SEPARATOR{
+		background-color:#b3b3b3;
+
+	}
+
+	#WHITE_SEPARATOR{
+		
+		background-color: #ffffff;
+
+	}
+
+	#EDIT_ITEM_BUTTON {
+			border-width: 5px;
+			border-radius: 0px;
+			padding: 0px 0px;
+			box-shadow: none;
+			border-color: #4784ed;
+			
+			color: white;
+			background-image:-gtk-gradient (linear,	left top, left bottom, from (#4784ed),  to (#4784ed));
+			text-shadow: none;
+			
+	}
+		
+	#EDIT_ITEM_BUTTON:hover {
+		border-color: #7ea8f2;
+		background-image:-gtk-gradient (linear,	left top, left bottom, from (#7ea8f2),  to (#7ea8f2));
+		box-shadow: -0.5px 3px 3px #aaaaaa;
+	}
+
+
+	#GUARD_ENABLED_BUTTON {
+			border-width: 5px;
+			border-radius: 0px;
+			padding: 0px 0px;
+			box-shadow: none;
+			border-color: #3dbb55;
+			
+			color: white;
+			background-image:-gtk-gradient (linear,	left top, left bottom, from (#3dbb55),  to (#3dbb55));
+			text-shadow: none;
+			
+	}
+	
+	#GUARD_ENABLED_BUTTON:hover {
+		border-color: #77cf88;
+		background-image:-gtk-gradient (linear,	left top, left bottom, from (#77cf88),  to (#77cf88));
+		box-shadow: -0.5px 3px 3px #aaaaaa;
+	}
+
+
+	#GUARD_DISABLED_BUTTON {
+			border-width: 5px;
+			border-radius: 0px;
+			padding: 0px 0px;
+			box-shadow: none;
+			border-color: #db3237;
+			
+			color: white;
+			background-image:-gtk-gradient (linear,	left top, left bottom, from (#db3237),  to (#db3237));
+			text-shadow: none;
+			
+	}
+		
+	#GUARD_DISABLED_BUTTON:hover {
+		border-color: #e56f73;
+		background-image:-gtk-gradient (linear,	left top, left bottom, from (#e56f73),  to (#e25a5e));
+		box-shadow: -0.5px 3px 3px #aaaaaa;
+	}
+
+
+	#GUARD_UNKNOWN_BUTTON {
+			border-width: 5px;
+			border-radius: 0px;
+			padding: 0px 0px;
+			box-shadow: none;
+			border-color: #ecf720;
+			
+			color: white;
+			background-image:-gtk-gradient (linear,	left top, left bottom, from (#ecf720),  to (#ecf720));
+			text-shadow: none;
+			
+	}
+	
+	#GUARD_UNKNOWN_BUTTON:hover {
+		border-color: #f0f951;
+		background-image:-gtk-gradient (linear,	left top, left bottom, from (#f0f951),  to (#f0f951));
+		box-shadow: -0.5px 3px 3px #aaaaaa;
+	}
+
+	#WAITING_LABEL{
+
+		color: #3366cc;
+		font: 11pt Roboto Bold;
+			
+	}	
+
+	#EDIT_LABEL{
+
+		color: @arc-blue;
+		/*color: #3366cc;*/
+		font: 12pt Roboto Bold;
+			
+	}
+	
+
+	#MSG_ERROR_LABEL {
+
+		color: #CC0000;
+		font: 11pt Roboto Bold; 
+	}
+	
+	#MSG_CORRECT_LABEL {
+			color: #43a047;
+			font: 11pt Roboto Bold;
+
+	}
+		
+    #WINDOW{
+		
+		background-color: #ffffff;
+		
+	}
+
+	
+	#POPOVER_OFF {
+		color: #707070;
+
+	}	
+
+	#POPOVER_ON{
+
+		color: #3366cc;
+
+	}
+
+	#POPOVER_SEPARATOR{
+
+		color: #b3b3b3;
+
+	}
+
+	
+	#CUSTOM-ENTRY
+	{
+		color: @default-grey;
+		border: none;
+		/*border-radius: 5px;*/
+		/*background-color: @arc-blue;*/
+		border-bottom: 1px solid #aaaaaa;
+		padding: 4px;
+		/*background: #eeeeee;*/
+		
+		/*border-bottom: 2px solid transparent;*/
+	
+	}
+
+	#CUSTOM-ENTRY:focus
+	{
+		color: @arc-blue;
+		border-bottom: 1px solid @arc-blue-light;
+		/*border-bottom: 2px solid rgba(0,0,0,0);*/
+		/*background-color: transparent;*/
+		
+	
+	}
+	#CUSTOM-ENTRY:selected
+	{
+		color: white;
+	}
+
+	#CUSTOM-ENTRY:disabled
+	{
+		background-color: #bbbbbb;
+		border-bottom: 1px solid transparent;
+		color: #999999;
+	}
+
+	#APP_BOX {
+		background-color: #ffffff;
+	}
+
+	#REMOVE_BOX {
+		background-color: #c9c9c9;
+	}
