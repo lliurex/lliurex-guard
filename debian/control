@@ -1,25 +1,19 @@
 Source: lliurex-guard
-Section: admin
-Priority: extra
-Maintainer: David Montalva Furio <montalva_dav@gva.es> 
-Build-Depends: debhelper (>= 10), zero-dev
+Section: utils
+Priority: optional
+Maintainer: Equipo LliureX <lliurex@gva.es>
+Uploaders: Equipo LliureX <lliurex@gva.es>
+Build-Depends: llxsrchelper,debhelper (>= 10),dh-python, python3-poinstaller,python3-setuptools,python3-all,zero-dev
 Standards-Version: 4.1.2
-Homepage: http://www.lliurex.net
-#Vcs-Git: git://git.debian.org/collab-maint/lliurex-guard.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/lliurex-guard.git;a=summary
 
-Package: admin-center-lliurex-guard
-Conflicts: lliurex-guard-easy-gui
-Replaces: lliurex-guard-easy-gui
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, admin-center, lliurex-guard-n4d
-Description: LliureX Guard Module For Admin Center.
- This interface allows one to edit the configuration
- filters of squid3 and save it through web Admin Center.
- 
-Package: lliurex-guard-n4d
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, squid, n4d-lliurex-base ( >= 0.6 ), lliurex-guard-data ( >=0.4 )
-Recommends: admin-center-lliurex-guard
-Description: Easy interface to manage Squid3 filters 
- N4d methods for lliurex guard easy. 
+Package: lliurex-guard
+Architecture: all
+Depends: n4d,n4d-lliurex-base,python3-jsondiff
+Description: Contains lliurex-guard
+ This package contains the : lliurex-guard gui
+
+Package: n4d-lliurex-guard
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends},n4d, n4d-server-plugins,n4d-network
+Description: Lliurx Guard plugin
+  Plugins supporting lliurex guard functionality
