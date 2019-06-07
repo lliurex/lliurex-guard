@@ -54,7 +54,6 @@ class MainWindow:
 		
 		self.banner_box=builder.get_object("banner_box")
 		self.image_banner_box=builder.get_object("image_banner_box")
-		self.banner_separator=builder.get_object("banner_separator")
 	
 		self.stack_window.add_titled(self.banner_box,"bannerBox", "Banner Box")
 		self.stack_window.add_titled(self.core.editBox, "editBox", "Edit Box")
@@ -76,8 +75,6 @@ class MainWindow:
 		self.set_css_info()
 		self.init_threads()
 		self.connect_signals()
-		self.banner_separator.hide()
-		self.banner_separator.hide()
 			
 		self.main_window.show()
 		self.stack_window.set_transition_type(Gtk.StackTransitionType.NONE)
@@ -104,7 +101,7 @@ class MainWindow:
 		self.style_provider.load_from_file(f)
 		Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),self.style_provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 		self.main_window.set_name("WINDOW")
-		self.image_banner_box.set_name("IMAGE_BANNER")
+		#self.image_banner_box.set_name("IMAGE_BANNER")
 		
 	#def set_css_info	
 				
@@ -119,7 +116,6 @@ class MainWindow:
 	def load_info(self,action=None):
 	
 		self.core.optionsBox.toolbar.show()
-		self.banner_separator.show()
 		self.core.optionsBox.search_entry.show()	
 		self.core.optionsBox.options_pbar.hide()
 		self.guardMode=""

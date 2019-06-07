@@ -226,7 +226,7 @@ class GuardManager(object):
 		else:
 			code=13
 			data=error_info
-		msg_log=msg+"error: "+status+" Error details: "+str(error_info)
+		msg_log=msg+"error: "+str(status)+" Error details: "+str(error_info)
 		self.write_log(msg_log)
 		return {'status':status,'code':code,'data':data}
 
