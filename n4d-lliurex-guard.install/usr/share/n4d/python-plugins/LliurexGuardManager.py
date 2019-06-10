@@ -53,7 +53,8 @@ class LliurexGuardManager(object):
 
 		if not os.path.exists(self.blacklist_disable_dir):
 			os.mkdir(self.blacklist_disable_dir)
-			os.system("cp -R "+self.default_list_path+ " "+self.blacklist_disable_dir)
+			if os.path.exists(self.default_list_path):
+				os.system("cp -R "+self.default_list_path+ " "+self.blacklist_disable_dir)
 
 		if not os.path.exists(self.whitelist_dir):
 			os.mkdir(self.whitelist_dir)
