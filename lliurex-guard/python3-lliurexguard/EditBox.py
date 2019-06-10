@@ -197,6 +197,7 @@ class EditBox(Gtk.VBox):
 				pass
 			else:
 				self.core.editBox.load_values(self.core.optionsBox.order)
+			self.core.mainWindow.lock_quit=False
 			self.core.optionsBox.options_pbar.hide()
 			self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
 			self.core.mainWindow.stack_window.set_visible_child_name("editBox")		
@@ -289,6 +290,7 @@ class EditBox(Gtk.VBox):
 		self.edit_msg_label.set_name("WAITING_LABEL")
 		self.edit_msg_label.show()
 		self.edit_pbar.show()
+		self.core.mainWindow.lock_quit=True
 		self.init_threads()
 		self.saving_data_t.start()
 		GLib.timeout_add(100,self.pulsate_saving_data)
@@ -309,6 +311,7 @@ class EditBox(Gtk.VBox):
 			return True
 			
 		else:
+			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
 			self.edit_pbar.hide()
 			if self.saving['status']:
@@ -367,6 +370,7 @@ class EditBox(Gtk.VBox):
 
 		self.init_threads()
 		self.main_box.set_sensitive(False)
+		self.core.mainWindow.lock_quit=True
 		self.open_editor_t.start()
 		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(6))
 		self.edit_msg_label.set_name("WAITING_LABEL")
@@ -381,6 +385,7 @@ class EditBox(Gtk.VBox):
 			return True
 
 		else:
+			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
 			self.edit_msg_label.set_text("")
 
@@ -415,6 +420,8 @@ class EditBox(Gtk.VBox):
 			self.edit_msg_label.set_name("WAITING_LABEL")
 			self.edit_msg_label.set_text(_("Searching.Wait a moment..."))
 			self.waiting_search=True
+			self.cancel_btn.set_sensitive(False)
+			self.save_btn.set_sensitive(False)
 			GLib.timeout_add_seconds(1,self.pulsate_waiting_search)
 
 	#def detect_changes
@@ -427,6 +434,8 @@ class EditBox(Gtk.VBox):
 
 		 else:
 		 	self.waiting_search=False
+		 	self.cancel_btn.set_sensitive(True)
+		 	self.save_btn.set_sensitive(True)
 		 	self.edit_msg_label.set_text("")
 		 	self.url_search_entry_changed()
 		 	return False

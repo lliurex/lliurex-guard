@@ -75,7 +75,8 @@ class MainWindow:
 		self.set_css_info()
 		self.init_threads()
 		self.connect_signals()
-			
+		self.lock_quit=False
+
 		self.main_window.show()
 		self.stack_window.set_transition_type(Gtk.StackTransitionType.NONE)
 		self.stack_window.set_visible_child_name("bannerBox")
@@ -120,6 +121,7 @@ class MainWindow:
 		self.core.optionsBox.options_pbar.hide()
 		self.guardMode=""
 		self.list_info={}
+		self.lock_quit=True
 		self.init_threads()
 		self.load_info_t.start()
 		GLib.timeout_add(100,self.pulsate_load_info,action)
@@ -134,6 +136,8 @@ class MainWindow:
 			return True
 
 		else:
+			self.lock_quit=False
+			self.core.loginBox.login_spinner.stop()
 			if action!=None:
 				self.core.optionsBox.options_pbar.hide()
 
@@ -235,6 +239,8 @@ class MainWindow:
 			msg_text=_("Error reading list headers")
 		elif code==26:
 			msg_text=_("Saving changes. Wait a moment...")
+		elif code==27:
+			msg_text=_("The file loaded is empty")	
 		return msg_text
 
 	#def get_msg	
@@ -242,26 +248,29 @@ class MainWindow:
 
 	def check_changes(self,widget,event=None):
 
-		pending_changes=0
+		if not self.lock_quit:
+			pending_changes=0
 
-		if len(self.core.optionsBox.list_data)>0:
-			if len(self.list_info)>0:	
-				pending_changes=len(diff(self.list_info,self.core.optionsBox.list_data))
-			else:
-				pending_changes+=1	
+			if len(self.core.optionsBox.list_data)>0:
+				if len(self.list_info)>0:	
+					pending_changes=len(diff(self.list_info,self.core.optionsBox.list_data))
+				else:
+					pending_changes+=1	
 
-		if pending_changes>0:
-			dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,
-		          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),"LliureX Guard")
-			dialog.format_secondary_text(_("There are pending changes to apply. Do you want to exit or cancel?"))
-			response=dialog.run()
-			dialog.destroy()
-			if response==Gtk.ResponseType.CLOSE:
-				return False
-			else:
-				return True
+			if pending_changes>0:
+				dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,
+			          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),"LliureX Guard")
+				dialog.format_secondary_text(_("There are pending changes to apply. Do you want to exit or cancel?"))
+				response=dialog.run()
+				dialog.destroy()
+				if response==Gtk.ResponseType.CLOSE:
+					return False
+				else:
+					return True
 
-		sys.exit(0)
+			sys.exit(0)
+		else:
+			return True	
 
 	#def check_changes
 

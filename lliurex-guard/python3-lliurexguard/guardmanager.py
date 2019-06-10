@@ -14,6 +14,7 @@ import unicodedata
 import subprocess
 import tempfile
 import time
+import re
 import sys
 import syslog
 from os import listdir
@@ -237,14 +238,15 @@ class GuardManager(object):
 		'''
 		Result code:
 			-15: File loaded successfully
-			-116: Error loading file info
+			-16: Error loading file info
+			-27: Empty file
 		'''
 
 		content=[]
 		count_lines=0
 		tmp_file=""
 		try:
-			if os.path.exists(file):
+			if os.path.exists(file) and os.path.getsize(file)>0:
 				f=open(file,'r')
 				lines=f.readlines()
 				for line in lines:
@@ -271,7 +273,9 @@ class GuardManager(object):
 					f.write("".join(content))
 					f.close()
 
-			return {'status':True,'code':15,'data':[content,count_lines,tmp_file]}
+				return {'status':True,'code':15,'data':[content,count_lines,tmp_file]}
+			else:
+				return {'status':False,'code':27,'data':''}	
 
 		except Exception as e:		
 			return {'status':False,'code':16,'data':str(e)}

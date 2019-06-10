@@ -55,6 +55,8 @@ class OptionsBox(Gtk.VBox):
 		self.activate_all_label=builder.get_object("activate_all_label")
 		self.deactivate_all_eb=builder.get_object("deactivate_all_eb")
 		self.deactivate_all_label=builder.get_object("deactivate_all_label")
+		self.remove_all_eb=builder.get_object("remove_all_eb")
+		self.remove_all_label=builder.get_object("remove_all_label")
 
 		self.mode_header_label=builder.get_object("mode_header_label")
 		self.mode_set_label=builder.get_object("mode_set_label")
@@ -148,14 +150,19 @@ class OptionsBox(Gtk.VBox):
 
 		self.global_management_button.connect("clicked",self.global_management)
 		self.activate_all_eb.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
-		self.activate_all_eb.connect("button-press-event", self.activate_all_list,True)
+		self.activate_all_eb.connect("button-press-event", self.activate_all_lists,True)
 		self.activate_all_eb.connect("motion-notify-event", self.mouse_over_popover)
 		self.activate_all_eb.connect("leave-notify-event", self.mouse_exit_popover)
 
 		self.deactivate_all_eb.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
-		self.deactivate_all_eb.connect("button-press-event", self.activate_all_list,False)
+		self.deactivate_all_eb.connect("button-press-event", self.activate_all_lists,False)
 		self.deactivate_all_eb.connect("motion-notify-event", self.mouse_over_popover)
 		self.deactivate_all_eb.connect("leave-notify-event", self.mouse_exit_popover)
+
+		self.remove_all_eb.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+		self.remove_all_eb.connect("button-press-event", self.remove_all_lists)
+		self.remove_all_eb.connect("motion-notify-event", self.mouse_over_popover)
+		self.remove_all_eb.connect("leave-notify-event", self.mouse_exit_popover)
 
 		self.search_entry.connect("changed",self.search_entry_changed)
 
@@ -464,6 +471,7 @@ class OptionsBox(Gtk.VBox):
 			self.main_box.set_sensitive(False)
 			file=dialog.get_filename()
 			dialog.destroy()
+			self.core.mainWindow.lock_quit=True
 			self.options_msg_label.show()
 			self.options_msg_label.set_name("WAITING_LABEL")
 			self.options_msg_label.set_text(self.core.mainWindow.get_msg(14))
@@ -495,7 +503,7 @@ class OptionsBox(Gtk.VBox):
 
 	#def global_management	
 
-	def activate_all_list(self,widge,event,active):
+	def activate_all_lists(self,widget,event,active):
 
 		self.global_management_popover.hide()
 
@@ -506,6 +514,28 @@ class OptionsBox(Gtk.VBox):
 			self.list_data[item]["active"]=active
 		
 	#def activate_all_list
+
+	def remove_all_lists(self,wiget,event):
+
+		self.global_management_popover.hide()
+
+		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "LliureX Guard")
+		dialog.format_secondary_text(_("Do you want delete all lists"))
+		response=dialog.run()
+		dialog.destroy()
+
+		if response==Gtk.ResponseType.YES:
+
+			for item in self.list_item_box:
+				order=item.get_children()[0].id
+				item.get_children()[0].get_children()[0].get_children()[2].popover.get_children()[0].get_children()[1].hide()
+				item.get_children()[0].get_children()[0].get_children()[2].popover.get_children()[0].get_children()[2].show()
+				item.get_children()[0].get_children()[0].set_name("REMOVE_BOX")
+				self.list_data[order]["remove"]=True
+
+
+
+	#def remove_all_lists	
 
 	def mode_button_clicked(self,widget,event=None):
 
@@ -534,6 +564,7 @@ class OptionsBox(Gtk.VBox):
 			self.options_msg_label.set_text(self.core.mainWindow.get_msg(7))
 			self.options_msg_label.set_name("WAITING_LABEL")
 			self.options_pbar.show()
+			self.core.mainWindow.lock_quit=True
 			self.change_guard_mode_t=threading.Thread(target=self.change_guard_process,args=(self.mode,))
 			self.change_guard_mode_t.start()
 			self.mode_popover.hide()
@@ -639,6 +670,7 @@ class OptionsBox(Gtk.VBox):
 		self.options_msg_label.show()
 		self.options_msg_label.set_text(self.core.mainWindow.get_msg(11))
 		self.options_msg_label.set_name("WAITING_LABEL")
+		self.core.mainWindow.lock_quit=True
 		self.options_pbar.show()
 		self.core.editBox.init_form()
 		self.init_threads()
@@ -662,6 +694,7 @@ class OptionsBox(Gtk.VBox):
 					GLib.timeout_add(100,self.core.editBox.write_tw)
 					return False
 				else:
+					self.core.mainWindow.lock_quit=False
 					self.options_pbar.hide()
 					self.core.editBox.render_form(False,self.read_list['data'][1])
 					self.core.editBox.load_values(self.order)
@@ -670,10 +703,11 @@ class OptionsBox(Gtk.VBox):
 					self.core.editBox.stack_edit.set_visible_child_name("urlEditor")
 					return False
 			else:
-					self.main_box.set_sensitive(True)
-					self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_list['code'])+"\n"+self.read_list['data'])
-					self.options_msg_label.set_name("MSG_ERROR_LABEL")
-					self.options_pbar.hide()		
+				self.core.mainWindow.lock_quit=False
+				self.main_box.set_sensitive(True)
+				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_list['code'])+"\n"+self.read_list['data'])
+				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.options_pbar.hide()		
 
 	#def pulsate_load_info
 
@@ -699,6 +733,7 @@ class OptionsBox(Gtk.VBox):
 						GLib.timeout_add(100,self.core.editBox.write_tw,self.read_file['data'][0])
 						return False
 					else:
+						self.core.mainWindow.lock_quit=False
 						self.options_pbar.hide()
 						self.core.editBox.render_form(False,self.read_file['data'][2])
 						self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
@@ -706,6 +741,7 @@ class OptionsBox(Gtk.VBox):
 						self.core.editBox.stack_edit.set_visible_child_name("urlEditor")	
 						return False
 			else:
+				self.core.mainWindow.lock_quit=False
 				self.main_box.set_sensitive(True)
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_file['code'])+"\n"+self.read_file['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")
@@ -725,6 +761,7 @@ class OptionsBox(Gtk.VBox):
 		self.options_msg_label.set_name("WAITING_LABEL")
 		self.options_msg_label.set_text(self.core.mainWindow.get_msg(17))
 		self.options_pbar.show()
+		self.core.mainWindow.lock_quit=True
 		self.init_threads()
 		self.apply_changes_t=threading.Thread(target=self.apply_changes)
 		self.apply_changes_t.start()
@@ -739,6 +776,7 @@ class OptionsBox(Gtk.VBox):
 			return True
 
 		else:
+			self.core.mainWindow.lock_quit=False
 			if self.result_apply['status']:
 				self.core.mainWindow.load_info("apply")
 				self.options_pbar.show()
