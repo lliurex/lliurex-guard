@@ -182,7 +182,6 @@ class GuardManager(object):
 		error_info=[]
 		listId=data[order]["id"]
 		if data[order]["tmpfile"]!="":
-			print("por aqui")
 			read_tmp_file=self.read_local_file(data[order]["tmpfile"],False)
 			msg="Readed local file "
 			self._debug(msg,read_tmp_file)
