@@ -155,7 +155,7 @@ class MainWindow:
 				else:
 					self.core.optionsBox.set_mode()
 					self.core.optionsBox.draw_list("init")
-					if action==None:
+					if action=="login":
 						self.stack_banner.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 						self.stack_banner.set_visible_child_name("optionsBox")
 					else:
@@ -237,7 +237,7 @@ class MainWindow:
 		elif code==21:
 			msg_text=("Error deactivating lists")
 		elif code==22:
-			msg_text=_("LLiurex Guard mode readed sucessfully")
+			msg_text=_("Lliurex Guard mode readed sucessfully")
 		elif code==23:
 			msg_text=_("Error reading Lliurex Guard mode")
 		elif code==24:
@@ -271,7 +271,7 @@ class MainWindow:
 
 			if pending_changes>0:
 				dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,
-			          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),"LliureX Guard")
+			          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),"Lliurex Guard")
 				dialog.format_secondary_text(_("There are pending changes to apply. Do you want to exit or cancel?"))
 				response=dialog.run()
 				dialog.destroy()

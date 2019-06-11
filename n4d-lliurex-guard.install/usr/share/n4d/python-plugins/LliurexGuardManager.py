@@ -14,7 +14,7 @@ class LliurexGuardManager(object):
 
 	def __init__(self):
 
-		self.default_list_path="/usr/share/lliurex-guard/blacklists/*"
+		self.default_list_path="/usr/share/lliurex-guard/blacklists"
 		self.mode_file_path="/etc/dnsmasq.d/lliurex-guard.conf"
 		self.conf_dir="/etc/lliurex-guard"
 		self.blacklist_dir=os.path.join(self.conf_dir,"blacklist")
@@ -54,7 +54,8 @@ class LliurexGuardManager(object):
 		if not os.path.exists(self.blacklist_disable_dir):
 			os.mkdir(self.blacklist_disable_dir)
 			if os.path.exists(self.default_list_path):
-				os.system("cp -R "+self.default_list_path+ " "+self.blacklist_disable_dir)
+
+				os.system("cp -R "+self.default_list_path+"/* "+self.blacklist_disable_dir)
 
 		if not os.path.exists(self.whitelist_dir):
 			os.mkdir(self.whitelist_dir)

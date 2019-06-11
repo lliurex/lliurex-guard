@@ -418,7 +418,7 @@ class EditBox(Gtk.VBox):
 		self.waiting=0
 		if not self.waiting_search:
 			self.edit_msg_label.set_name("WAITING_LABEL")
-			self.edit_msg_label.set_text(_("Searching.Wait a moment..."))
+			self.edit_msg_label.set_text(_("Searching. Wait a moment..."))
 			self.waiting_search=True
 			self.cancel_btn.set_sensitive(False)
 			self.save_btn.set_sensitive(False)
@@ -469,7 +469,6 @@ class EditBox(Gtk.VBox):
 			
 			end = self.buffer.get_end_iter()
 			match = start.forward_search(text, Gtk.TextSearchFlags.CASE_INSENSITIVE, end)
-			print(match)
 			if match is not None:
 				self.count+=1
 				match_start, match_end = match

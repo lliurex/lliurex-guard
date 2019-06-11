@@ -629,7 +629,7 @@ class OptionsBox(Gtk.VBox):
 	def delete_list_clicked(self,widget,event,hbox):
 
 		hbox.get_children()[0].get_children()[0].get_children()[2].popover.hide()
-		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "LliureX Guard")
+		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "Lliurex Guard")
 		dialog.format_secondary_text(_("Do you want delete the list?"))
 		response=dialog.run()
 		dialog.destroy()
