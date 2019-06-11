@@ -449,9 +449,10 @@ class EditBox(Gtk.VBox):
 		start=self.buffer.get_start_iter()
 		end = self.buffer.get_end_iter()
 		self.buffer.remove_tag(self.tag_found,start,end)
+		self.count=0
 
-		cursor_mark = self.buffer.get_insert()
-		start = self.buffer.get_iter_at_mark(cursor_mark)
+		#cursor_mark = self.buffer.get_insert()
+		#start = self.buffer.get_iter_at_mark(cursor_mark)
 
 		if self.url_search_entry.get_text()!="":
 			if start.get_offset() == self.buffer.get_char_count():
@@ -465,14 +466,25 @@ class EditBox(Gtk.VBox):
 	def search_and_mark(self,text,start):
 
 		try:
+			
 			end = self.buffer.get_end_iter()
 			match = start.forward_search(text, Gtk.TextSearchFlags.CASE_INSENSITIVE, end)
-
+			print(match)
 			if match is not None:
+				self.count+=1
 				match_start, match_end = match
 				self.buffer.apply_tag(self.tag_found, match_start, match_end)
 				self.search_and_mark(text, match_end)
+			else:
+				if self.count==0:
+					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(28))
+				else:
+					self.edit_msg_label.set_name("MSG_CORRECT_LABEL")
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(29)%self.count)	
+			
 		except:
+
 			pass		
 
 

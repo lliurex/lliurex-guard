@@ -139,7 +139,7 @@ class LoginBox(Gtk.VBox):
 			if group_found:
 				self.login_msg_label.set_text(_("Correct user\nLoading information. Wait a moment..."))
 				
-				self.core.mainWindow.load_info()
+				self.core.mainWindow.load_info("login")
 				
 							
 			else:

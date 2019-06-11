@@ -262,9 +262,9 @@ class OptionsBox(Gtk.VBox):
 		else:
 			tmp_list=self.search_list
 
-
+		order_list=self.core.guardmanager.get_order_list(tmp_list)
 		count=len(tmp_list)
-		for item in tmp_list:
+		for item in order_list:
 			self.new_item_box(item,count)
 			count-=1		
 		
@@ -519,7 +519,7 @@ class OptionsBox(Gtk.VBox):
 
 		self.global_management_popover.hide()
 
-		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "LliureX Guard")
+		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "Lliurex Guard")
 		dialog.format_secondary_text(_("Do you want delete all lists"))
 		response=dialog.run()
 		dialog.destroy()
@@ -547,13 +547,13 @@ class OptionsBox(Gtk.VBox):
 
 		self.mode=mode
 		if self.mode=="BlackMode":
-			text=_("Do yo want to change to black list mode?.\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
+			text=_("Do yo want to change to black list mode?\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
 		elif self.mode=="WhiteMode":
-			text=_("Do yo want to change to white list mode?.\nIf you activate this mode you can only access the urls contained in the active lists")
+			text=_("Do yo want to change to white list mode?\nIf you activate this mode, you can only access the urls contained in the active lists")
 		elif self.mode=="DisableMode":
-			text=_("Do you want to deactivate LliureX Guard?.\nIf you deactivate it, no filter will be applied")
+			text=_("Do you want to deactivate LliureX Guard?\nIf you deactivate it, no filter will be applied")
 
-		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "LliureX Guard")
+		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "Lliurex Guard")
 		dialog.format_secondary_text(text)
 		response=dialog.run()
 		dialog.destroy()
@@ -565,6 +565,7 @@ class OptionsBox(Gtk.VBox):
 			self.options_msg_label.set_name("WAITING_LABEL")
 			self.options_pbar.show()
 			self.core.mainWindow.lock_quit=True
+			self.init_threads()
 			self.change_guard_mode_t=threading.Thread(target=self.change_guard_process,args=(self.mode,))
 			self.change_guard_mode_t.start()
 			self.mode_popover.hide()
@@ -586,16 +587,15 @@ class OptionsBox(Gtk.VBox):
 				#self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_mode['code']))
 				#self.options_msg_label.set_name("MSG_CORRECT_LABEL")
 				self.core.mainWindow.load_info("mode")
-				self.options_pbar.show()
+				#self.options_pbar.show()
 				return False
 				#self.set_mode()
 				#self.draw_list("init")
 			else:
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_mode['code'])+'\n'+self.result_mode['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")
-
-			self.options_pbar.hide()
-			return False			
+				self.options_pbar.hide()
+				return False			
 
 	#def pulsate_change_guard_mode
 	
@@ -647,7 +647,7 @@ class OptionsBox(Gtk.VBox):
 	def restore_list_clicked(self,widget,event,hbox):
 
 		hbox.get_children()[0].get_children()[0].get_children()[2].popover.hide()
-		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "LliureX Guard")
+		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "Lliurex Guard")
 		dialog.format_secondary_text(_("Do you want restore the list?"))
 		response=dialog.run()
 		dialog.destroy()
@@ -779,7 +779,7 @@ class OptionsBox(Gtk.VBox):
 			self.core.mainWindow.lock_quit=False
 			if self.result_apply['status']:
 				self.core.mainWindow.load_info("apply")
-				self.options_pbar.show()
+				#self.options_pbar.show()
 				return False
 				
 			else:
@@ -834,6 +834,7 @@ class OptionsBox(Gtk.VBox):
 	
 	#def mouse_exit_popover
 
+	
 #class OptionsBox
 
 from . import Core

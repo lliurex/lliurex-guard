@@ -48,7 +48,7 @@ class MainWindow:
 		self.stack_window.set_margin_bottom(0)
 		
 		self.main_window=builder.get_object("main_window")
-		self.main_window.set_title("LliureX Guard")
+		self.main_window.set_title("Lliurex Guard")
 		self.main_window.resize(802,745)
 		self.main_box=builder.get_object("main_box")
 		
@@ -76,6 +76,7 @@ class MainWindow:
 		self.init_threads()
 		self.connect_signals()
 		self.lock_quit=False
+		self.core.optionsBox.options_pbar.hide()
 
 		self.main_window.show()
 		self.stack_window.set_transition_type(Gtk.StackTransitionType.NONE)
@@ -111,6 +112,8 @@ class MainWindow:
 		
 		self.main_window.connect("destroy",Gtk.main_quit)
 		self.main_window.connect("delete_event",self.check_changes)
+		self.main_window.connect("key-press-event",self.on_key_press_event)
+
 
 	#def connect_signals		
 		
@@ -118,7 +121,7 @@ class MainWindow:
 	
 		self.core.optionsBox.toolbar.show()
 		self.core.optionsBox.search_entry.show()	
-		self.core.optionsBox.options_pbar.hide()
+		#self.core.optionsBox.options_pbar.hide()
 		self.guardMode=""
 		self.list_info={}
 		self.lock_quit=True
@@ -137,14 +140,18 @@ class MainWindow:
 
 		else:
 			self.lock_quit=False
-			self.core.loginBox.login_spinner.stop()
+			
 			if action!=None:
 				self.core.optionsBox.options_pbar.hide()
+				if action=="login":
+					self.core.loginBox.login_spinner.stop()
 
 			if self.read_guardmode['status']:
 				if not self.read_guardmode_headers['status']:
 					self.core.optionsBox.add_button.set_sensitive(False)
 					self.core.optionsBox.apply_btn.set_sensitive(False)
+					self.core.optionsBox.options_msg_label.set_text(self.get_msg(read_guardmode['code']))
+					self.core.optionsBox.options_msg_label.set_label("MSG_ERROR_LABEL")
 				else:
 					self.core.optionsBox.set_mode()
 					self.core.optionsBox.draw_list("init")
@@ -200,11 +207,11 @@ class MainWindow:
 		elif code==6:
 			msg_text=_("Waiting while viewing / editing the list")
 		elif code==7:
-			msg_text=_("Changing LliureX Guard mode. Wait a moment...")
+			msg_text=_("Changing Lliurex Guard mode. Wait a moment...")
 		elif code==8:
-			msg_text=_("The change of LliureX Guard mode has been successful")	
+			msg_text=_("The change of Lliurex Guard mode has been successful")	
 		elif code==9:
-			msg_text=_("Error changing LliureX Guard mode:")
+			msg_text=_("Error changing Lliurex Guard mode:")
 		elif code==10:
 			msg_text=_("Error restarting dnsmasq")
 		elif code==11:
@@ -230,7 +237,7 @@ class MainWindow:
 		elif code==21:
 			msg_text=("Error deactivating lists")
 		elif code==22:
-			msg_text=_("LLiureX Guard mode readed sucessfully")
+			msg_text=_("LLiurex Guard mode readed sucessfully")
 		elif code==23:
 			msg_text=_("Error reading Lliurex Guard mode")
 		elif code==24:
@@ -240,8 +247,13 @@ class MainWindow:
 		elif code==26:
 			msg_text=_("Saving changes. Wait a moment...")
 		elif code==27:
-			msg_text=_("The file loaded is empty")	
+			msg_text=_("The file loaded is empty")
+		elif code==28:
+			msg_text=_("No match found for the indicated search")
+		elif code==29:
+			msg_text=_("%s matches found for the indicated search")			
 		return msg_text
+
 
 	#def get_msg	
 
@@ -273,6 +285,19 @@ class MainWindow:
 			return True	
 
 	#def check_changes
+
+	def on_key_press_event(self,window,event):
+		
+		ctrl=(event.state & Gdk.ModifierType.CONTROL_MASK)
+		if ctrl and event.keyval == Gdk.KEY_f:
+			if self.stack_window.get_visible_child_name()=="editBox":
+				if self.core.editBox.stack_edit.get_visible_child_name()=="urlTw":
+					self.core.editBox.url_search_entry.grab_focus()
+			else:	
+				if self.stack_banner.get_visible_child_name()=="optionsBox":
+					self.core.optionsBox.search_entry.grab_focus()
+		
+	#def on_key_press_event
 
 	def start_gui(self):
 		
