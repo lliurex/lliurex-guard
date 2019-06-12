@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-11 17:44+0200\n"
+"POT-Creation-Date: 2019-06-12 08:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgid "Error changing Lliurex Guard mode:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:216
-msgid "Error restarting dnsmasq"
+msgid "Error restarting dnsmasq:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:218
@@ -66,7 +66,7 @@ msgid "Information of the list loaded successfully"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:222
-msgid "Error loading the information from the list"
+msgid "Error loading the information from the list:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:224
@@ -78,7 +78,7 @@ msgid "File loaded sucessfully"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:228
-msgid "Error loading file"
+msgid "Error loading file:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:230
@@ -90,11 +90,11 @@ msgid "Changes applied successfully"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:234
-msgid "Error removing lists"
+msgid "Error removing lists:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:236
-msgid "Error activating lists"
+msgid "Error activating lists:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:240
@@ -102,7 +102,7 @@ msgid "Lliurex Guard mode readed sucessfully"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:242
-msgid "Error reading Lliurex Guard mode"
+msgid "Error reading Lliurex Guard mode:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:244
@@ -110,7 +110,7 @@ msgid "List code readed successfully"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:246
-msgid "Error reading list headers"
+msgid "Error reading list headers:"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:248
@@ -148,6 +148,10 @@ msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:206
 msgid "Unknown mode"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/OptionsBox.py:297
+msgid " entries"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:335
@@ -290,53 +294,49 @@ msgid "Help"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:552
-msgid "Search by site name"
+msgid "Search by list name and description"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:594
 msgid "Established mode: "
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:612
-msgid "Black list"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:625
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:624
 msgid "Manage Lliurex Guard modes"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:761
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:760
 msgid "Add custom list"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:797
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:796
 msgid "Add custom list by file"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:844
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:843
 msgid "Activate all lists"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:880
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:879
 msgid "Deactivate all lists"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:916
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:915
 msgid "Remove all lists"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:963
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:962
 msgid "Activate Black List mode"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:999
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:998
 msgid "Activate White List mode"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1035
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1034
 msgid "Deactivate LliureX Guard"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1067
+#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1066
 msgid "To view or edit the url list click here"
 msgstr ""

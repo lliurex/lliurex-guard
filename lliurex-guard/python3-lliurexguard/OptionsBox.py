@@ -294,7 +294,7 @@ class OptionsBox(Gtk.VBox):
 		list_name.set_valign(Gtk.Align.START)
 
 		list_entries=Gtk.Label()
-		list_entries.set_text(str(self.list_data[order]["lines"])+" entries")
+		list_entries.set_text(str(self.list_data[order]["lines"])+_(" entries"))
 		list_entries.set_margin_left(10)
 		list_entries.set_margin_right(5)
 		list_entries.set_margin_top(0)
