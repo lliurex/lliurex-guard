@@ -40,6 +40,10 @@ class LoginBox(Gtk.VBox):
 
 		self.pack_start(self.login_box,True,True,0)
 
+		if 'desktop' in self.core.guardmanager.flavours:
+				self.server_ip_entry.set_text("localhost")
+				self.server_ip_entry.hide()
+
 		self.set_css_info()
 		self.connect_signals()
 		self.init_threads()

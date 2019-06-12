@@ -34,12 +34,14 @@ class GuardManager(object):
 		self.validation=None
 		self.limit_lines=2500
 
+		self.detect_flavour()
+
 		if server!=None:
 			self.set_server(server)
 
 		context=ssl._create_unverified_context()
 		self.n4d_local = n4dclient.ServerProxy("https://localhost:9779",context=context,allow_none=True)	
-		self.detect_flavour()	
+			
 	
 	#def __init__	
 	
@@ -71,7 +73,7 @@ class GuardManager(object):
 		
 		if self.user_validated:
 			self.validation=(user,password)
-			session_user=os.environ["USERNAME"]
+			session_user=os.environ["USER"]
 			msg_log="Session User: %s"%session_user+" LlxGuard User: %s"%self.validation[0]
 			self.write_log(msg_log)
 
