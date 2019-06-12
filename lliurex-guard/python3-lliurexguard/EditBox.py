@@ -197,6 +197,7 @@ class EditBox(Gtk.VBox):
 				pass
 			else:
 				self.core.editBox.load_values(self.core.optionsBox.order)
+			self.core.mainWindow.lock_quit=False
 			self.core.optionsBox.options_pbar.hide()
 			self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
 			self.core.mainWindow.stack_window.set_visible_child_name("editBox")		
@@ -289,6 +290,7 @@ class EditBox(Gtk.VBox):
 		self.edit_msg_label.set_name("WAITING_LABEL")
 		self.edit_msg_label.show()
 		self.edit_pbar.show()
+		self.core.mainWindow.lock_quit=True
 		self.init_threads()
 		self.saving_data_t.start()
 		GLib.timeout_add(100,self.pulsate_saving_data)
@@ -309,6 +311,7 @@ class EditBox(Gtk.VBox):
 			return True
 			
 		else:
+			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
 			self.edit_pbar.hide()
 			if self.saving['status']:
@@ -367,6 +370,7 @@ class EditBox(Gtk.VBox):
 
 		self.init_threads()
 		self.main_box.set_sensitive(False)
+		self.core.mainWindow.lock_quit=True
 		self.open_editor_t.start()
 		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(6))
 		self.edit_msg_label.set_name("WAITING_LABEL")
@@ -381,6 +385,7 @@ class EditBox(Gtk.VBox):
 			return True
 
 		else:
+			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
 			self.edit_msg_label.set_text("")
 
@@ -413,8 +418,10 @@ class EditBox(Gtk.VBox):
 		self.waiting=0
 		if not self.waiting_search:
 			self.edit_msg_label.set_name("WAITING_LABEL")
-			self.edit_msg_label.set_text(_("Searching.Wait a moment..."))
+			self.edit_msg_label.set_text(_("Searching. Wait a moment..."))
 			self.waiting_search=True
+			self.cancel_btn.set_sensitive(False)
+			self.save_btn.set_sensitive(False)
 			GLib.timeout_add_seconds(1,self.pulsate_waiting_search)
 
 	#def detect_changes
@@ -427,6 +434,8 @@ class EditBox(Gtk.VBox):
 
 		 else:
 		 	self.waiting_search=False
+		 	self.cancel_btn.set_sensitive(True)
+		 	self.save_btn.set_sensitive(True)
 		 	self.edit_msg_label.set_text("")
 		 	self.url_search_entry_changed()
 		 	return False
@@ -440,9 +449,10 @@ class EditBox(Gtk.VBox):
 		start=self.buffer.get_start_iter()
 		end = self.buffer.get_end_iter()
 		self.buffer.remove_tag(self.tag_found,start,end)
+		self.count=0
 
-		cursor_mark = self.buffer.get_insert()
-		start = self.buffer.get_iter_at_mark(cursor_mark)
+		#cursor_mark = self.buffer.get_insert()
+		#start = self.buffer.get_iter_at_mark(cursor_mark)
 
 		if self.url_search_entry.get_text()!="":
 			if start.get_offset() == self.buffer.get_char_count():
@@ -456,14 +466,24 @@ class EditBox(Gtk.VBox):
 	def search_and_mark(self,text,start):
 
 		try:
+			
 			end = self.buffer.get_end_iter()
 			match = start.forward_search(text, Gtk.TextSearchFlags.CASE_INSENSITIVE, end)
-
 			if match is not None:
+				self.count+=1
 				match_start, match_end = match
 				self.buffer.apply_tag(self.tag_found, match_start, match_end)
 				self.search_and_mark(text, match_end)
+			else:
+				if self.count==0:
+					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(28))
+				else:
+					self.edit_msg_label.set_name("MSG_CORRECT_LABEL")
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(29)%self.count)	
+			
 		except:
+
 			pass		
 
 

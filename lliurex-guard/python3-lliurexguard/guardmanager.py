@@ -14,6 +14,7 @@ import unicodedata
 import subprocess
 import tempfile
 import time
+import re
 import sys
 import syslog
 from os import listdir
@@ -27,7 +28,7 @@ class GuardManager(object):
 
 		super(GuardManager, self).__init__()
 
-		self.dbg=1
+		self.dbg=0
 		self.user_validated=False
 		self.user_groups=[]
 		self.validation=None
@@ -202,18 +203,12 @@ class GuardManager(object):
 			else:
 				status=False
 				error_info=read_guardmode_list['data']
-
+			read_guardmode_list=None	
 		if status:
 			code=12		
 			if count_lines>self.limit_lines:
 				if not tmpfile:
 					tmp_file=self._create_tmp_file(listId)
-					'''
-					tmp_file=tempfile.mkstemp("_"+listId)[1]
-					basename=os.path.basename(tmp_file)
-					shutil.move(tmp_file,os.path.join(self.tmp_folder,basename))
-					tmp_file=os.path.join(self.tmp_folde,basename)
-					'''
 					f=open(tmp_file,'w')
 					tmp_content="".join(content)
 					f.write(tmp_content)
@@ -221,12 +216,13 @@ class GuardManager(object):
 					tmp_content=None
 				else:
 					tmp_file=read_tmp_file['data'][2]	
-
+				content=None
+				read_tmp_file=None	
 			data=[content,tmp_file]
 		else:
 			code=13
 			data=error_info
-		msg_log=msg+"error: "+status+" Error details: "+str(error_info)
+		msg_log=msg+"error: "+str(status)+" Error details: "+str(error_info)
 		self.write_log(msg_log)
 		return {'status':status,'code':code,'data':data}
 
@@ -237,14 +233,15 @@ class GuardManager(object):
 		'''
 		Result code:
 			-15: File loaded successfully
-			-116: Error loading file info
+			-16: Error loading file info
+			-27: Empty file
 		'''
 
 		content=[]
 		count_lines=0
 		tmp_file=""
 		try:
-			if os.path.exists(file):
+			if os.path.exists(file) and os.path.getsize(file)>0:
 				f=open(file,'r')
 				lines=f.readlines()
 				for line in lines:
@@ -261,17 +258,15 @@ class GuardManager(object):
 				
 				if create_tmpfile:
 					tmp_file=self._create_tmp_file(os.path.basename(file))
-					'''
-					tmp_file=tempfile.mkstemp("_"+os.path.basename(file))[1]
-					basename=os.path.basename(tmp_file)
-					shutil.move(tmp_file,os.path.join(self.tmp_folder,basename))
-					tmp_file=os.path.join(self.tmp_folde,basename)
-					'''
 					f=open(tmp_file,'w')
 					f.write("".join(content))
 					f.close()
+					if count_lines>self.limit_lines:
+						content=None
 
-			return {'status':True,'code':15,'data':[content,count_lines,tmp_file]}
+				return {'status':True,'code':15,'data':[content,count_lines,tmp_file]}
+			else:
+				return {'status':False,'code':27,'data':''}	
 
 		except Exception as e:		
 			return {'status':False,'code':16,'data':str(e)}
@@ -368,6 +363,26 @@ class GuardManager(object):
 
 	#def get_siteId
 
+	def get_order_list(self,info):
+
+		tmp=[]
+		order_list=[]
+
+		for item in info:
+			name=info[item]["name"]
+			x=()
+			x=item,name
+			tmp.append(x)
+
+		tmp.sort(key=lambda list:list[1])
+		for	item in tmp:
+			order_list.append(item[0])
+
+		return order_list
+
+	#def get_order_list		
+
+
 	def apply_changes(self,list_data,orig_data):
 
 
@@ -404,7 +419,7 @@ class GuardManager(object):
 						if list_data[item]["tmpfile"]!="":
 							tmpfile_list.append(list_data[item]["tmpfile"])
 							if "client" in self.flavours:
-								send=self._send_tmpfile_toserver(list_data[item]["tmpfile"])
+								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 									
 						list_to_active.append(list_data[item])
 									
@@ -413,7 +428,7 @@ class GuardManager(object):
 						if list_data[item]["tmpfile"]!="":
 							tmpfile_list.append(list_data[item]["tmpfile"])
 							if "client" in self.flavours:
-								send=self._send_tmpfile_toserver(list_data[item]["tmpfile"])
+								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 								
 						list_to_deactive.append(list_data[item])
 
@@ -458,7 +473,7 @@ class GuardManager(object):
 							data=result_deactive['data']
 
 			if not error:
-				self._remove_tmp_file(tmpfile_list)
+				self.remove_tmp_file(tmpfile_list)
 				result_restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
 				if result_restart['status']:
 					return {'status':True,'code':18}
@@ -476,12 +491,12 @@ class GuardManager(object):
 
 	#def apply_changes
 
-	def _send_tmpfile_toserver(self,tmp_file):
+	def send_tmpfile_toserver(self,tmp_file):
 
 		send_tmpfile=self.n4d_local.send_file("","ScpManager",self.validation[0],self.validation[1],"server",tmp_file,"/tmp")
 			
 		return send_tmpfile
-	#def _send_tmpfile_toserver		
+	#def send_tmpfile_toserver		
 
 	def _create_tmp_file(self,listId):
 	
@@ -492,7 +507,7 @@ class GuardManager(object):
 
 	#def _create_tmp_file	
 
-	def _remove_tmp_file(self,tmpfile_list):
+	def remove_tmp_file(self,tmpfile_list):
 
 		if "client" in self.flavours:
 			for item in tmpfile_list:

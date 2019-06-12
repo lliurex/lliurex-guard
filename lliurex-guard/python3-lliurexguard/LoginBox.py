@@ -36,6 +36,7 @@ class LoginBox(Gtk.VBox):
 		self.password_entry=builder.get_object("password_entry")
 		self.server_ip_entry=builder.get_object("server_ip_entry")
 		self.login_msg_label=builder.get_object("login_msg_label")
+		self.login_spinner=builder.get_object("login_spinner")
 
 		self.pack_start(self.login_box,True,True,0)
 
@@ -100,9 +101,8 @@ class LoginBox(Gtk.VBox):
 		else:
 			self.core.guardmanager.set_server("server")
 		
-		
 		self.login_msg_label.set_text(_("Validating user..."))
-		
+		self.login_msg_label.set_name("WAITING_LABEL")
 		self.login_button.set_sensitive(False)
 		self.validate_user(user,password)	
 
@@ -111,7 +111,7 @@ class LoginBox(Gtk.VBox):
 	
 	def validate_user(self,user,password):
 		
-		
+		self.login_spinner.start()
 		t=threading.Thread(target=self.core.guardmanager.validate_user,args=(user,password,))
 		t.daemon=True
 		t.start()
@@ -124,24 +124,26 @@ class LoginBox(Gtk.VBox):
 			
 		if thread.is_alive():
 			return True
-				
+		
 		self.login_button.set_sensitive(True)
 		if not self.core.guardmanager.user_validated:
+			self.login_spinner.stop()
 			self.login_msg_label.set_markup("<span foreground='red'>"+_("Invalid user")+"</span>")
 		else:
 			group_found=False
-			for g in ["sudo","admins","teachers"]:
+			for g in ["sudo","admins","admin"]:
 				if g in self.core.guardmanager.user_groups:
 					group_found=True
 					break
 					
 			if group_found:
-				self.login_msg_label.set_text("")
+				self.login_msg_label.set_text(_("Correct user\nLoading information. Wait a moment..."))
 				
-				self.core.mainWindow.load_info()
+				self.core.mainWindow.load_info("login")
 				
 							
 			else:
+				self.login_spinner.stop()
 				self.login_msg_label.set_markup("<span foreground='red'>"+_("Invalid user")+"</span>")
 				
 		return False

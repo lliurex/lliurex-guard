@@ -32,19 +32,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkSeparator" id="banner_separator">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">5</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
+      <placeholder/>
     </child>
     <child>
       <placeholder/>
@@ -206,7 +194,7 @@
                 <property name="valign">center</property>
                 <property name="margin_right">10</property>
                 <property name="margin_top">10</property>
-                <property name="label" translatable="yes">Relationship of urls:</property>
+                <property name="label" translatable="yes">Relationship of urls and domains:</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -337,7 +325,7 @@
   <object class="GtkBox" id="login_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="halign">center</property>
+    <property name="valign">center</property>
     <property name="margin_left">10</property>
     <property name="margin_right">10</property>
     <property name="orientation">vertical</property>
@@ -345,6 +333,7 @@
       <object class="GtkBox" id="box14">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="halign">center</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkGrid" id="grid2">
@@ -353,12 +342,11 @@
             <property name="margin_top">5</property>
             <property name="margin_bottom">5</property>
             <property name="row_spacing">16</property>
-            <property name="column_homogeneous">True</property>
             <child>
               <object class="GtkEntry" id="user_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="primary_icon_name">emblem-personal</property>
+                <property name="primary_icon_name">user-online</property>
                 <property name="placeholder_text" translatable="yes">User</property>
               </object>
               <packing>
@@ -372,7 +360,7 @@
                 <property name="can_focus">True</property>
                 <property name="visibility">False</property>
                 <property name="invisible_char">•</property>
-                <property name="primary_icon_name">badge-small</property>
+                <property name="primary_icon_name">dialog-password</property>
                 <property name="placeholder_text" translatable="yes">Password</property>
               </object>
               <packing>
@@ -408,10 +396,43 @@
               <object class="GtkLabel" id="login_msg_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="justify">center</property>
+                <property name="ellipsize">end</property>
+                <property name="width_chars">40</property>
+                <property name="max_width_chars">40</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="spinner_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkSpinner" id="login_spinner">
+                    <property name="width_request">50</property>
+                    <property name="height_request">50</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
           </object>
@@ -497,7 +518,7 @@
                 <property name="tooltip_text" translatable="yes">Global management</property>
                 <property name="margin_right">10</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-execute</property>
+                <property name="stock_id">gtk-preferences</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -601,7 +622,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Manage LliureX Guard modes</property>
+                <property name="tooltip_text" translatable="yes">Manage Lliurex Guard modes</property>
                 <property name="valign">center</property>
                 <child>
                   <object class="GtkImage" id="mode_button_img">
@@ -873,6 +894,42 @@
             <property name="position">1</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkBox" id="remove_all_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkEventBox" id="remove_all_eb">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="remove_all_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">Remove all lists</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>
@@ -998,6 +1055,7 @@
   <object class="GtkBox" id="url_editor_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="valign">center</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkLabel" id="url_editor_label">
