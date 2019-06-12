@@ -150,7 +150,7 @@ class MainWindow:
 				if not self.read_guardmode_headers['status']:
 					self.core.optionsBox.add_button.set_sensitive(False)
 					self.core.optionsBox.apply_btn.set_sensitive(False)
-					self.core.optionsBox.options_msg_label.set_text(self.get_msg(read_guardmode['code']))
+					self.core.optionsBox.options_msg_label.set_text(self.get_msg(self.read_guardmode_headers['code'])+"\n"+self.read_guardmode_headers['data'])
 					self.core.optionsBox.options_msg_label.set_label("MSG_ERROR_LABEL")
 				else:
 					self.core.optionsBox.set_mode()
@@ -167,7 +167,7 @@ class MainWindow:
 						self.core.optionsBox.main_box.set_sensitive(True)
 						self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")		
 			else:
-				self.core.optionsBox.options_msg_label.set_text(self.get_msg(read_guardmode['code']))
+				self.core.optionsBox.options_msg_label.set_text(self.get_msg(self.read_guardmode['code'])+"\n"+self.read_guardmode['data'])
 				self.core.optionsBox.options_msg_label.set_label("MSG_ERROR_LABEL")
 				self.core.optionsBox.add_button.set_sensitive(False)
 				self.core.optionsBox.apply_btn.set_sensitive(False)
@@ -213,37 +213,37 @@ class MainWindow:
 		elif code==9:
 			msg_text=_("Error changing Lliurex Guard mode:")
 		elif code==10:
-			msg_text=_("Error restarting dnsmasq")
+			msg_text=_("Error restarting dnsmasq:")
 		elif code==11:
 			msg_text=_("Loading the information from the list. Wait a moment...")
 		elif code==12:
 			msg_text=_("Information of the list loaded successfully")
 		elif code==13:
-			msg_text=_("Error loading the information from the list")	
+			msg_text=_("Error loading the information from the list:")	
 		elif code==14:
 			msg_text=_("Loading file. Wait a moment...")
 		elif code==15:
 			msg_text=_("File loaded sucessfully")	
 		elif code==16:
-			msg_text=_("Error loading file")	
+			msg_text=_("Error loading file:")	
 		elif code==17:
 			msg_text=_("Applying changes. Wait a moment...")
 		elif code==18:
 			msg_text=_("Changes applied successfully")	
 		elif code==19:
-			msg_text=_("Error removing lists")
+			msg_text=_("Error removing lists:")
 		elif code==20:
-			msg_text=_("Error activating lists")
+			msg_text=_("Error activating lists:")
 		elif code==21:
-			msg_text=("Error deactivating lists")
+			msg_text=("Error deactivating lists:")
 		elif code==22:
 			msg_text=_("Lliurex Guard mode readed sucessfully")
 		elif code==23:
-			msg_text=_("Error reading Lliurex Guard mode")
+			msg_text=_("Error reading Lliurex Guard mode:")
 		elif code==24:
 			msg_text=_("List code readed successfully")
 		elif code==25:
-			msg_text=_("Error reading list headers")
+			msg_text=_("Error reading list headers:")
 		elif code==26:
 			msg_text=_("Saving changes. Wait a moment...")
 		elif code==27:
