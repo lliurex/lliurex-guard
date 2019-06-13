@@ -37,7 +37,7 @@ class LliurexGuardManager(object):
 	#def __init__	
 
 
-	def _create_guardmode_conf(self):
+	def _create_guardmode_conf_file(self):
 
 		f=open(self.mode_file_path,'w')
 		f.write(self.disable_bm_mode+"\n")
@@ -45,23 +45,29 @@ class LliurexGuardManager(object):
 		f.write(self.disable_whitelist_filter)
 		f.close()
 
+	#def _create_guardmode_conf
+
+	def _create_guardmode_conf_dir(self,mode_to_set):
+
+		
 		if not os.path.exists(self.conf_dir):
 			os.mkdir(self.conf_dir)
 
-		if not os.path.exists(self.blacklist_dir):
-			os.mkdir(self.blacklist_dir)
+		if mode_to_set =="BlackMode":
+			if not os.path.exists(self.blacklist_dir):
+				os.mkdir(self.blacklist_dir)
 
-		if not os.path.exists(self.blacklist_disable_dir):
-			os.mkdir(self.blacklist_disable_dir)
-			if os.path.exists(self.default_list_path):
+			if not os.path.exists(self.blacklist_disable_dir):
+				os.mkdir(self.blacklist_disable_dir)
+				if os.path.exists(self.default_list_path):
+					os.system("cp -R "+self.default_list_path+"/* "+self.blacklist_disable_dir)
 
-				os.system("cp -R "+self.default_list_path+"/* "+self.blacklist_disable_dir)
+		elif mode_to_set=="WhiteMode":			
+			if not os.path.exists(self.whitelist_dir):
+				os.mkdir(self.whitelist_dir)
 
-		if not os.path.exists(self.whitelist_dir):
-			os.mkdir(self.whitelist_dir)
-
-		if not os.path.exists(self.whitelist_disable_dir):
-			os.mkdir(self.whitelist_disable_dir)		
+			if not os.path.exists(self.whitelist_disable_dir):
+				os.mkdir(self.whitelist_disable_dir)		
 			
 	#def _create_guardmode_conf	
 
@@ -96,7 +102,7 @@ class LliurexGuardManager(object):
 		
 		try:
 			if not os.path.exists(self.mode_file_path):
-				self._create_guardmode_conf()
+				self._create_guardmode_conf_file()
 
 			f=open(self.mode_file_path,'r')
 			lines=f.readlines()
@@ -160,6 +166,7 @@ class LliurexGuardManager(object):
 				
 			
 			f.close()
+			self._create_guardmode_conf_dir(mode_to_set)
 			#restart=self.restart_dnsmasq()
 			return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully"}
 			

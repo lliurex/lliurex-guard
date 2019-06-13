@@ -120,14 +120,14 @@ class GuardManager(object):
 		'''	
 
 		change_guardmode=self.n4d.change_guardmode(self.validation,"LliurexGuardManager",mode)
-		msg="LliureX Guard Mode changed "
+		msg="LliureX Guard Mode changed to %s"%mode
 		self._debug(msg,change_guardmode)
 		msg_log=msg+str(change_guardmode)
 		self.write_log(msg_log)
 		
 		if change_guardmode['status']:
 			restart_dnsmasq=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
-			msg="LliureX Guard Mode changed.Dnsmasq restarted "
+			msg="LliureX Guard Mode changed. Dnsmasq restarted "
 			self._debug(msg,restart_dnsmasq)
 			msg_log=msg+str(restart_dnsmasq)
 			self.write_log(msg_log)
@@ -185,7 +185,7 @@ class GuardManager(object):
 		listId=data[order]["id"]
 		if data[order]["tmpfile"]!="":
 			read_tmp_file=self.read_local_file(data[order]["tmpfile"],False)
-			msg="Readed local file "
+			msg="List %s. Readed local file (%s)"%(listId,data[order]["tmpfile"])
 			self._debug(msg,read_tmp_file)
 			if read_tmp_file['status']:
 				content=read_tmp_file['data'][0]
@@ -197,7 +197,7 @@ class GuardManager(object):
 				error_info=read_tmp_file['data']
 		else:
 			read_guardmode_list=self.n4d.read_guardmode_list(self.validation,"LliurexGuardManager",listId,data[order]['active'])
-			msg="Readed list file "
+			msg="List %s. Readed file"%listId
 			self._debug(msg,read_guardmode_list)
 			if read_guardmode_list['status']:
 				content=read_guardmode_list['data'][0]
@@ -220,13 +220,15 @@ class GuardManager(object):
 					tmp_file=read_tmp_file['data'][2]	
 				content=None
 				read_tmp_file=None	
-			data=[content,tmp_file]
+			result=[content,tmp_file]
+			msg_log=msg + " successfully"
 		else:
 			code=13
-			data=error_info
-		msg_log=msg+"error: "+str(status)+" Error details: "+str(error_info)
+			result=error_info
+			msg_log=msg+ "with errors. Error details: "+str(error_info)
+		
 		self.write_log(msg_log)
-		return {'status':status,'code':code,'data':data}
+		return {'status':status,'code':code,'data':result}
 
 	#def read_guardmode_list	
 			
@@ -316,9 +318,9 @@ class GuardManager(object):
 			result['code']=5
 			result['data']=str(e)
 		
-		msg="Saved list changes"
+		msg="List %s. Saved changes "%info["id"]
 		self._debug(msg,result)
-		msg_log=msg+str(result)	
+		msg_log=msg+" "+str(result)	
 		self.write_log(msg_log)
 
 		return result
@@ -496,7 +498,8 @@ class GuardManager(object):
 	def send_tmpfile_toserver(self,tmp_file):
 
 		send_tmpfile=self.n4d_local.send_file("","ScpManager",self.validation[0],self.validation[1],"server",tmp_file,"/tmp")
-			
+		msg_log="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
+		self.write_log(msg_log)
 		return send_tmpfile
 	#def send_tmpfile_toserver		
 

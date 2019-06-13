@@ -439,7 +439,7 @@ class OptionsBox(Gtk.VBox):
 		self.list_item_box.set_valign(Gtk.Align.FILL)
 		hbox.queue_draw()	
 
-	#def new_service_box	
+	#def new_item_box	
 
 	def add_list(self,widget):
 
@@ -819,7 +819,9 @@ class OptionsBox(Gtk.VBox):
 					self.search_list.pop(item)
 
 			if len(self.search_list)>0:
-				self.draw_list("search")		
+				self.draw_list("search")	
+
+	#def search_entry_changed				
 
 
 	def mouse_over_popover(self,widget,event=None):

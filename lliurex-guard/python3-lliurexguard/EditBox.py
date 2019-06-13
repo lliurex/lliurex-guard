@@ -277,7 +277,6 @@ class EditBox(Gtk.VBox):
 		list_info["description"]=self.data_tocheck["description"]
 		if self.read_tw:
 			content=self.buffer.get_text(self.buffer.get_start_iter(),self.buffer.get_end_iter(),True)
-			print(self.loaded_file)
 			if self.loaded_file!=None:
 				lines=content.count("\n")
 			else:
