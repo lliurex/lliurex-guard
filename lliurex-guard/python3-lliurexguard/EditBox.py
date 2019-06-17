@@ -76,6 +76,10 @@ class EditBox(Gtk.VBox):
 		url_editor_label=builder.get_object("url_editor_label")
 		self.open_editor_btn=builder.get_object("open_editor_btn")
 
+		self.edit_waiting_box=builder.get_object("edit_waiting_box")
+		self.edit_spinner=builder.get_object("edit_spinner")
+		self.edit_spinner_label=builder.get_object("edit_spinner_label")
+
 		self.stack_edit= Gtk.Stack()
 		self.stack_edit.set_transition_duration(750)
 		self.stack_edit.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
@@ -84,6 +88,7 @@ class EditBox(Gtk.VBox):
 
 		self.stack_edit.add_titled(self.url_tw_box,"urlTw","Url Tw")
 		self.stack_edit.add_titled(self.url_editor_box,"urlEditor","Url Editor")
+		self.stack_edit.add_titled(self.edit_waiting_box,"editWaiting","Edit Waiting")
 		self.stack_edit.show_all()
 		self.content_box.pack_start(self.stack_edit,True,True,5)
 
@@ -180,7 +185,7 @@ class EditBox(Gtk.VBox):
 			self.process_block=len(info)	
 		
 		if len(info)>0:
-			self.core.optionsBox.options_pbar.pulse()
+			#self.core.optionsBox.options_pbar.pulse()
 				
 			for i in range(0,self.process_block):
 				iter=self.buffer.get_end_iter()
@@ -198,10 +203,10 @@ class EditBox(Gtk.VBox):
 			else:
 				self.core.editBox.load_values(self.core.optionsBox.order)
 			self.core.mainWindow.lock_quit=False
-			self.core.optionsBox.options_pbar.hide()
+			self.core.optionsBox.option_spinner.stop()
 			self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
 			self.core.mainWindow.stack_window.set_visible_child_name("editBox")		
-			self.core.editBox.stack_edit.set_visible_child_name("urlTW")
+			self.stack_edit.set_visible_child_name("urlTW")
 			return False	
 	
 	#def write_tw	
@@ -229,10 +234,12 @@ class EditBox(Gtk.VBox):
 		self.data_tocheck["name"]=self.list_name_entry.get_text()
 		self.data_tocheck["description"]=self.list_description_entry.get_text()
 	
-		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(24))			
-		self.edit_msg_label.set_name("WAITING_LABEL")
-		self.edit_msg_label.show()
-		self.edit_pbar.show()
+		self.edit_spinner.start()
+		self.edit_spinner_label.set_text(self.core.mainWindow.get_msg(26))			
+		self.edit_spinner_label.set_name("WAITING_LABEL")
+		self.stack_edit.set_transition_duration(550)
+		self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+		self.stack_edit.set_visible_child_name("editWaiting")
 		
 		self.main_box.set_sensitive(False)
 		self.init_threads()
@@ -244,21 +251,30 @@ class EditBox(Gtk.VBox):
 	def pulsate_checking_data(self):
 		
 		if self.checking_data_t.is_alive():
-			self.core.mainWindow.waiting_pbar.pulse()
+			#self.core.mainWindow.waiting_pbar.pulse()
 			return True
 			
 		else:
 			
 			if not self.check["result"]:
+
 				self.main_box.set_sensitive(True)
-				self.edit_pbar.hide()
+				#self.edit_pbar.hide()
+				self.edit_spinner.stop()
+				self.stack_edit.set_transition_duration(550)
+				self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				if self.read_tw:
+					self.stack_edit.set_visible_child_name("urlTw")
+				else:
+					self.stack_edit.set_visible_child_name("urlEditor")	
 				msg_text=self.core.mainWindow.get_msg(self.check["code"])
 				self.edit_msg_label.set_name("MSG_ERROR_LABEL")
 				self.edit_msg_label.set_text(msg_text)
+				return False
 			else:	
 				self.save_values()
 		
-		return False
+		
 		
 	#def pulsate_checking_data	
 		
@@ -285,10 +301,12 @@ class EditBox(Gtk.VBox):
 
 		self.args=[list_info,content,self.loaded_file]
 
+		'''
 		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(26))			
 		self.edit_msg_label.set_name("WAITING_LABEL")
 		self.edit_msg_label.show()
 		self.edit_pbar.show()
+		'''
 		self.core.mainWindow.lock_quit=True
 		self.init_threads()
 		self.saving_data_t.start()
@@ -310,6 +328,7 @@ class EditBox(Gtk.VBox):
 			return True
 			
 		else:
+			self.edit_spinner.stop()
 			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
 			self.edit_pbar.hide()
@@ -349,10 +368,10 @@ class EditBox(Gtk.VBox):
 
 			self.core.optionsBox.main_box.set_sensitive(True)
 			self.core.optionsBox.search_entry.set_text("")
-			self.core.optionsBox.options_pbar.hide()
 			self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_RIGHT)
 			self.core.mainWindow.stack_window.set_visible_child_name("bannerBox")
 			self.core.mainWindow.stack_banner.set_visible_child_name("optionsBox")
+			self.core.optionsBox.stack_opt.set_visible_child_name("listBox")
 			self.core.editBox.remove(self.core.editBox.main_box)
 			
 			return False
@@ -404,10 +423,10 @@ class EditBox(Gtk.VBox):
 		self.core.optionsBox.main_box.set_sensitive(True)
 		self.core.editBox.remove(self.core.editBox.main_box)
 		self.core.optionsBox.options_msg_label.set_text("")
-		self.core.optionsBox.options_pbar.hide()
 		self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_RIGHT)
 		self.core.mainWindow.stack_window.set_visible_child_name("bannerBox")
 		self.core.mainWindow.stack_banner.set_visible_child_name("optionsBox")
+		self.core.optionsBox.stack_opt.set_visible_child_name("listBox")
 
 	#def cancel_clicked	
 	

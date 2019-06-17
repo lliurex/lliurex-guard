@@ -168,7 +168,7 @@ class LliurexGuardManager(object):
 			f.close()
 			self._create_guardmode_conf_dir(mode_to_set)
 			#restart=self.restart_dnsmasq()
-			return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully"}
+			return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
 			
 		except Exception as e:
 			return {'status':False,'msg':"Unable to change Guard Mode",'data':str(e)}	
@@ -185,6 +185,7 @@ class LliurexGuardManager(object):
 			if restart !=0:
 				error=True
 				data=str(restart)
+				
 		except Exception as e:
 			error=True
 			data=str(e)
@@ -192,7 +193,7 @@ class LliurexGuardManager(object):
 		if not error:			
 			return {'status':True,'msg':"Dnsmaq restart successfully"}
 		else:
-			return {'status':True,'msg':"Error restarting Dnsmaq",'data':data}
+			return {'status':False,'msg':"Error restarting Dnsmaq",'data':data}
 
 	#def __restart_dnsmasq				
 	
@@ -248,7 +249,6 @@ class LliurexGuardManager(object):
 						line=line.encode("utf-8")
 						if "NAME" in line:
 							tmp["name"]=line.split(":")[1].split("\n")[0]
-							print(tmp["name"])
 							match+=1
 						if "DESCRIPTION" in line:
 							tmp["description"]=line.split(":")[1].split("\n")[0]
@@ -272,7 +272,7 @@ class LliurexGuardManager(object):
 						tmp["active"]=False
 
 					files_headers.append(tmp)
-					
+			
 			return {'status':True,'msg':"Lists readed successfully",'data':files_headers}
 
 		except Exception as e:			
@@ -316,6 +316,7 @@ class LliurexGuardManager(object):
 							
 				f.close()
 				lines=None
+				
 				return {'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
 		except Exception as e:
 			return {'status':False,'msg':"Unable to read content list",'data':str(e)}
@@ -334,12 +335,12 @@ class LliurexGuardManager(object):
 					else:
 						if os.path.exists(os.path.join(self.disable_path,file)):
 							os.remove(os.path.join(self.disable_path,file))	
-
+							
 			return {'status':True,'msg':"Listed removed sucessfully"}		
 
 		except Exception as e:
 
-			return {'status':False,'msg':"Error removing lists",'data':str[e]}		
+			return {'status':False,'msg':"Error removing lists",'data':str(e)}		
 							
 
 	#def remove_guardmode_list
@@ -432,6 +433,8 @@ class LliurexGuardManager(object):
 			
 	def remove_tmp_file(self):
 
+		print(self.list_tmpfile)
+		
 		for item in self.list_tmpfile:
 			if os.path.exists(item):
 				os.remove(item)

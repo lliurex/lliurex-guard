@@ -134,43 +134,55 @@ class MainWindow:
 	def pulsate_load_info(self,action=None):
 
 		if self.load_info_t.is_alive():
-			if action!=None:
-				self.core.optionsBox.options_pbar.pulse()
 			return True
 
 		else:
 			self.lock_quit=False
 			
 			if action!=None:
-				self.core.optionsBox.options_pbar.hide()
 				if action=="login":
 					self.core.loginBox.login_spinner.stop()
+				else:
+					self.core.optionsBox.option_spinner.stop()	
 
 			if self.read_guardmode['status']:
+				error=False
+				self.core.optionsBox.set_mode()
 				if not self.read_guardmode_headers['status']:
-					self.core.optionsBox.add_button.set_sensitive(False)
-					self.core.optionsBox.apply_btn.set_sensitive(False)
-					self.core.optionsBox.options_msg_label.set_text(self.get_msg(self.read_guardmode_headers['code'])+"\n"+self.read_guardmode_headers['data'])
-					self.core.optionsBox.options_msg_label.set_label("MSG_ERROR_LABEL")
+					error=True
+					msg=self.get_msg(self.read_guardmode_headers['code'])+"\n"+self.read_guardmode_headers['data']
+					
 				else:
-					self.core.optionsBox.set_mode()
 					self.core.optionsBox.draw_list("init")
-					if action=="login":
-						self.stack_banner.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-						self.stack_banner.set_visible_child_name("optionsBox")
-					else:
+					if action!="login":
 						if action=="apply":
-							self.core.optionsBox.options_msg_label.set_text(self.get_msg(self.core.optionsBox.result_apply['code']))
+							msg=self.get_msg(self.core.optionsBox.result_apply['code'])
 						else:
-							self.core.optionsBox.options_msg_label.set_text(self.get_msg(self.core.optionsBox.result_mode['code']))
-	
-						self.core.optionsBox.main_box.set_sensitive(True)
-						self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")		
+							msg=self.get_msg(self.core.optionsBox.result_mode['code'])
+					else:
+						msg=""		
+							
 			else:
-				self.core.optionsBox.options_msg_label.set_text(self.get_msg(self.read_guardmode['code'])+"\n"+self.read_guardmode['data'])
-				self.core.optionsBox.options_msg_label.set_label("MSG_ERROR_LABEL")
+				error=True
+				msg=self.get_msg(self.read_guardmode['code'])+"\n"+self.read_guardmode['data']
+
+
+			if error:
 				self.core.optionsBox.add_button.set_sensitive(False)
 				self.core.optionsBox.apply_btn.set_sensitive(False)
+				self.core.optionsBox.options_msg_label.set_name("MSG_ERROR_LABEL")
+			else:
+				self.core.optionsBox.main_box.set_sensitive(True)
+				self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")
+				
+			self.core.optionsBox.options_msg_label.set_text(msg)
+				
+			if action=="login":
+				self.stack_banner.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_banner.set_visible_child_name("optionsBox")
+			else:
+				self.core.optionsBox.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.core.optionsBox.stack_opt.set_visible_child_name("listBox")	
 
 			return False	
 
@@ -276,10 +288,11 @@ class MainWindow:
 				response=dialog.run()
 				dialog.destroy()
 				if response==Gtk.ResponseType.CLOSE:
+					self.core.guardmanager.remove_tmp_file()
 					return False
 				else:
 					return True
-
+			self.core.guardmanager.remove_tmp_file()		
 			sys.exit(0)
 		else:
 			return True	

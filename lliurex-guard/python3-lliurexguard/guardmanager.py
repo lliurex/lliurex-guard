@@ -33,6 +33,7 @@ class GuardManager(object):
 		self.user_groups=[]
 		self.validation=None
 		self.limit_lines=2500
+		self.garbage_files=[]
 
 		self.detect_flavour()
 
@@ -164,7 +165,7 @@ class GuardManager(object):
 			return {'status':True,'code':24,'data':tmp_list}	
 
 		else:
-			return {'status':False,'code':25,'data':read_guardmode_headers['data']}
+			return {'status':False,'code':25,'data':str(read_guardmode_headers['data'])}
 		
 
 	#def read_guardmode_headers	
@@ -216,6 +217,7 @@ class GuardManager(object):
 					f.write(tmp_content)
 					f.close()
 					tmp_content=None
+					self.garbage_files.append(tmp_file)
 				else:
 					tmp_file=read_tmp_file['data'][2]	
 				content=None
@@ -268,6 +270,8 @@ class GuardManager(object):
 					if count_lines>self.limit_lines:
 						content=None
 
+				self.garbage_files.append(tmp_file)		
+
 				return {'status':True,'code':15,'data':[content,count_lines,tmp_file]}
 			else:
 				return {'status':False,'code':27,'data':''}	
@@ -291,7 +295,7 @@ class GuardManager(object):
 		try:
 			if args[2]==None:
 				tmp_list=self._create_tmp_file(info["id"])
-				
+				self.garbage_files.append(tmp_list)
 			else:
 				tmp_list=args[2]
 
@@ -401,7 +405,7 @@ class GuardManager(object):
 		list_to_remove=[]
 		list_to_active=[]
 		list_to_deactive=[]
-		tmpfile_list=[]
+		self.tmpfile_list=[]
 		error=False
 		code=""
 		data=""
@@ -421,7 +425,7 @@ class GuardManager(object):
 							
 					if list_data[item]["active"]:
 						if list_data[item]["tmpfile"]!="":
-							tmpfile_list.append(list_data[item]["tmpfile"])
+							#self.tmpfile_list.append(list_data[item]["tmpfile"])
 							if "client" in self.flavours:
 								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 									
@@ -430,7 +434,7 @@ class GuardManager(object):
 									
 					if not list_data[item]["active"]:
 						if list_data[item]["tmpfile"]!="":
-							tmpfile_list.append(list_data[item]["tmpfile"])
+							#self.tmpfile_list.append(list_data[item]["tmpfile"])
 							if "client" in self.flavours:
 								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 								
@@ -477,7 +481,7 @@ class GuardManager(object):
 							data=result_deactive['data']
 
 			if not error:
-				self.remove_tmp_file(tmpfile_list)
+				#self.remove_tmp_file(tmpfile_list)
 				result_restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
 				if result_restart['status']:
 					return {'status':True,'code':18}
@@ -512,12 +516,19 @@ class GuardManager(object):
 
 	#def _create_tmp_file	
 
-	def remove_tmp_file(self,tmpfile_list):
+	def remove_tmp_file(self):
 
+		'''
 		if "client" in self.flavours:
-			for item in tmpfile_list:
+			for item in self.tmpfile_list:
 				if os.path.exists(item):
 					os.remove(item)
+		'''
+		for item in self.garbage_files:
+			if os.path.exists(item):
+				os.remove(item)
+		
+		self.garbage_files=[]	
 
 		self.n4d.remove_tmp_file(self.validation,"LliurexGuardManager")			
 

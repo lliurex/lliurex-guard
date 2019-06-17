@@ -44,6 +44,41 @@
       <placeholder/>
     </child>
   </object>
+  <object class="GtkBox" id="edit_waiting_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="valign">center</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkSpinner" id="edit_spinner">
+        <property name="width_request">50</property>
+        <property name="height_request">50</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="edit_spinner_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="margin_top">10</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
   <object class="GtkBox" id="list_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -405,7 +440,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
             <child>
@@ -432,7 +467,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">4</property>
               </packing>
             </child>
           </object>
@@ -479,6 +514,41 @@
           </object>
         </child>
       </object>
+    </child>
+  </object>
+  <object class="GtkBox" id="option_waiting_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="valign">center</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkSpinner" id="option_spinner">
+        <property name="width_request">50</property>
+        <property name="height_request">50</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="option_spinner_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="margin_top">10</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
     </child>
   </object>
   <object class="GtkBox" id="options_box">
