@@ -75,6 +75,10 @@ class OptionsBox(Gtk.VBox):
 		self.list_box_vp=builder.get_object("list_box_viewport")
 		self.list_item_box=builder.get_object("list_item_box")
 
+		self.option_waiting_box=builder.get_object("option_waiting_box")
+		self.option_spinner=builder.get_object("option_spinner")
+		self.option_spinner_label=builder.get_object("option_spinner_label")
+
 		self.options_msg_label=builder.get_object("options_msg_label")
 		self.options_pbar=builder.get_object("options_pbar")
 		self.apply_btn=builder.get_object("apply_btn")
@@ -86,6 +90,7 @@ class OptionsBox(Gtk.VBox):
 		self.stack_opt.set_margin_bottom(0)
 
 		self.stack_opt.add_titled(self.list_box,"listBox","List Box")
+		self.stack_opt.add_titled(self.option_waiting_box,"waitingBox","Waiting Box")
 		self.stack_opt.show_all()
 		self.main_box.pack_start(self.stack_opt,True,True,5)
 
@@ -439,7 +444,7 @@ class OptionsBox(Gtk.VBox):
 		self.list_item_box.set_valign(Gtk.Align.FILL)
 		hbox.queue_draw()	
 
-	#def new_service_box	
+	#def new_item_box	
 
 	def add_list(self,widget):
 
@@ -472,10 +477,12 @@ class OptionsBox(Gtk.VBox):
 			file=dialog.get_filename()
 			dialog.destroy()
 			self.core.mainWindow.lock_quit=True
-			self.options_msg_label.show()
-			self.options_msg_label.set_name("WAITING_LABEL")
-			self.options_msg_label.set_text(self.core.mainWindow.get_msg(14))
-			self.options_pbar.show()
+			self.option_spinner_label.set_name("WAITING_LABEL")
+			self.option_spinner_label.set_text(self.core.mainWindow.get_msg(14))
+			self.option_spinner.start()
+			self.stack_opt.set_transition_duration(550)
+			self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+			self.stack_opt.set_visible_child_name("waitingBox")
 			self.init_threads()
 			self.load_file_t=threading.Thread(target=self.load_file_info,args=(file,))
 			self.load_file_t.start()
@@ -561,10 +568,14 @@ class OptionsBox(Gtk.VBox):
 		if response==Gtk.ResponseType.YES:
 
 			self.main_box.set_sensitive(False)
-			self.options_msg_label.set_text(self.core.mainWindow.get_msg(7))
-			self.options_msg_label.set_name("WAITING_LABEL")
-			self.options_pbar.show()
+			self.options_msg_label.set_text("")
 			self.core.mainWindow.lock_quit=True
+			self.option_spinner_label.set_name("WAITING_LABEL")
+			self.option_spinner_label.set_text(self.core.mainWindow.get_msg(7))
+			self.option_spinner.start()
+			self.stack_opt.set_transition_duration(550)
+			self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+			self.stack_opt.set_visible_child_name("waitingBox")
 			self.init_threads()
 			self.change_guard_mode_t=threading.Thread(target=self.change_guard_process,args=(self.mode,))
 			self.change_guard_mode_t.start()
@@ -579,22 +590,21 @@ class OptionsBox(Gtk.VBox):
 	def pulsate_change_guard_mode(self):
 
 		if self.change_guard_mode_t.is_alive():
-			self.options_pbar.pulse()
 			return True
 
 		else:
 			if self.result_mode['status']:
-				#self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_mode['code']))
-				#self.options_msg_label.set_name("MSG_CORRECT_LABEL")
 				self.core.mainWindow.load_info("mode")
-				#self.options_pbar.show()
 				return False
-				#self.set_mode()
-				#self.draw_list("init")
+				
 			else:
+				self.core.mainWindow.lock_quit=False
+				self.option_spinner.stop()
+				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_mode['code'])+'\n'+self.result_mode['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")
-				self.options_pbar.hide()
+				#self.options_pbar.hide()
 				return False			
 
 	#def pulsate_change_guard_mode
@@ -667,11 +677,14 @@ class OptionsBox(Gtk.VBox):
 		hbox.get_children()[0].get_children()[0].get_children()[2].popover.hide()
 		self.order=hbox.get_children()[0].id
 		lines=self.list_data[self.order]["lines"]
-		self.options_msg_label.show()
-		self.options_msg_label.set_text(self.core.mainWindow.get_msg(11))
-		self.options_msg_label.set_name("WAITING_LABEL")
 		self.core.mainWindow.lock_quit=True
-		self.options_pbar.show()
+		self.options_msg_label.set_text("")
+		self.option_spinner_label.set_name("WAITING_LABEL")
+		self.option_spinner_label.set_text(self.core.mainWindow.get_msg(11))
+		self.option_spinner.start()
+		self.stack_opt.set_transition_duration(350)
+		self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+		self.stack_opt.set_visible_child_name("waitingBox")
 		self.core.editBox.init_form()
 		self.init_threads()
 		self.load_info_t=threading.Thread(target=self.load_info)
@@ -684,7 +697,6 @@ class OptionsBox(Gtk.VBox):
 	def pulsate_load_info(self,lines):
 
 		if self.load_info_t.is_alive():
-			self.options_pbar.pulse()
 			return True
 		else:
 
@@ -695,7 +707,7 @@ class OptionsBox(Gtk.VBox):
 					return False
 				else:
 					self.core.mainWindow.lock_quit=False
-					self.options_pbar.hide()
+					self.option_spinner.stop()
 					self.core.editBox.render_form(False,self.read_list['data'][1])
 					self.core.editBox.load_values(self.order)
 					self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
@@ -707,7 +719,10 @@ class OptionsBox(Gtk.VBox):
 				self.main_box.set_sensitive(True)
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_list['code'])+"\n"+self.read_list['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")
-				self.options_pbar.hide()		
+				self.option_spinner.stop()
+				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_opt.set_visible_child_name("listBox")
+				return False		
 
 	#def pulsate_load_info
 
@@ -720,7 +735,6 @@ class OptionsBox(Gtk.VBox):
 	def pulsate_load_file(self):
 
 		if self.load_file_t.is_alive():
-			self.options_pbar.pulse()
 			return True
 
 		else:
@@ -733,19 +747,22 @@ class OptionsBox(Gtk.VBox):
 						GLib.timeout_add(100,self.core.editBox.write_tw,self.read_file['data'][0])
 						return False
 					else:
+						self.option_spinner.stop()
 						self.core.mainWindow.lock_quit=False
-						self.options_pbar.hide()
 						self.core.editBox.render_form(False,self.read_file['data'][2])
 						self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
 						self.core.mainWindow.stack_window.set_visible_child_name("editBox")	
 						self.core.editBox.stack_edit.set_visible_child_name("urlEditor")	
 						return False
 			else:
+				self.option_spinner.stop()
 				self.core.mainWindow.lock_quit=False
 				self.main_box.set_sensitive(True)
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_file['code'])+"\n"+self.read_file['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")
-				self.options_pbar.hide()			
+				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_opt.set_visible_child_name("waitingBox")
+				return False			
 
 	#def pulsate_load_file					
 
@@ -758,9 +775,13 @@ class OptionsBox(Gtk.VBox):
 	def apply_btn_clicked(self,widget):
 
 		self.main_box.set_sensitive(False)
-		self.options_msg_label.set_name("WAITING_LABEL")
-		self.options_msg_label.set_text(self.core.mainWindow.get_msg(17))
-		self.options_pbar.show()
+		self.options_msg_label.set_text("")
+		self.option_spinner_label.set_name("WAITING_LABEL")
+		self.option_spinner_label.set_text(self.core.mainWindow.get_msg(17))
+		self.option_spinner.start()
+		self.stack_opt.set_transition_duration(150)
+		self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+		self.stack_opt.set_visible_child_name("waitingBox")
 		self.core.mainWindow.lock_quit=True
 		self.init_threads()
 		self.apply_changes_t=threading.Thread(target=self.apply_changes)
@@ -772,21 +793,22 @@ class OptionsBox(Gtk.VBox):
 	def pulsate_apply_changes(self):
 
 		if self.apply_changes_t.is_alive():
-			self.options_pbar.pulse()
 			return True
 
 		else:
 			self.core.mainWindow.lock_quit=False
+			
 			if self.result_apply['status']:
 				self.core.mainWindow.load_info("apply")
-				#self.options_pbar.show()
 				return False
 				
 			else:
+				self.option_spinner.stop()
+				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_apply['code'])+"\n"+self.result_apply['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")	
 				self.main_box.set_sensitive(True)
-				self.options_pbar.hide()	
 				return False
 				
 	#def pulsat_apply_changes
@@ -819,7 +841,9 @@ class OptionsBox(Gtk.VBox):
 					self.search_list.pop(item)
 
 			if len(self.search_list)>0:
-				self.draw_list("search")		
+				self.draw_list("search")	
+
+	#def search_entry_changed				
 
 
 	def mouse_over_popover(self,widget,event=None):

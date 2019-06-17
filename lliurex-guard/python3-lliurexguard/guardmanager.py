@@ -33,13 +33,16 @@ class GuardManager(object):
 		self.user_groups=[]
 		self.validation=None
 		self.limit_lines=2500
+		self.garbage_files=[]
+
+		self.detect_flavour()
 
 		if server!=None:
 			self.set_server(server)
 
 		context=ssl._create_unverified_context()
 		self.n4d_local = n4dclient.ServerProxy("https://localhost:9779",context=context,allow_none=True)	
-		self.detect_flavour()	
+			
 	
 	#def __init__	
 	
@@ -71,7 +74,7 @@ class GuardManager(object):
 		
 		if self.user_validated:
 			self.validation=(user,password)
-			session_user=os.environ["USERNAME"]
+			session_user=os.environ["USER"]
 			msg_log="Session User: %s"%session_user+" LlxGuard User: %s"%self.validation[0]
 			self.write_log(msg_log)
 
@@ -118,14 +121,14 @@ class GuardManager(object):
 		'''	
 
 		change_guardmode=self.n4d.change_guardmode(self.validation,"LliurexGuardManager",mode)
-		msg="LliureX Guard Mode changed "
+		msg="LliureX Guard Mode changed to %s"%mode
 		self._debug(msg,change_guardmode)
 		msg_log=msg+str(change_guardmode)
 		self.write_log(msg_log)
 		
 		if change_guardmode['status']:
 			restart_dnsmasq=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
-			msg="LliureX Guard Mode changed.Dnsmasq restarted "
+			msg="LliureX Guard Mode changed. Dnsmasq restarted "
 			self._debug(msg,restart_dnsmasq)
 			msg_log=msg+str(restart_dnsmasq)
 			self.write_log(msg_log)
@@ -162,7 +165,7 @@ class GuardManager(object):
 			return {'status':True,'code':24,'data':tmp_list}	
 
 		else:
-			return {'status':False,'code':25,'data':read_guardmode_headers['data']}
+			return {'status':False,'code':25,'data':str(read_guardmode_headers['data'])}
 		
 
 	#def read_guardmode_headers	
@@ -183,7 +186,7 @@ class GuardManager(object):
 		listId=data[order]["id"]
 		if data[order]["tmpfile"]!="":
 			read_tmp_file=self.read_local_file(data[order]["tmpfile"],False)
-			msg="Readed local file "
+			msg="List %s. Readed local file (%s)"%(listId,data[order]["tmpfile"])
 			self._debug(msg,read_tmp_file)
 			if read_tmp_file['status']:
 				content=read_tmp_file['data'][0]
@@ -195,7 +198,7 @@ class GuardManager(object):
 				error_info=read_tmp_file['data']
 		else:
 			read_guardmode_list=self.n4d.read_guardmode_list(self.validation,"LliurexGuardManager",listId,data[order]['active'])
-			msg="Readed list file "
+			msg="List %s. Readed file"%listId
 			self._debug(msg,read_guardmode_list)
 			if read_guardmode_list['status']:
 				content=read_guardmode_list['data'][0]
@@ -214,17 +217,20 @@ class GuardManager(object):
 					f.write(tmp_content)
 					f.close()
 					tmp_content=None
+					self.garbage_files.append(tmp_file)
 				else:
 					tmp_file=read_tmp_file['data'][2]	
 				content=None
 				read_tmp_file=None	
-			data=[content,tmp_file]
+			result=[content,tmp_file]
+			msg_log=msg + " successfully"
 		else:
 			code=13
-			data=error_info
-		msg_log=msg+"error: "+str(status)+" Error details: "+str(error_info)
+			result=error_info
+			msg_log=msg+ "with errors. Error details: "+str(error_info)
+		
 		self.write_log(msg_log)
-		return {'status':status,'code':code,'data':data}
+		return {'status':status,'code':code,'data':result}
 
 	#def read_guardmode_list	
 			
@@ -264,6 +270,8 @@ class GuardManager(object):
 					if count_lines>self.limit_lines:
 						content=None
 
+				self.garbage_files.append(tmp_file)		
+
 				return {'status':True,'code':15,'data':[content,count_lines,tmp_file]}
 			else:
 				return {'status':False,'code':27,'data':''}	
@@ -287,7 +295,7 @@ class GuardManager(object):
 		try:
 			if args[2]==None:
 				tmp_list=self._create_tmp_file(info["id"])
-				
+				self.garbage_files.append(tmp_list)
 			else:
 				tmp_list=args[2]
 
@@ -314,9 +322,9 @@ class GuardManager(object):
 			result['code']=5
 			result['data']=str(e)
 		
-		msg="Saved list changes"
+		msg="List %s. Saved changes "%info["id"]
 		self._debug(msg,result)
-		msg_log=msg+str(result)	
+		msg_log=msg+" "+str(result)	
 		self.write_log(msg_log)
 
 		return result
@@ -397,7 +405,7 @@ class GuardManager(object):
 		list_to_remove=[]
 		list_to_active=[]
 		list_to_deactive=[]
-		tmpfile_list=[]
+		self.tmpfile_list=[]
 		error=False
 		code=""
 		data=""
@@ -417,7 +425,7 @@ class GuardManager(object):
 							
 					if list_data[item]["active"]:
 						if list_data[item]["tmpfile"]!="":
-							tmpfile_list.append(list_data[item]["tmpfile"])
+							#self.tmpfile_list.append(list_data[item]["tmpfile"])
 							if "client" in self.flavours:
 								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 									
@@ -426,7 +434,7 @@ class GuardManager(object):
 									
 					if not list_data[item]["active"]:
 						if list_data[item]["tmpfile"]!="":
-							tmpfile_list.append(list_data[item]["tmpfile"])
+							#self.tmpfile_list.append(list_data[item]["tmpfile"])
 							if "client" in self.flavours:
 								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 								
@@ -473,7 +481,7 @@ class GuardManager(object):
 							data=result_deactive['data']
 
 			if not error:
-				self.remove_tmp_file(tmpfile_list)
+				#self.remove_tmp_file(tmpfile_list)
 				result_restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
 				if result_restart['status']:
 					return {'status':True,'code':18}
@@ -494,7 +502,8 @@ class GuardManager(object):
 	def send_tmpfile_toserver(self,tmp_file):
 
 		send_tmpfile=self.n4d_local.send_file("","ScpManager",self.validation[0],self.validation[1],"server",tmp_file,"/tmp")
-			
+		msg_log="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
+		self.write_log(msg_log)
 		return send_tmpfile
 	#def send_tmpfile_toserver		
 
@@ -507,12 +516,19 @@ class GuardManager(object):
 
 	#def _create_tmp_file	
 
-	def remove_tmp_file(self,tmpfile_list):
+	def remove_tmp_file(self):
 
+		'''
 		if "client" in self.flavours:
-			for item in tmpfile_list:
+			for item in self.tmpfile_list:
 				if os.path.exists(item):
 					os.remove(item)
+		'''
+		for item in self.garbage_files:
+			if os.path.exists(item):
+				os.remove(item)
+		
+		self.garbage_files=[]	
 
 		self.n4d.remove_tmp_file(self.validation,"LliurexGuardManager")			
 
