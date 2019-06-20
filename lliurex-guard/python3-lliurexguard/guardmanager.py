@@ -135,6 +135,10 @@ class GuardManager(object):
 			if restart_dnsmasq['status']:
 				return {'status':True,'code':8}
 			else:
+				disable_llxguard=self.n4d.change_guardmode(self.validation,"LliurexGuardManager","DisableMode")
+				if disable_llxguard['status']:
+					restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
+					
 				return {'status':False,'code':10,'data':restart_dnsmasq['data']}	
 		else:
 			return {'status':False,'code':9,'data':change_guardmode['data']}		
