@@ -56,8 +56,8 @@ msgid "Error changing Lliurex Guard mode:"
 msgstr "Error cambiando el modo de Lliurex Guard:"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:216
-msgid "Error restarting dnsmasq:"
-msgstr "Error reiniciando dnsmasq:"
+msgid "Error restarting dnsmasq. Lliurex Guard will be disabled:"
+msgstr "Error reiniciando dnsmasq. Lliurex Guard será desactivado:"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:218
 msgid "Loading the information from the list. Wait a moment..."
