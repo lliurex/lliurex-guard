@@ -231,6 +231,9 @@ class OptionsBox(Gtk.VBox):
 				self.whitemode_box.hide()
 				self.add_button.set_sensitive(True)
 				self.global_management_button.set_sensitive(True)
+			else:
+				self.add_button.set_sensitive(False)
+				self.global_management_button.set_sensitive(False)
 				
 		else:
 			self.blackmode_box.show()
@@ -808,7 +811,8 @@ class OptionsBox(Gtk.VBox):
 				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_apply['code'])+"\n"+self.result_apply['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")	
-				self.main_box.set_sensitive(True)
+				if self.result_apply['code']!=10:
+					self.main_box.set_sensitive(True)
 				return False
 				
 	#def pulsat_apply_changes
