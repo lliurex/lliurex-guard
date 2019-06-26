@@ -381,7 +381,7 @@ class GuardManager(object):
 		order_list=[]
 
 		for item in info:
-			name=info[item]["name"]
+			name=info[item]["name"].lower()
 			x=()
 			x=item,name
 			tmp.append(x)
