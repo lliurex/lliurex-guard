@@ -117,7 +117,7 @@ class MainWindow:
 
 	#def connect_signals		
 		
-	def load_info(self,action=None):
+	def load_info(self,action):
 	
 		self.core.optionsBox.toolbar.show()
 		self.core.optionsBox.search_entry.show()	
@@ -131,7 +131,7 @@ class MainWindow:
 
 	#def load_info
 	
-	def pulsate_load_info(self,action=None):
+	def pulsate_load_info(self,action):
 
 		if self.load_info_t.is_alive():
 			return True
@@ -139,11 +139,10 @@ class MainWindow:
 		else:
 			self.lock_quit=False
 			
-			if action!=None:
-				if action=="login":
-					self.core.loginBox.login_spinner.stop()
-				else:
-					self.core.optionsBox.option_spinner.stop()	
+			if action=="login":
+				self.core.loginBox.login_spinner.stop()
+			else:
+				self.core.optionsBox.option_spinner.stop()	
 
 			if self.read_guardmode['status']:
 				error=False
@@ -225,7 +224,7 @@ class MainWindow:
 		elif code==9:
 			msg_text=_("Error changing Lliurex Guard mode:")
 		elif code==10:
-			msg_text=_("Error restarting dnsmasq:")
+			msg_text=_("Error restarting dnsmasq. Lliurex Guard will be disabled:")
 		elif code==11:
 			msg_text=_("Loading the information from the list. Wait a moment...")
 		elif code==12:

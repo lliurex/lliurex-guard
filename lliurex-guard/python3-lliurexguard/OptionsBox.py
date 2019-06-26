@@ -124,8 +124,8 @@ class OptionsBox(Gtk.VBox):
 
 	def init_threads(self):
 
-		self.load_info_t=threading.Thread()
-		self.load_info_t.daemon=True
+		self.load_list_info_t=threading.Thread()
+		self.load_list_info_t.daemon=True
 		self.load_file_t=threading.Thread()
 		self.load_file_t.daemon=True
 		self.write_tw_t=threading.Thread()
@@ -687,16 +687,16 @@ class OptionsBox(Gtk.VBox):
 		self.stack_opt.set_visible_child_name("waitingBox")
 		self.core.editBox.init_form()
 		self.init_threads()
-		self.load_info_t=threading.Thread(target=self.load_info)
-		self.load_info_t.start()
-		GLib.timeout_add(100,self.pulsate_load_info,lines)
+		self.load_list_info_t=threading.Thread(target=self.load_list_info)
+		self.load_list_info_t.start()
+		GLib.timeout_add(100,self.pulsate_load_list_info,lines)
 
 
 	#def edit_list_clicked
 
-	def pulsate_load_info(self,lines):
+	def pulsate_load_list_info(self,lines):
 
-		if self.load_info_t.is_alive():
+		if self.load_list_info_t.is_alive():
 			return True
 		else:
 
@@ -726,7 +726,7 @@ class OptionsBox(Gtk.VBox):
 
 	#def pulsate_load_info
 
-	def load_info(self):
+	def load_list_info(self):
 		
 		self.read_list=self.core.guardmanager.read_guardmode_list(self.order,self.list_data)
 
