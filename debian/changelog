@@ -1,3 +1,9 @@
+lliurex-guard (4.5) bionic; urgency=medium
+
+  * New version based in dnsmasq
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 26 Jun 2019 17:30:39 +0200
+
 lliurex-guard (4.4.16) bionic; urgency=medium
 
   * Initial release for bionic

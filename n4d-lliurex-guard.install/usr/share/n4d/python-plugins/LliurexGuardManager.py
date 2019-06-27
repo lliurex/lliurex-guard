@@ -146,7 +146,7 @@ class LliurexGuardManager(object):
 
 	#def _set_variables		
 	
-	def change_guardmode(self,mode_to_set):
+	def change_guardmode(self,mode_to_set,rescue=False):
 
 		try:
 			f=open(self.mode_file_path,'w')
@@ -167,7 +167,8 @@ class LliurexGuardManager(object):
 			
 			f.close()
 			self._create_guardmode_conf_dir(mode_to_set)
-			#restart=self.restart_dnsmasq()
+			if rescue:
+				restart=self.restart_dnsmasq(True)
 			return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
 			
 		except Exception as e:
@@ -175,7 +176,7 @@ class LliurexGuardManager(object):
 
 	#def change_guard_mode
 	
-	def restart_dnsmasq(self):			
+	def restart_dnsmasq(self,nonretry=False):			
 
 		cmd="systemctl restart dnsmasq.service 1>/dev/null"
 		error=False
@@ -193,6 +194,8 @@ class LliurexGuardManager(object):
 		if not error:			
 			return {'status':True,'msg':"Dnsmaq restart successfully"}
 		else:
+			if not nonretry:
+				self.change_guardmode("DisableMode",True)
 			return {'status':False,'msg':"Error restarting Dnsmaq",'data':data}
 
 	#def __restart_dnsmasq				
@@ -417,6 +420,10 @@ class LliurexGuardManager(object):
 							f.write(tmp_line)
 						else:
 							for dns in self.dns_vars:
+								if "https" in line:
+									line=line.replace("https://","")
+								else:
+									line=line.replace("http://","")	
 								tmp_line=self.whitelist_redirection+line.split("\n")[0]+"/"+dns
 								f.write(tmp_line+"\n")	
 				

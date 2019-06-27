@@ -135,10 +135,11 @@ class GuardManager(object):
 			if restart_dnsmasq['status']:
 				return {'status':True,'code':8}
 			else:
+				'''
 				disable_llxguard=self.n4d.change_guardmode(self.validation,"LliurexGuardManager","DisableMode")
 				if disable_llxguard['status']:
 					restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
-					
+				'''	
 				return {'status':False,'code':10,'data':restart_dnsmasq['data']}	
 		else:
 			return {'status':False,'code':9,'data':change_guardmode['data']}		
@@ -258,7 +259,8 @@ class GuardManager(object):
 					if "NAME" not in line:
 						if "DESCRIPTION" not in line:
 							if line !="":
-								if line.startswith(".") or line.startswith("_") or line.startswith("-"):
+								firstchar=line[0]
+								if firstchar in [".","_","-","+","*"]:
 									line=line[1:]
 								content.append(line)	
 								count_lines+=1
@@ -381,7 +383,7 @@ class GuardManager(object):
 		order_list=[]
 
 		for item in info:
-			name=info[item]["name"]
+			name=info[item]["name"].lower()
 			x=()
 			x=item,name
 			tmp.append(x)
@@ -490,10 +492,11 @@ class GuardManager(object):
 				if result_restart['status']:
 					return {'status':True,'code':18}
 				else:
+					'''
 					disable_llxguard=self.n4d.change_guardmode(self.validation,"LliurexGuardManager","DisableMode")
 					if disable_llxguard['status']:
 						restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
-
+					'''
 					return {'status':False,'code':10,'data':result_restart['data']}
 			else:
 				return {'status':False,'code':code,'data':data}									
