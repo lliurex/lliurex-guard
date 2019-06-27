@@ -260,7 +260,7 @@ class GuardManager(object):
 						if "DESCRIPTION" not in line:
 							if line !="":
 								firstchar=line[0]
-								if firstchar in [".","_","-","+","*"]:
+								if firstchar in [".","_","-","+","*","$"," ","&","!","¡"]:
 									line=line[1:]
 								content.append(line)	
 								count_lines+=1

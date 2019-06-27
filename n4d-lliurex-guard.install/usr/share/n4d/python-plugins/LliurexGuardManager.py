@@ -287,17 +287,28 @@ class LliurexGuardManager(object):
 
 		if active:
 			path=self.active_path
+			alternative_path=self.disable_path
 				
 		else:
 			path=self.disable_path	
+			alternative_path=self.active_path
 				
 		try:
+			existsfile=False
 			file=os.path.join(path,listId+".list")
 			content=[]
 			count_lines=0
 			if os.path.exists(file):
 				#f=codecs.open(file,'r',encoding="utf-8")
 				f=open(file,'r')
+				existsfile=True
+			else:	
+				file=os.path.join(alternative_path,listId+".list")
+				if os.path.exists(file):
+					f=open(file,'r')
+					existsfile=True
+
+			if existsfile:		
 				lines=f.readlines()
 				for line in lines:
 					if "NAME" not in line:
@@ -321,6 +332,9 @@ class LliurexGuardManager(object):
 				lines=None
 				
 				return {'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
+			else:
+				return {'status':False,'msg':"Unable to read content list.The file does not exist",'data':"The file does not exist"}
+
 		except Exception as e:
 			return {'status':False,'msg':"Unable to read content list",'data':str(e)}
 					
