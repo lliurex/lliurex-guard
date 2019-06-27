@@ -1,3 +1,9 @@
+lliurex-guard (4.5.1) bionic; urgency=medium
+
+  * Fixed bug when you try to edit a marked list to change state
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Thu, 27 Jun 2019 12:26:32 +0200
+
 lliurex-guard (4.5) bionic; urgency=medium
 
   * New version based in dnsmasq
