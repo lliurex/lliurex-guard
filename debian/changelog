@@ -1,3 +1,9 @@
+lliurex-guard (4.5.2) bionic; urgency=medium
+
+  * Added connection check to server when restarting dnsmasq
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 28 Jun 2019 13:00:48 +0200
+
 lliurex-guard (4.5.1) bionic; urgency=medium
 
   * Fixed bug when you try to edit a marked list to change state
