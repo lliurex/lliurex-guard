@@ -17,6 +17,7 @@ import time
 import re
 import sys
 import syslog
+import urllib.request
 from os import listdir
 from os.path import isfile,isdir,join
 from jsondiff import diff
@@ -49,8 +50,9 @@ class GuardManager(object):
 
 	def set_server(self,server):	
 		
+		self.server_ip=server
 		context=ssl._create_unverified_context()	
-		self.n4d=n4dclient.ServerProxy("https://"+server+":9779",context=context,allow_none=True)
+		self.n4d=n4dclient.ServerProxy("https://"+self.server_ip+":9779",context=context,allow_none=True)
 	
 	#def set_server
 		
@@ -127,11 +129,8 @@ class GuardManager(object):
 		self.write_log(msg_log)
 		
 		if change_guardmode['status']:
-			restart_dnsmasq=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
 			msg="LliureX Guard Mode changed. Dnsmasq restarted "
-			self._debug(msg,restart_dnsmasq)
-			msg_log=msg+str(restart_dnsmasq)
-			self.write_log(msg_log)
+			restart_dnsmasq=self.restart_dnsmasq(msg)
 			if restart_dnsmasq['status']:
 				return {'status':True,'code':8}
 			else:
@@ -488,8 +487,9 @@ class GuardManager(object):
 
 			if not error:
 				#self.remove_tmp_file(tmpfile_list)
-				result_restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
-				if result_restart['status']:
+				msg="Lliurex Guard applied changes. Dnsmasq restart"
+				restart_dnsmasq=self.restart_dnsmasq(msg)
+				if restart_dnsmasq['status']:
 					return {'status':True,'code':18}
 				else:
 					'''
@@ -497,7 +497,7 @@ class GuardManager(object):
 					if disable_llxguard['status']:
 						restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
 					'''
-					return {'status':False,'code':10,'data':result_restart['data']}
+					return {'status':False,'code':10,'data':restart_dnsmasq['data']}
 			else:
 				return {'status':False,'code':code,'data':data}									
 
@@ -505,6 +505,35 @@ class GuardManager(object):
 			return {'status':True,'code':0}						
 
 	#def apply_changes
+
+	def restart_dnsmasq(self,msg):
+
+		restart_dnsmasq=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
+		self.connection=False
+		self.timeout=120
+		self.count=0
+
+		while not self.connection:
+			time.sleep(1)
+			try:
+				res=urllib.request.urlopen("http://"+self.server_ip)
+				self.connection=True
+			except Exception as e:
+				if self.count<self.timeout:
+					self.count+=1
+				else:
+					msg_log="Lliurex Guard checking connection with server. Time Out. Error:%s"%str(e)
+					self.write_log(msg_log)
+					self.connection=True
+
+			
+		self.set_server(self.server_ip)	
+		self._debug(msg,restart_dnsmasq)
+		msg_log=msg+str(restart_dnsmasq)
+		self.write_log(msg_log)
+		return restart_dnsmasq				
+
+	#def restart_dnsmasq()	
 
 	def send_tmpfile_toserver(self,tmp_file):
 
