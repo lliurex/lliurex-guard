@@ -145,7 +145,7 @@ msgid "White List mode"
 msgstr "Mode White List"
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:202
-msgid "Lliurex Guard is disable"
+msgid "Lliurex Guard is disabled"
 msgstr "Lliurex Guard esta desactivado"
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:206
