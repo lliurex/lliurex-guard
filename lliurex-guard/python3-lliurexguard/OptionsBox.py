@@ -204,7 +204,7 @@ class OptionsBox(Gtk.VBox):
 			label=_("White List mode")
 		elif self.core.mainWindow.guardMode=="DisableMode":
 			img=Gtk.Image.new_from_file(self.manage_list_image)
-			label=_("Lliurex Guard is disable")
+			label=_("Lliurex Guard is disabled")
 			self.mode_button.set_name("GUARD_DISABLED_BUTTON")
 		else:
 			img=Gtk.Image.new_from_file(self.manage_list_image)

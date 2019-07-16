@@ -103,7 +103,7 @@ class MainWindow:
 		self.style_provider.load_from_file(f)
 		Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),self.style_provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 		self.main_window.set_name("WINDOW")
-		#self.image_banner_box.set_name("IMAGE_BANNER")
+		self.image_banner_box.set_name("IMAGE_BANNER")
 		
 	#def set_css_info	
 				
@@ -291,7 +291,10 @@ class MainWindow:
 					return False
 				else:
 					return True
-			self.core.guardmanager.remove_tmp_file()		
+			try:		
+				self.core.guardmanager.remove_tmp_file()
+			except:
+				pass			
 			sys.exit(0)
 		else:
 			return True	
