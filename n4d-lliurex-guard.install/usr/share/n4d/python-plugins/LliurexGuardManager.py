@@ -454,7 +454,6 @@ class LliurexGuardManager(object):
 			
 	def remove_tmp_file(self):
 
-		print(self.list_tmpfile)
 		
 		for item in self.list_tmpfile:
 			if os.path.exists(item):
