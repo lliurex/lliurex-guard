@@ -134,6 +134,8 @@ class OptionsBox(Gtk.VBox):
 		self.apply_changes_t.daemon=True
 		self.change_guard_mode_t=threading.Thread()
 		self.change_guard_mode_t.daemon=True
+		self.open_help_t=threading.Thread(target=self.open_help)
+		self.open_help_t.daemon=True
 
 		GObject.threads_init()	
 
@@ -168,6 +170,8 @@ class OptionsBox(Gtk.VBox):
 		self.remove_all_eb.connect("button-press-event", self.remove_all_lists)
 		self.remove_all_eb.connect("motion-notify-event", self.mouse_over_popover)
 		self.remove_all_eb.connect("leave-notify-event", self.mouse_exit_popover)
+
+		self.help_button.connect("clicked",self.help_clicked)
 
 		self.search_entry.connect("changed",self.search_entry_changed)
 
@@ -849,6 +853,25 @@ class OptionsBox(Gtk.VBox):
 
 	#def search_entry_changed				
 
+	def help_clicked(self,widget):
+
+		lang=os.environ["LANG"]
+
+		if 'ca_ES' in lang:
+			self.help_cmd='xdg-open https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex-Guard-en-Lliurex-19_va'
+		else:
+			self.help_cmd='xdg-open https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex-Guard-en-Lliurex-19'
+
+		self.init_threads()
+		self.open_help_t.start()
+
+	#def help_clicked	
+
+	def open_help(self):
+
+		os.system(self.help_cmd)
+
+	#def open_help	
 
 	def mouse_over_popover(self,widget,event=None):
 
