@@ -415,7 +415,7 @@ class OptionsBox(Gtk.VBox):
 		vbox.pack_start(restore_box,True,True,8)
 		vbox.show_all()
 
-		restore_box.hide()
+		#restore_box.hide()
 		popover.add(vbox)
 		popover.set_position(Gtk.PositionType.BOTTOM)
 		popover.set_relative_to(manage_list)
@@ -426,8 +426,12 @@ class OptionsBox(Gtk.VBox):
 
 		if self.list_data[order]["remove"]:
 			hbox_list_data.set_name("REMOVE_BOX")
+			remove_box.hide()
+			restore_box.show()
 		else:	
 			hbox_list_data.set_name("APP_BOX")
+			remove_box.show()
+			restore_box.hide()
 
 		list_separator=Gtk.Separator()
 		list_separator.set_margin_top(5)
