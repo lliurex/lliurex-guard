@@ -1,3 +1,9 @@
+lliurex-guard (4.5.4) bionic; urgency=medium
+
+  * Fixed bug to show options to remove/restore list
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 23 Jul 2019 14:36:36 +0200
+
 lliurex-guard (4.5.3) bionic; urgency=medium
 
   * Added link to help
