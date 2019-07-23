@@ -1,3 +1,10 @@
+lliurex-guard (4.5.3) bionic; urgency=medium
+
+  * Added link to help
+  * Added valencian translations
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 23 Jul 2019 11:25:12 +0200
+
 lliurex-guard (4.5.2) bionic; urgency=medium
 
   * Added connection check to server when restarting dnsmasq
