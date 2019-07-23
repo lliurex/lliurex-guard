@@ -14,6 +14,6 @@ Description: Contains lliurex-guard
 
 Package: n4d-lliurex-guard
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends},n4d, n4d-server-plugins,n4d-network
+Depends: ${misc:Depends}, ${python3:Depends},n4d,dnsmasq,n4d-network
 Description: Lliurx Guard plugin
   Plugins supporting lliurex guard functionality
