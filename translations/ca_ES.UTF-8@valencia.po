@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-06-12 08:51+0200\n"
-"PO-Revision-Date: 2019-07-16 12:37+0200\n"
+"PO-Revision-Date: 2019-07-24 09:21+0200\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 19.04.2\n"
+"X-Generator: Poedit 2.0.6\n"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:198
 msgid "You must indicate a name for the list"
@@ -156,7 +156,7 @@ msgstr "Mode desconegut"
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:297
 msgid " entries"
-msgstr "entrades"
+msgstr " entrades"
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:335
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:614
@@ -198,7 +198,7 @@ msgid ""
 "If you activate this mode, you will not be able to access the urls contained "
 "in the active lists"
 msgstr ""
-"Voleu canviar al mode de llista negra? "
+"Voleu canviar al mode de llista negra?\n"
 "Si activeu aquest mode, no podreu accedir als url que estiguen en les llistes"
 " actives"
 
@@ -208,7 +208,7 @@ msgid ""
 "If you activate this mode, you can only access the urls contained in the "
 "active lists"
 msgstr ""
-"Voleu canviar al mode de llista blanca? "
+"Voleu canviar al mode de llista blanca?\n"
 "Si activeu aquest mode, sols podreu accedir als url que estiguen en les"
 " llistes actives"
 
@@ -217,7 +217,7 @@ msgid ""
 "Do you want to deactivate LliureX Guard?\n"
 "If you deactivate it, no filter will be applied"
 msgstr ""
-"Voleu desactivar LliureX Guard? "
+"Voleu desactivar LliureX Guard?\n"
 "Si el desactiveu, no s'aplicarà cap filtre"
 
 #: lliurex-guard/python3-lliurexguard/OptionsBox.py:633
@@ -241,9 +241,7 @@ msgstr "L'usuari no és vàlid"
 msgid ""
 "Correct user\n"
 "Loading information. Wait a moment..."
-msgstr ""
-"L'usuari és correcte  "
-"S'està carregant la informació. Espereu..."
+msgstr "L'usuari és correcte  S'està carregant la informació. Espereu..."
 
 #: lliurex-guard/python3-lliurexguard/EditBox.py:96
 #: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:98
