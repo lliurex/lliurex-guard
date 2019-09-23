@@ -563,6 +563,7 @@ class OptionsBox(Gtk.VBox):
 
 	def change_mode(self,widget,event,mode):
 
+		self.mode_popover.hide()
 		self.mode=mode
 		if self.mode=="BlackMode":
 			text=_("Do yo want to change to black list mode?\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
@@ -590,7 +591,6 @@ class OptionsBox(Gtk.VBox):
 			self.init_threads()
 			self.change_guard_mode_t=threading.Thread(target=self.change_guard_process,args=(self.mode,))
 			self.change_guard_mode_t.start()
-			self.mode_popover.hide()
 			GLib.timeout_add(100,self.pulsate_change_guard_mode)
 
 		else:
@@ -772,7 +772,7 @@ class OptionsBox(Gtk.VBox):
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_file['code'])+"\n"+self.read_file['data'])
 				self.options_msg_label.set_name("MSG_ERROR_LABEL")
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-				self.stack_opt.set_visible_child_name("waitingBox")
+				self.stack_opt.set_visible_child_name("listBox")
 				return False			
 
 	#def pulsate_load_file					

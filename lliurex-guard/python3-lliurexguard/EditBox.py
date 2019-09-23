@@ -363,7 +363,7 @@ class EditBox(Gtk.VBox):
 				self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")
 				
 			else:
-				self.core.optionsBox.options_msg_label.set_text(self.saving['code']+'\n'+self.saving['data'])
+				self.core.optionsBox.options_msg_label.set_text(self.core.mainWindow.get_msg(self.saving['code'])+'\n'+self.saving['data'])
 				self.core.optionsBox.options_msg_label.set_name("MSG_ERROR_LABEL")
 
 			self.core.optionsBox.main_box.set_sensitive(True)
