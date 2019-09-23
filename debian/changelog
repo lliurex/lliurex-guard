@@ -1,3 +1,10 @@
+lliurex-guard (4.5.6) bionic; urgency=medium
+
+  * Added standalone funcionality
+  * Added new features: checking clipboard  and checking size file when list is imported
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 23 Sep 2019 13:00:55 +0200
+
 lliurex-guard (4.5.5) bionic; urgency=medium
 
   * Fixed translations
