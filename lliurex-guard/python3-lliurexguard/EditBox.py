@@ -21,6 +21,7 @@ import threading
 import subprocess
 import multiprocessing
 import sys
+import time
 sys.setrecursionlimit(3500)
 
 import datetime
@@ -115,6 +116,7 @@ class EditBox(Gtk.VBox):
 		self.set_css_info()
 		self.connect_signals()
 		self.init_threads()
+		#self.clipboard=Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 		#self.init_data_form()
 				
 	#def render_form_
@@ -147,6 +149,10 @@ class EditBox(Gtk.VBox):
 		self.cancel_btn.connect("clicked",self.core.editBox.cancel_clicked)
 		self.open_editor_btn.connect("clicked",self.open_editor_clicked)
 		self.url_search_entry.connect("changed",self.detect_search)
+		self.url_tw.connect("paste-clipboard",self.get_clipboard)
+		self.url_tw.connect("button-press-event",self.urltw_mouse_clicked)
+		self.url_tw.connect("key-press-event",self.urltw_key_clicked)
+	
 	
 	#def connect_signals	
 
@@ -155,12 +161,14 @@ class EditBox(Gtk.VBox):
 		self.checking_data_t=threading.Thread(target=self.checking_data)
 		self.saving_data_t=threading.Thread(target=self.saving_data)
 		self.open_editor_t=multiprocessing.Process(target=self.open_editor)
+		self.get_clipboard_content_t=threading.Thread(target=self.get_clipboard_content)
 		self.checking_data_t.daemon=True
 		self.saving_data_t.daemon=True
 		self.open_editor_t.daemon=True
+		self.get_clipboard_content_t.daemon=True
 
 		GObject.threads_init()
-		
+
 	#def init_threads	
 
 	def init_data_form(self):
@@ -170,17 +178,16 @@ class EditBox(Gtk.VBox):
 	#def init_data_form	
 
 
-	def write_tw(self,content=None):
+	def write_tw(self,clipboard,content=None):
 
 		self.process_block=125
-
+		
 		if content!=None:
-			
 			info=content
+			
 		else:
 			info=self.core.optionsBox.read_list['data'][0]
-
-
+			
 		if len(info)<self.process_block:
 			self.process_block=len(info)	
 		
@@ -202,11 +209,24 @@ class EditBox(Gtk.VBox):
 				pass
 			else:
 				self.core.editBox.load_values(self.core.optionsBox.order)
+			
 			self.core.mainWindow.lock_quit=False
-			self.core.optionsBox.option_spinner.stop()
-			self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
-			self.core.mainWindow.stack_window.set_visible_child_name("editBox")		
-			self.stack_edit.set_visible_child_name("urlTW")
+			
+			if not clipboard:
+				self.core.optionsBox.option_spinner.stop()
+				self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
+				self.core.mainWindow.stack_window.set_visible_child_name("editBox")		
+				self.stack_edit.set_visible_child_name("urlTW")
+			else:
+				self.edit_spinner.stop()
+				self.main_box.set_sensitive(True)
+				self.url_tw.set_property('editable',True)
+				self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_edit.set_visible_child_name("urlTw")		
+				if self.clipboard_content['code']==33:
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(self.clipboard_content['code']))
+					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
+			
 			return False	
 	
 	#def write_tw	
@@ -280,7 +300,7 @@ class EditBox(Gtk.VBox):
 		
 	def checking_data(self):
 		
-		self.check=self.core.guardmanager.check_data(self.core.optionsBox.list_data,self.data_tocheck,self.edit,self.origId)
+		self.check=self.core.guardmanager.check_data(self.core.optionsBox.list_data,self.data_tocheck,self.edit,self.loaded_file,self.origId)
 	
 	#def checking_data
 		
@@ -293,20 +313,14 @@ class EditBox(Gtk.VBox):
 		list_info["description"]=self.data_tocheck["description"]
 		if self.read_tw:
 			content=self.buffer.get_text(self.buffer.get_start_iter(),self.buffer.get_end_iter(),True)
-			if self.loaded_file!=None:
-				lines=content.count("\n")
-			else:
-				lines=content.count("\n")+1
-			list_info["lines"]=lines
-
+			content_lines="".join(content).split("\n")
+			while "" in content_lines:
+				content_lines.remove("")
+				
+			list_info["lines"]=len(content_lines)
+			content_lines=None
+		
 		self.args=[list_info,content,self.loaded_file]
-
-		'''
-		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(26))			
-		self.edit_msg_label.set_name("WAITING_LABEL")
-		self.edit_msg_label.show()
-		self.edit_pbar.show()
-		'''
 		self.core.mainWindow.lock_quit=True
 		self.init_threads()
 		self.saving_data_t.start()
@@ -386,6 +400,7 @@ class EditBox(Gtk.VBox):
 
 	def open_editor_clicked(self,widget):
 
+		
 		self.init_threads()
 		self.main_box.set_sensitive(False)
 		self.core.mainWindow.lock_quit=True
@@ -393,7 +408,8 @@ class EditBox(Gtk.VBox):
 		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(6))
 		self.edit_msg_label.set_name("WAITING_LABEL")
 		GLib.timeout_add(10,self.pulsate_waiting_editor_close)
-
+		
+		
 		
 	#def open_editor_clicked	
 
@@ -497,6 +513,7 @@ class EditBox(Gtk.VBox):
 					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
 					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(28))
 				else:
+					#self.get_clipboard()
 					self.edit_msg_label.set_name("MSG_CORRECT_LABEL")
 					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(29)%self.count)	
 			
@@ -507,7 +524,64 @@ class EditBox(Gtk.VBox):
 
 	#def search_and_mark	
 		
+
+	def get_clipboard(self,wigdet=None):
+
+		self.url_tw.set_property('editable',False)
+		self.main_box.set_sensitive(False)
+		self.core.mainWindow.lock_quit=True
 		
+		self.edit_spinner.start()
+		self.edit_spinner_label.set_text(self.core.mainWindow.get_msg(32))			
+		self.edit_spinner_label.set_name("WAITING_LABEL")
+		
+		self.stack_edit.set_transition_duration(550)
+		self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+		self.stack_edit.set_visible_child_name("editWaiting")	
+		
+		self.init_threads()
+		self.get_clipboard_content_t.start()
+		GLib.timeout_add(100,self.pulsate_get_clipboard)
+
+	#def get_clipboard	
+
+
+	def pulsate_get_clipboard(self):
+
+
+		if self.get_clipboard_content_t.is_alive():
+			return True
+					
+		else:
+			text_to_copy=self.clipboard_content['data']
+			GLib.timeout_add(100,self.write_tw,True,text_to_copy)
+			return False
+
+	#def pulsate_get_clipboard			
+
+		
+	def get_clipboard_content(self):
+
+		self.clipboard_content=self.core.guardmanager.get_clipboard_content()
+		
+	#def get_clipboard_content		
+
+	def urltw_mouse_clicked(self,widget,event=None):
+
+		if event.button==3:
+			
+			self.url_tw.set_property('editable',True)
+		else:
+			self.url_tw.set_property('editable',False)	
+
+	#def urltw_mouse_clicked		
+						
+	def urltw_key_clicked(self,widget,event=None):
+
+		self.url_tw.set_property('editable',True)	
+
+	#def urltw_key_clicked				
+
 #class EditBox
 
 from . import Core

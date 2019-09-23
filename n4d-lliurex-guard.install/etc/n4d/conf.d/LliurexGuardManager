@@ -12,3 +12,4 @@ activate_guardmode_list=sudo,admins
 deactivate_guardmode_list=sudo,admins
 restart_dnsmasq=sudo,admins
 remove_tmp_file=sudo,admins
+update_whitelist_dns=sudo,admins

@@ -36,6 +36,30 @@ class LliurexGuardManager(object):
 		
 	#def __init__	
 
+	def _check_dnsmasq_conf(self):
+		
+		with open("/etc/dnsmasq.conf","r") as fd:
+			lines = fd.readlines()
+
+		if "conf-dir=/etc/dnsmasq.d/" not in lines:
+			with open("/etc/dnsmasq.conf","a") as fd:
+				fd.write("conf-dir=/etc/dnsmasq.d/\n")
+		if "conf-dir=/var/lib/dnsmasq/config" not in lines:
+			with open("/etc/dnsmasq.conf","a") as fd:
+				fd.write("conf-dir=/var/lib/dnsmasq/config\n")
+
+
+		if not os.path.exists("/var/lib/dnsmasq/config/extra-dns"):
+			with open("/var/lib/dnsmasq/config/extra-dns","w") as fd:
+				desktop_dns=self._get_desktop_dns()
+				for item in desktop_dns:
+					line="server=%s"%item+"\n"
+					fd.write(line)
+				fd.close()		
+
+		fd.close()		
+
+	#def check_dnsmasq_conf			
 
 	def _create_guardmode_conf_file(self):
 
@@ -86,24 +110,77 @@ class LliurexGuardManager(object):
 
 	def _get_dns(self):
 
-		self._detect_flavour()
+		#self._detect_flavour()
 		dns_vars=[]
 
 		if 'server' in self.flavours:
 			dns_vars=self.n4d.get_variable("","VariablesManager","DNS_EXTERNAL")
 		else:
-			pass	
+			dns_vars=self._get_desktop_dns()
 		
 		return dns_vars
 
 	#def _get_dns	
 
-	def read_guardmode(self):
+	def _first_init(self):
+
+		if not os.path.exists("/var/lib/lliurex-guard"):
+			os.makedirs("/var/lib/lliurex-guard")
+
+		if 'server' not in self.flavours:
+			if not os.path.exists("/var/lib/dnsmasq"):
+				os.makedirs("/var/lib/dnsmasq")
+
+			if not os.path.exists("/var/lib/dnsmasq/config"):
+				os.makedirs("/var/lib/dnsmasq/config")
+
+			self._check_dnsmasq_conf()
+
+			if not os.path.exists("etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
+				os.system('systemctl stop systemd-resolved')
+				objects['NetworkManager'].systemd_resolved_conf()
+				# Restart service to fix bug on /etc/resolv.conf search field
+				os.system('systemctl restart systemd-resolved')
+
+		fd = open("/var/lib/lliurex-guard/first_init","w")
+		fd.close()
+
+	#def first_init
+
+
+	def _get_desktop_dns(self):
+
+		desktop_dns=[]
+		cmd="nmcli device show | grep DNS | awk '{print$2}'"
+		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
+		output=p.communicate()[0]
+
+		if type(output) is bytes:
+			output=output.decode()
+
+		output=output.split("\n")
+
+		for item in output:	
+			if item!='':
+				desktop_dns.append(item)
+
+		return desktop_dns		
+
+	#def _get_desktop_dns	
+
+
+	def read_guardmode(self,checkconfig=False):
 		
 		try:
-			if not os.path.exists(self.mode_file_path):
-				self._create_guardmode_conf_file()
+			
+			if checkconfig:
+				self._detect_flavour()
+				if not os.path.exists("/var/lib/lliurex-guard/first_init"):
+					self._first_init()
 
+				if not os.path.exists(self.mode_file_path):
+					self._create_guardmode_conf_file()
+	
 			f=open(self.mode_file_path,'r')
 			lines=f.readlines()
 			count=0
@@ -115,15 +192,16 @@ class LliurexGuardManager(object):
 						guardMode="BlackMode"
 					else:
 						guardMode="WhiteMode"
-			
-			
+				
+				
 			if count==3:
 				self.guardMode="DisableMode"
 			else:
 				self.guardMode=guardMode
 
 			f.close()
-			self._set_variables()
+			if checkconfig:
+				self._set_variables()
 
 			return {'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
 		
@@ -429,17 +507,21 @@ class LliurexGuardManager(object):
 				f.write(header_desc)
 				for line in lines:
 					if line !="":
-						if self.guardMode=="BlackMode":
-							tmp_line=self.redirection+" "+line
-							f.write(tmp_line)
-						else:
-							for dns in self.dns_vars:
+						if self.redirection in line:
+								f.write(line)
+						else:		
+							if self.guardMode=="BlackMode":
+								tmp_line=self.redirection+" "+line
+								f.write(tmp_line)
+							else:
 								if "https" in line:
 									line=line.replace("https://","")
 								else:
 									line=line.replace("http://","")	
-								tmp_line=self.whitelist_redirection+line.split("\n")[0]+"/"+dns
-								f.write(tmp_line+"\n")	
+								
+								for dns in self.dns_vars:
+									tmp_line=self.redirection+line.split("\n")[0]+"/"+dns
+									f.write(tmp_line+"\n")	
 				
 				f.close()
 				lines=None
@@ -461,3 +543,53 @@ class LliurexGuardManager(object):
 
 		self.list_tmpfile=[]
 	#def _remove_tmp_file			
+
+	def update_whitelist_dns(self):
+
+		self._detect_flavour()
+		dns_vars = self._get_dns()
+		folders_to_update=[self.whitelist_dir,self.whitelist_disable_dir]
+
+		try:
+			for folder in folders_to_update:
+				for item in listdir(folder):
+					t=join(folder,item)
+					if isfile(t):
+						content=[]
+						format_lines=[]
+						f=codecs.open(t,'r',encoding="utf-8")
+						lines=f.readlines()
+						f.close()
+						for line in lines:
+							if line!="":
+								if "NAME" in line:
+									format_lines.append(line)
+									
+								elif "DESCRIPTION" in line:
+									format_lines.append(line)
+								else:
+									if self.whitelist_redirection in line:
+										line=line.split(self.whitelist_redirection)[1]
+										line=line.split("/")[0]
+										tmp_line=line+"\n"
+										if tmp_line not in content:
+											content.append(line+"\n")
+											format_lines.append(line+"\n")
+
+						f=open(t,'w')
+						for line in format_lines:
+							if "NAME" in line:
+								f.write(unicode(line).encode("utf-8"))
+							elif "DESCRIPTION" in line:
+								f.write(unicode(line).encode("utf-8"))
+							else:
+								for dns in dns_vars:
+									tmp_line=self.whitelist_redirection+line.split("\n")[0]+"/"+dns
+									f.write(tmp_line+"\n")	
+						f.close()
+									 					
+			return {'status':True,'msg':'The update of the dns has been carried out successfully','data':""}
+
+		except Exception as e:
+
+			return {'status':False,'msg':'Error updating white list dns','data':str(e)}							

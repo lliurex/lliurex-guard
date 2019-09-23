@@ -34,6 +34,7 @@ class GuardManager(object):
 		self.user_groups=[]
 		self.validation=None
 		self.limit_lines=2500
+		self.limit_file_size=28000000
 		self.garbage_files=[]
 
 		self.detect_flavour()
@@ -100,7 +101,7 @@ class GuardManager(object):
 			-23:Error reading mode
 		'''
 			
-		read_guardmode=self.n4d.read_guardmode(self.validation,"LliurexGuardManager")
+		read_guardmode=self.n4d.read_guardmode(self.validation,"LliurexGuardManager",True)
 		msg="Read LliureX Guard Mode: "
 		self._debug(msg,read_guardmode)
 		msg_log=msg+str(read_guardmode)
@@ -245,6 +246,7 @@ class GuardManager(object):
 			-15: File loaded successfully
 			-16: Error loading file info
 			-27: Empty file
+			-30: Size of file off limit
 		'''
 
 		content=[]
@@ -252,15 +254,16 @@ class GuardManager(object):
 		tmp_file=""
 		try:
 			if os.path.exists(file) and os.path.getsize(file)>0:
+				if create_tmpfile:
+					if os.path.getsize(file)>self.limit_file_size:
+						return {'status':False,'code':30,'data':''}	
 				f=open(file,'r')
 				lines=f.readlines()
 				for line in lines:
 					if "NAME" not in line:
 						if "DESCRIPTION" not in line:
 							if line !="":
-								firstchar=line[0]
-								if firstchar in [".","_","-","+","*","$"," ","&","!","¡"]:
-									line=line[1:]
+								line=self._format_line(line)
 								content.append(line)	
 								count_lines+=1
 				f.close()
@@ -309,16 +312,26 @@ class GuardManager(object):
 				f=open(tmp_list,'r')
 				lines=f.readlines()
 				f.close()
+				f=open(tmp_list,'w')
 				for line in lines:
-					tmp_content.append(line)
-					result["lines"]=len(tmp_content)
-					#content="".join(tmp_content)
-			else:		
+					if line!="":
+						line=self._format_line(line)
+						f.write(line)
+		
+				f.close()		
+				result["lines"]=len(lines)
+			else:
+				format_content=[]	
+				content=content.split("\n")	
+				for line in content:
+					if line !="":
+						line=self._format_line(line)
+						format_content.append(line+"\n")	
 				f=open(tmp_list,"w")
-				f.write(content)
+				f.write("".join(format_content))
 				f.close()
 			content=None
-			tmp_content=None
+			format_content=None
 			result["status"]=True
 			result["tmpfile"]=tmp_list
 			
@@ -338,13 +351,14 @@ class GuardManager(object):
 			
 	#def save_conf		
 
-	def check_data(self,list_data,data,edit,orig_id=None):
+	def check_data(self,list_data,data,edit,loaded_file,orig_id=None):
 
 		'''
 		Result code:
 			-1: Missing list name
 			-2: List name duplicate
-	
+			-30: Size file off limit
+ 	
 		'''	
 
 		if data["name"]=="":
@@ -360,6 +374,10 @@ class GuardManager(object):
 				for item in list_data:
 					if list_data[item]["id"]==data["id"]:
 						return {"result":False,"code":2,"data":""}
+
+			if loaded_file !=None:
+				if os.path.getsize(loaded_file)>self.limit_file_size:
+					return {'result':False,'code':31,'data':''}			
 
 		return {"result":True,"code":0}			
 			 			
@@ -516,7 +534,8 @@ class GuardManager(object):
 		while not self.connection:
 			time.sleep(1)
 			try:
-				res=urllib.request.urlopen("http://"+self.server_ip)
+				if 'server' in self.flavours and 'client' in self.flavours:
+					res=urllib.request.urlopen("http://"+self.server_ip)
 				self.connection=True
 			except Exception as e:
 				if self.count<self.timeout:
@@ -531,6 +550,7 @@ class GuardManager(object):
 		self._debug(msg,restart_dnsmasq)
 		msg_log=msg+str(restart_dnsmasq)
 		self.write_log(msg_log)
+		
 		return restart_dnsmasq				
 
 	#def restart_dnsmasq()	
@@ -540,7 +560,9 @@ class GuardManager(object):
 		send_tmpfile=self.n4d_local.send_file("","ScpManager",self.validation[0],self.validation[1],"server",tmp_file,"/tmp")
 		msg_log="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
 		self.write_log(msg_log)
+		
 		return send_tmpfile
+
 	#def send_tmpfile_toserver		
 
 	def _create_tmp_file(self,listId):
@@ -577,4 +599,104 @@ class GuardManager(object):
 		syslog.syslog(msg)	
 
 	#def write_log	
+
+	def _format_line(self,line):
+
+		firstchar=line[0]
+		
+		if firstchar in [".","_","-","+","*","$"," ","&","!","¡","#","%","?","¿"]:
+			line=line[1:]
+		
+		return line
+
+	#def _format_line
+
+	def get_clipboard_content(self):
+
+		'''
+		Result code:
+			-33: Lines to copy >limit
+		'''	
+
+		text_to_copy=[]
+		code=""
+		
+		try:
+			p = subprocess.Popen(['xclip','-selection', 'clipboard', '-o'], stdout=subprocess.PIPE)
+			data=p.communicate()[0]
+		except Exception as e:
+			print (str(e))
+			data=""
+	
+		if type(data) is bytes:
+			result=data.decode()
+		else:
+			result=data
+		
+		if result!="":	
+			text=result.split("\n")
+			   		
+			if len(text)<=self.limit_lines:
+				for item in text:
+					text_to_copy.append(item+"\n")
+				
+			else:
+				count=0
+				code=33
+			
+				for item in text:
+					if count<2500:
+						text_to_copy.append(item+"\n")
+						count+=1
+					else:
+						break
+
+		return {'status':True,'code':code,'data':text_to_copy} 	
+
+	#def get_clipboard_content				
+
+	def update_list_dns(self,list_data):
+
+		'''
+			Result code:
+				-34: Unable to read file
+				-35: Read file successfully
+
+		'''
+		
+		status=True
+		error_info=[]
+		code=""
+		for item in list_data:
+			read_guardmode_list=self.n4d.read_guardmode_list(self.validation,"LliurexGuardManager",list_data[item]["id"],list_data[item]['active'])
+			if read_guardmode_list['status']:
+				content=read_guardmode_list['data'][0]
+				count_lines=read_guardmode_list['data'][1]
+				tmp_file=self._create_tmp_file(list_data[item]["id"])
+				f=open(tmp_file,'w')
+				tmp_content="".join(content)
+				f.write(tmp_content)
+				f.close()
+				tmp_content=None
+				self.garbage_files.append(tmp_file)
+				list_data[item]["tmpfile"]=tmp_file
+
+			else:
+				status=False
+				code=34
+				error_info=read_guardmode_list['data']
+				break
+
+		if status:
+			code=35
+			result=list_data
+		else:
+			result=error_info
+
+		return {'status':status,'code':code,'data':result}
+		
+				
+
+	#def update_list_dns	
+
 #class GuardManager

@@ -57,6 +57,9 @@ class OptionsBox(Gtk.VBox):
 		self.deactivate_all_label=builder.get_object("deactivate_all_label")
 		self.remove_all_eb=builder.get_object("remove_all_eb")
 		self.remove_all_label=builder.get_object("remove_all_label")
+		self.update_wl_dns_box=builder.get_object("update_wl_dns_box")
+		self.update_wl_dns_eb=builder.get_object("update_wl_dns_eb")
+		self.update_wl_dns_label=builder.get_object("update_wl_dns_label")
 
 		self.mode_header_label=builder.get_object("mode_header_label")
 		self.mode_set_label=builder.get_object("mode_set_label")
@@ -96,7 +99,6 @@ class OptionsBox(Gtk.VBox):
 
 		self.list_data={}
 		self.search_list={}
-		self.limit_lines=2500
 		self.pack_start(self.main_box,True,True,0)
 		self.set_css_info()
 		self.init_threads()
@@ -136,6 +138,8 @@ class OptionsBox(Gtk.VBox):
 		self.change_guard_mode_t.daemon=True
 		self.open_help_t=threading.Thread(target=self.open_help)
 		self.open_help_t.daemon=True
+		self.update_wl_dns_t=threading.Thread()
+		self.update_wl_dns_t.daemon=True
 
 		GObject.threads_init()	
 
@@ -170,6 +174,11 @@ class OptionsBox(Gtk.VBox):
 		self.remove_all_eb.connect("button-press-event", self.remove_all_lists)
 		self.remove_all_eb.connect("motion-notify-event", self.mouse_over_popover)
 		self.remove_all_eb.connect("leave-notify-event", self.mouse_exit_popover)
+
+		self.update_wl_dns_eb.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+		self.update_wl_dns_eb.connect("button-press-event", self.update_whitelists_dns)
+		self.update_wl_dns_eb.connect("motion-notify-event", self.mouse_over_popover)
+		self.update_wl_dns_eb.connect("leave-notify-event", self.mouse_exit_popover)
 
 		self.help_button.connect("clicked",self.help_clicked)
 
@@ -230,11 +239,20 @@ class OptionsBox(Gtk.VBox):
 				self.whitemode_box.show()
 				self.add_button.set_sensitive(True)
 				self.global_management_button.set_sensitive(True)
+				self.update_wl_dns_box.hide()
+
 			elif self.core.mainWindow.guardMode=="WhiteMode":
 				self.blackmode_box.show()
 				self.whitemode_box.hide()
 				self.add_button.set_sensitive(True)
 				self.global_management_button.set_sensitive(True)
+				
+				if 'server' not in self.core.guardmanager.flavours and 'client' not in self.core.guardmanager.flavours:
+					self.update_wl_dns_box.show()
+				else:
+					self.update_wl_dns_box.hide()
+				
+						
 			else:
 				self.add_button.set_sensitive(False)
 				self.global_management_button.set_sensitive(False)
@@ -245,6 +263,7 @@ class OptionsBox(Gtk.VBox):
 			self.disablemode_box.hide()
 			self.add_button.set_sensitive(False)
 			self.global_management_button.set_sensitive(False)
+
 
 	#def _manage_mode_options			
 
@@ -484,17 +503,9 @@ class OptionsBox(Gtk.VBox):
 		response=dialog.run()
 
 		if response==Gtk.ResponseType.OK:
-			self.main_box.set_sensitive(False)
 			file=dialog.get_filename()
 			dialog.destroy()
-			self.core.mainWindow.lock_quit=True
-			self.option_spinner_label.set_name("WAITING_LABEL")
-			self.option_spinner_label.set_text(self.core.mainWindow.get_msg(14))
-			self.option_spinner.start()
-			self.stack_opt.set_transition_duration(550)
-			self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-			self.stack_opt.set_visible_child_name("waitingBox")
-			self.init_threads()
+			self.manage_waiting_form(14)
 			self.load_file_t=threading.Thread(target=self.load_file_info,args=(file,))
 			self.load_file_t.start()
 			GLib.timeout_add(100,self.pulsate_load_file)
@@ -505,7 +516,6 @@ class OptionsBox(Gtk.VBox):
 
 	#def add_file_list	
 
-
 	def add_filter(self,dialog):
 
 		filter_text = Gtk.FileFilter()
@@ -514,6 +524,47 @@ class OptionsBox(Gtk.VBox):
 		dialog.add_filter(filter_text)
 
 	#def add_filer	
+
+	def pulsate_load_file(self):
+
+		if self.load_file_t.is_alive():
+			return True
+
+		else:
+			if self.read_file['status']:
+				if self.read_file['data'][1]>0:
+					self.core.editBox.init_form()
+					
+					if self.read_file['data'][1]<=self.core.guardmanager.limit_lines:
+						self.core.editBox.render_form(True)
+						GLib.timeout_add(100,self.core.editBox.write_tw,False,self.read_file['data'][0])
+						return False
+					else:
+						self.option_spinner.stop()
+						self.core.mainWindow.lock_quit=False
+						self.core.editBox.render_form(False,self.read_file['data'][2])
+						self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
+						self.core.mainWindow.stack_window.set_visible_child_name("editBox")	
+						self.core.editBox.stack_edit.set_visible_child_name("urlEditor")	
+						return False
+			else:
+				self.option_spinner.stop()
+				self.core.mainWindow.lock_quit=False
+				self.main_box.set_sensitive(True)
+				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_file['code'])+"\n"+self.read_file['data'])
+				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+				self.stack_opt.set_visible_child_name("listBox")
+				return False			
+
+	#def pulsate_load_file					
+
+	def load_file_info(self,args):
+
+		self.read_file=self.core.guardmanager.read_local_file(args,True)
+	
+	#def load_file_info	
+
 
 	def global_management(self,widget,event=None):
 
@@ -555,6 +606,56 @@ class OptionsBox(Gtk.VBox):
 
 	#def remove_all_lists	
 
+	def update_whitelists_dns(self,widget,event):
+
+		self.global_management_popover.hide()
+		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "Lliurex Guard")
+		dialog.format_secondary_text(_("Do you want to update white list dns?"))
+		response=dialog.run()
+		dialog.destroy()
+
+		if response==Gtk.ResponseType.YES:
+			list_data=copy.deepcopy(self.list_data)
+			self.manage_waiting_form(36)
+			self.update_wl_dns_t=threading.Thread(target=self.update_wl_dns,args=(list_data,))
+			self.update_wl_dns_t.start()
+			GLib.timeout_add(100,self.pulsate_update_wl_dns)
+
+	#def update_whitelists_dns
+
+	def pulsate_update_wl_dns(self):
+	
+		if self.update_wl_dns_t.is_alive():
+			return True
+
+		else:
+			self.core.mainWindow.lock_quit=False
+			self.main_box.set_sensitive(True)
+			self.option_spinner.stop()
+			self.stack_opt.set_transition_duration(550)
+			self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+			self.stack_opt.set_visible_child_name("listBox")
+
+
+			if self.result_update_wl_dns['status']:
+				self.options_msg_label.set_name("MSG_CORRECT_LABEL")
+				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_update_wl_dns['code']))
+				self.list_data=self.result_update_wl_dns['data']
+
+			else:
+				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_update_wl_dns['code'])+'\n'+self.result_update_wl_dns['data'])
+	
+
+	#def pulsate_update_wl_dns	
+
+	def update_wl_dns(self,args):
+
+		self.result_update_wl_dns=self.core.guardmanager.update_list_dns(args)
+
+	#def update_wl_dns	
+
+
 	def mode_button_clicked(self,widget,event=None):
 
 		self.mode_popover.show()
@@ -578,17 +679,7 @@ class OptionsBox(Gtk.VBox):
 		dialog.destroy()
 
 		if response==Gtk.ResponseType.YES:
-
-			self.main_box.set_sensitive(False)
-			self.options_msg_label.set_text("")
-			self.core.mainWindow.lock_quit=True
-			self.option_spinner_label.set_name("WAITING_LABEL")
-			self.option_spinner_label.set_text(self.core.mainWindow.get_msg(7))
-			self.option_spinner.start()
-			self.stack_opt.set_transition_duration(550)
-			self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-			self.stack_opt.set_visible_child_name("waitingBox")
-			self.init_threads()
+			self.manage_waiting_form(7)
 			self.change_guard_mode_t=threading.Thread(target=self.change_guard_process,args=(self.mode,))
 			self.change_guard_mode_t.start()
 			GLib.timeout_add(100,self.pulsate_change_guard_mode)
@@ -684,20 +775,12 @@ class OptionsBox(Gtk.VBox):
 
 	def edit_list_clicked(self,widget,event,hbox): 	
 
-		self.main_box.set_sensitive(False)
+		#self.main_box.set_sensitive(False)
 		hbox.get_children()[0].get_children()[0].get_children()[2].popover.hide()
 		self.order=hbox.get_children()[0].id
 		lines=self.list_data[self.order]["lines"]
-		self.core.mainWindow.lock_quit=True
-		self.options_msg_label.set_text("")
-		self.option_spinner_label.set_name("WAITING_LABEL")
-		self.option_spinner_label.set_text(self.core.mainWindow.get_msg(11))
-		self.option_spinner.start()
-		self.stack_opt.set_transition_duration(350)
-		self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-		self.stack_opt.set_visible_child_name("waitingBox")
 		self.core.editBox.init_form()
-		self.init_threads()
+		self.manage_waiting_form(11)
 		self.load_list_info_t=threading.Thread(target=self.load_list_info)
 		self.load_list_info_t.start()
 		GLib.timeout_add(100,self.pulsate_load_list_info,lines)
@@ -712,9 +795,9 @@ class OptionsBox(Gtk.VBox):
 		else:
 
 			if self.read_list['status']:
-				if lines<self.limit_lines:
+				if lines<=self.core.guardmanager.limit_lines:
 					self.core.editBox.render_form(True)
-					GLib.timeout_add(100,self.core.editBox.write_tw)
+					GLib.timeout_add(100,self.core.editBox.write_tw,False)
 					return False
 				else:
 					self.core.mainWindow.lock_quit=False
@@ -743,58 +826,10 @@ class OptionsBox(Gtk.VBox):
 
 	#def load_info		
 
-	def pulsate_load_file(self):
-
-		if self.load_file_t.is_alive():
-			return True
-
-		else:
-			if self.read_file['status']:
-				if self.read_file['data'][1]>0:
-					self.core.editBox.init_form()
-					
-					if self.read_file['data'][1]<self.limit_lines:
-						self.core.editBox.render_form(True)
-						GLib.timeout_add(100,self.core.editBox.write_tw,self.read_file['data'][0])
-						return False
-					else:
-						self.option_spinner.stop()
-						self.core.mainWindow.lock_quit=False
-						self.core.editBox.render_form(False,self.read_file['data'][2])
-						self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
-						self.core.mainWindow.stack_window.set_visible_child_name("editBox")	
-						self.core.editBox.stack_edit.set_visible_child_name("urlEditor")	
-						return False
-			else:
-				self.option_spinner.stop()
-				self.core.mainWindow.lock_quit=False
-				self.main_box.set_sensitive(True)
-				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_file['code'])+"\n"+self.read_file['data'])
-				self.options_msg_label.set_name("MSG_ERROR_LABEL")
-				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-				self.stack_opt.set_visible_child_name("listBox")
-				return False			
-
-	#def pulsate_load_file					
-
-	def load_file_info(self,args):
-
-		self.read_file=self.core.guardmanager.read_local_file(args,True)
 	
-	#def load_file_info	
-
 	def apply_btn_clicked(self,widget):
 
-		self.main_box.set_sensitive(False)
-		self.options_msg_label.set_text("")
-		self.option_spinner_label.set_name("WAITING_LABEL")
-		self.option_spinner_label.set_text(self.core.mainWindow.get_msg(17))
-		self.option_spinner.start()
-		self.stack_opt.set_transition_duration(150)
-		self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-		self.stack_opt.set_visible_child_name("waitingBox")
-		self.core.mainWindow.lock_quit=True
-		self.init_threads()
+		self.manage_waiting_form(17)
 		self.apply_changes_t=threading.Thread(target=self.apply_changes)
 		self.apply_changes_t.start()
 		GLib.timeout_add(100,self.pulsate_apply_changes)
@@ -888,6 +923,21 @@ class OptionsBox(Gtk.VBox):
 		widget.set_name("POPOVER_OFF")		
 	
 	#def mouse_exit_popover
+
+	def manage_waiting_form(self,msg_code):
+
+		self.main_box.set_sensitive(False)
+		self.core.mainWindow.lock_quit=True
+		self.options_msg_label.set_text("")
+		self.option_spinner_label.set_name("WAITING_LABEL")
+		self.option_spinner_label.set_text(self.core.mainWindow.get_msg(msg_code))
+		self.option_spinner.start()
+		self.stack_opt.set_transition_duration(150)
+		self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+		self.stack_opt.set_visible_child_name("waitingBox")
+		self.init_threads()
+
+	#def manage_waiting_form 
 
 	
 #class OptionsBox
