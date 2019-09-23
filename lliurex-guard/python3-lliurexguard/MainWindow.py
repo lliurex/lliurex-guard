@@ -83,6 +83,11 @@ class MainWindow:
 		self.stack_window.set_visible_child_name("bannerBox")
 		self.stack_banner.set_visible_child_name("loginBox")
 
+		if 'desktop' in self.core.guardmanager.flavours:
+			if 'client' not in self.core.guardmanager.flavours and 'server' not in self.core.guardmanager.flavours:
+				self.core.loginBox.server_ip_entry.set_text("localhost")
+				self.core.loginBox.server_ip_entry.hide()
+
 		
 	#def load_gui
 
@@ -262,7 +267,21 @@ class MainWindow:
 		elif code==28:
 			msg_text=_("No match found for the indicated search")
 		elif code==29:
-			msg_text=_("%s matches found for the indicated search")			
+			msg_text=_("%s matches found for the indicated search")
+		elif code==30:
+			msg_text=_("It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
+		elif code==31:
+			msg_text=_("It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")	
+		elif code==32:
+			msg_text=_("Copying selected content. Wait a moment...")
+		elif code==33:
+			msg_text=_("It is not possible to copy all the selected content.\nOnly the first 2500 lines have been copied")
+		elif code==34:
+			msg_text=_("It is not possible to update white list dns")	
+		elif code==35:
+			msg_text=_("The white list dns update was successful")
+		elif code==36:
+			msg_text=_("Updating white list dns. Wait a moment...")	
 		return msg_text
 
 
@@ -283,7 +302,7 @@ class MainWindow:
 			if pending_changes>0:
 				dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,
 			          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),"Lliurex Guard")
-				dialog.format_secondary_text(_("There are pending changes to apply. Do you want to exit or cancel?"))
+				dialog.format_secondary_text(_("There are pending changes to apply.\nDo you want to close the application and lose the changes or cancel and return to the application?"))
 				response=dialog.run()
 				dialog.destroy()
 				if response==Gtk.ResponseType.CLOSE:
