@@ -33,3 +33,12 @@ Replaces: lliurex-guard
 Description: Files to open or install lliurex-guard from Zero-center
  Zero launcher to install zero center, and execute lliurex-guard if this is
  installed on system
+
+Package: lliurex-guard-standalone-zerofiles
+Architecture: all
+Depends: ${misc:Depends},${python3:Depends}, lliurex-guard-zerofiles
+Description: Files to open or install lliurex-guard-standalone from Zero-center
+ Zero launcher to install zero center, and execute lliurex-guard if this is
+ installed on system
+
+
