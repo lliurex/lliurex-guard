@@ -1,3 +1,9 @@
+lliurex-guard (4.6) bionic; urgency=medium
+
+  * Create new packages
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Mon, 30 Sep 2019 17:32:51 +0200
+
 lliurex-guard (4.5.6) bionic; urgency=medium
 
   * Added standalone funcionality
