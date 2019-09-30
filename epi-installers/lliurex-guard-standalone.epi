@@ -1,0 +1,8 @@
+
+{
+	"type":"apt",
+	"pkg_list": [{"name":"lliurex-guard-standalone","key_store":"zero-lliurex-guard-standalone"}],
+	"script": {"name":"/usr/share/zero-lliurex-guard/lliurex-guard-standalone_script","remove":true},
+	"zomando":"zero-lliurex-pyromaths"
+
+}
