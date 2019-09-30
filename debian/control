@@ -8,7 +8,7 @@ Standards-Version: 4.1.2
 
 Package: lliurex-guard
 Architecture: all
-Depends: n4d,n4d-lliurex-base,python3-jsondiff,xclip
+Depends: n4d,n4d-lliurex-base,python3-jsondiff,xclip,lliurex-guard-zerofiles
 Description: Contains lliurex-guard
  This package contains the : lliurex-guard gui
 
@@ -26,3 +26,10 @@ Description: Metapackage and fix scripts to lliurex-guard on desktop flavour
  install scripts to update lliurex-guard whitelist and update dns list of 
  dnsmasq
 
+Package: lliurex-guard-zerofiles
+Architecture: all
+Depends: ${misc:Depends},${python3:Depends}
+Replaces: lliurex-guard
+Description: Files to open or install lliurex-guard from Zero-center
+ Zero launcher to install zero center, and execute lliurex-guard if this is
+ installed on system
