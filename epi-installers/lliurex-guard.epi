@@ -3,6 +3,5 @@
 	"type":"apt",
 	"pkg_list": [{"name":"lliurex-guard","key_store":"zero-lliurex-guard"}],
 	"script": {"name":"/usr/share/zero-lliurex-guard/lliurex-guard_script","remove":true},
-	"zomando":"zero-lliurex-pyromaths"
-
+	"zomando":"lliurex-guard"
 }
