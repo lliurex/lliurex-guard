@@ -1,3 +1,9 @@
+lliurex-guard (4.6.1) bionic; urgency=medium
+
+  * Fix typo
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Fri, 18 Oct 2019 08:47:30 +0200
+
 lliurex-guard (4.6) bionic; urgency=medium
 
   * Create new packages
