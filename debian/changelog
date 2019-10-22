@@ -1,3 +1,10 @@
+lliurex-guard (4.6.3) bionic; urgency=medium
+
+  * Move zero-center banner to lliurex-guard-zerofiles package to show on
+    desktop flavour
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 22 Oct 2019 12:44:24 +0200
+
 lliurex-guard (4.6.1) bionic; urgency=medium
 
   * Fix typo
