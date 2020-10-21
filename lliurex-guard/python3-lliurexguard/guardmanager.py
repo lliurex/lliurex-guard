@@ -59,13 +59,29 @@ class GuardManager(object):
 		
 	def detect_flavour(self):
 		
+		self.is_server=""
+		self.is_client=""
+		self.is_desktop=""
+
 		cmd='lliurex-version -v'
 		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 		result=p.communicate()[0]
 
 		if type(result) is bytes:
 			result=result.decode()
-		self.flavours = [ x.strip() for x in result.split(',') ]
+		flavours = [ x.strip() for x in result.split(',') ]
+
+		for item in flavours:
+			if 'server' in item:
+				self.is_server=True
+				self.is_desktop=False
+				break
+			elif 'client' in item:
+				self.is_client=True
+				self.is_desktop=False
+				break
+			elif 'desktop' in item:
+				self.is_desktop=True	
 
 	#def detect_flavour
 
@@ -449,7 +465,7 @@ class GuardManager(object):
 					if list_data[item]["active"]:
 						if list_data[item]["tmpfile"]!="":
 							#self.tmpfile_list.append(list_data[item]["tmpfile"])
-							if "client" in self.flavours:
+							if self.is_client:
 								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 									
 						list_to_active.append(list_data[item])
@@ -458,7 +474,7 @@ class GuardManager(object):
 					if not list_data[item]["active"]:
 						if list_data[item]["tmpfile"]!="":
 							#self.tmpfile_list.append(list_data[item]["tmpfile"])
-							if "client" in self.flavours:
+							if self.is_client:
 								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
 								
 						list_to_deactive.append(list_data[item])
@@ -534,7 +550,7 @@ class GuardManager(object):
 		while not self.connection:
 			time.sleep(1)
 			try:
-				if 'server' in self.flavours and 'client' in self.flavours:
+				if self.is_server or self.is_client:
 					res=urllib.request.urlopen("http://"+self.server_ip)
 				self.connection=True
 			except Exception as e:

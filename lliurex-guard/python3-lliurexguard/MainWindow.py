@@ -83,8 +83,8 @@ class MainWindow:
 		self.stack_window.set_visible_child_name("bannerBox")
 		self.stack_banner.set_visible_child_name("loginBox")
 
-		if 'desktop' in self.core.guardmanager.flavours:
-			if 'client' not in self.core.guardmanager.flavours and 'server' not in self.core.guardmanager.flavours:
+		if self.core.guardmanager.is_desktop:
+			if not self.core.guardmanager.is_client or not self.core.guardmanager.is_server:
 				self.core.loginBox.server_ip_entry.set_text("localhost")
 				self.core.loginBox.server_ip_entry.hide()
 
