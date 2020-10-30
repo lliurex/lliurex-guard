@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-10 13:00+0200\n"
-"PO-Revision-Date: 2019-09-10 13:10+0200\n"
+"PO-Revision-Date: 2020-10-21 12:15+0200\n"
 "Last-Translator: lliurex <lliurex@gva.es>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -162,7 +162,7 @@ msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:280
 msgid "It is not possible to update white list dns"
-msgstr ""
+msgstr "No es posible actualizar los dns de las listas blancas"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:282
 msgid "The white list dns update was successful"

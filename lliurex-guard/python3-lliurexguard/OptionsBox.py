@@ -247,7 +247,7 @@ class OptionsBox(Gtk.VBox):
 				self.add_button.set_sensitive(True)
 				self.global_management_button.set_sensitive(True)
 				
-				if 'server' not in self.core.guardmanager.flavours and 'client' not in self.core.guardmanager.flavours:
+				if not self.core.guardmanager.is_server and not self.core.guardmanager.is_client:
 					self.update_wl_dns_box.show()
 				else:
 					self.update_wl_dns_box.hide()

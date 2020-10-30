@@ -97,6 +97,8 @@ class LliurexGuardManager(object):
 
 	def _detect_flavour(self):
 		
+		self.is_server=False
+
 		cmd='lliurex-version -v'
 		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
 		result=p.communicate()[0]
@@ -104,16 +106,22 @@ class LliurexGuardManager(object):
 		if type(result) is bytes:
 			result=result.decode()
 		
-		self.flavours = [ x.strip() for x in result.split(',') ]
+		flavours = [ x.strip() for x in result.split(',') ]
 
+		for item in flavours:
+			if 'server' in item:
+				self.is_server=True
+				break
+	
 	#def _detect_flavour	
 
 	def _get_dns(self):
 
 		#self._detect_flavour()
 		dns_vars=[]
+		is_server=False
 
-		if 'server' in self.flavours:
+		if self.is_server:
 			dns_vars=self.n4d.get_variable("","VariablesManager","DNS_EXTERNAL")
 		else:
 			dns_vars=self._get_desktop_dns()
@@ -127,7 +135,7 @@ class LliurexGuardManager(object):
 		if not os.path.exists("/var/lib/lliurex-guard"):
 			os.makedirs("/var/lib/lliurex-guard")
 
-		if 'server' not in self.flavours:
+		if not self.is_server:
 			if not os.path.exists("/var/lib/dnsmasq"):
 				os.makedirs("/var/lib/dnsmasq")
 
