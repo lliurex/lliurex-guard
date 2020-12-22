@@ -897,7 +897,7 @@ class OptionsBox(Gtk.VBox):
 		lang=os.environ["LANG"]
 
 		if 'ca_ES' in lang:
-			self.help_cmd='xdg-open https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex-Guard-en-Lliurex-19_va'
+			self.help_cmd='xdg-open https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex+Guard+en+Lliurex+19.'
 		else:
 			self.help_cmd='xdg-open https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex-Guard-en-Lliurex-19'
 
