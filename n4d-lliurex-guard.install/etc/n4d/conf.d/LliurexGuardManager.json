@@ -1,0 +1,69 @@
+{
+    "SETUP": {
+        "type": "python",
+        "path": "LliurexGuardManager.py",
+        "class": "LliurexGuardManager"
+    },
+    "METHODS": {
+       "read_guardmode": {
+            "allowed_groups": [
+                "*",
+                "anonymous"
+            ]
+        },
+       "change_guardmode": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "restart_dnsmasq": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "read_guardmode_headers": {
+            "allowed_groups": [
+                "*",
+                "anonymous"
+            ]
+        },
+        "read_guardmode_list": {
+            "allowed_groups": [
+                "*",
+                "anonymous"
+            ]
+        },
+        "remove_guardmode_list": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "activate_guardmode_list": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "deactivate_guardmode_list": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "remove_tmp_file": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "update_whitelist_dns": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        }
+    }
+}

@@ -3,17 +3,19 @@ import os
 import json
 import codecs
 import shutil
-import xmlrpclib as n4dclient
 import ssl
 import subprocess
 from os import listdir
 from os.path import isfile,isdir,join
+import n4d.server.core as n4dcore
+import n4d.responses
 
 
-class LliurexGuardManager(object):
+class LliurexGuardManager:
 
 	def __init__(self):
 
+		self.core=n4dcore.Core.get_core()
 		self.default_list_path="/usr/share/lliurex-guard/blacklists"
 		self.mode_file_path="/etc/dnsmasq.d/lliurex-guard.conf"
 		self.conf_dir="/etc/lliurex-guard"
@@ -30,10 +32,11 @@ class LliurexGuardManager(object):
 		self.whitelist_filter="address=/#/"+self.blacklist_redirection
 		self.disable_whitelist_filter="#"+self.whitelist_filter
 		self.list_tmpfile=[]
+		'''
 		server='localhost'
 		context=ssl._create_unverified_context()
 		self.n4d = n4dclient.ServerProxy("https://"+server+":9779",context=context,allow_none=True)
-		
+		'''
 	#def __init__	
 
 	def _check_dnsmasq_conf(self):
@@ -122,7 +125,9 @@ class LliurexGuardManager(object):
 		is_server=False
 
 		if self.is_server:
-			dns_vars=self.n4d.get_variable("","VariablesManager","DNS_EXTERNAL")
+			#Old n4d: dns_vars=self.n4d.get_variable("","VariablesManager","DNS_EXTERNAL")
+			dns_vars=self.core.get_variable("DNS_EXTERNAL")['return']
+
 		else:
 			dns_vars=self._get_desktop_dns()
 		
@@ -211,10 +216,15 @@ class LliurexGuardManager(object):
 			if checkconfig:
 				self._set_variables()
 
-			return {'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
+			#Old n4d:return {'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
+			result={'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
+			return n4d.respondes.build_successful_call_response(result)
 		
 		except Exception as e:
-			return {'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
+			#Old n4d: return {'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
+			result={'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
+			return n4d.responses.build_successful_call_response(result)
+	
 
 	#def read_guard_mode
 	
@@ -255,10 +265,14 @@ class LliurexGuardManager(object):
 			self._create_guardmode_conf_dir(mode_to_set)
 			if rescue:
 				restart=self.restart_dnsmasq(True)
-			return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
-			
+			#Old n4d:return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
+			result={'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
+			return n4d.responses.build_successful_call_response(result)
+	
 		except Exception as e:
-			return {'status':False,'msg':"Unable to change Guard Mode",'data':str(e)}	
+			#Old n4d:return {'status':False,'msg':"Unable to change Guard Mode",'data':str(e)}	
+			result={'status':False,'msg':"Unable to change Guard Mode",'data':str(e)}	
+			return n4d.responses.build_successful_call_response(result)	
 
 	#def change_guard_mode
 	
@@ -278,11 +292,15 @@ class LliurexGuardManager(object):
 			data=str(e)
 
 		if not error:			
-			return {'status':True,'msg':"Dnsmaq restart successfully"}
+			#Old n4d:return {'status':True,'msg':"Dnsmaq restart successfully"}
+			result={'status':True,'msg':"Dnsmaq restart successfully"}
+			return n4d.responses.build_successful_call_response(result)
 		else:
 			if not nonretry:
 				self.change_guardmode("DisableMode",True)
-			return {'status':False,'msg':"Error restarting Dnsmaq",'data':data}
+			#Old n4d_return {'status':False,'msg':"Error restarting Dnsmaq",'data':data}
+			result={'status':False,'msg':"Error restarting Dnsmaq",'data':data}
+			return n4d.responses.build_successful_call_response(result)
 
 	#def __restart_dnsmasq				
 	
@@ -313,10 +331,14 @@ class LliurexGuardManager(object):
 				list_config[str(count)]=item
 				count+=1
 
-			return {'status':True,'msg':'Reading %s sucessfully'%self.guardMode,'data':list_config}	
+			#Old n4d: return {'status':True,'msg':'Reading %s sucessfully'%self.guardMode,'data':list_config}	
+			result={'status':True,'msg':'Reading %s sucessfully'%self.guardMode,'data':list_config}	
+		'''
 		else:
-			return result	
-
+			return result
+		'''		
+		return n4d.build_successful_call_response(result)	
+	
 
 	#def read_guardmode_list
 	
@@ -417,12 +439,19 @@ class LliurexGuardManager(object):
 				f.close()
 				lines=None
 				
-				return {'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
-			else:
-				return {'status':False,'msg':"Unable to read content list.The file does not exist",'data':"The file does not exist"}
+				#Old n4d:return {'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
+				result={'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
 
+			else:
+				#Old n4d: return {'status':False,'msg':"Unable to read content list.The file does not exist",'data':"The file does not exist"}
+				result={'status':False,'msg':"Unable to read content list.The file does not exist",'data':"The file does not exist"}
+
+			return n4d.responses.build_successful_call_response(result)	
+		
 		except Exception as e:
-			return {'status':False,'msg':"Unable to read content list",'data':str(e)}
+			#Old n4d: return {'status':False,'msg':"Unable to read content list",'data':str(e)}
+			result={'status':False,'msg':"Unable to read content list",'data':str(e)}
+			return n4d.responses.build_successful_call_response(result)
 					
 
 	#def read_guardmode_list	
@@ -439,11 +468,14 @@ class LliurexGuardManager(object):
 						if os.path.exists(os.path.join(self.disable_path,file)):
 							os.remove(os.path.join(self.disable_path,file))	
 							
-			return {'status':True,'msg':"Listed removed sucessfully"}		
+			#Old n4d:return {'status':True,'msg':"Listed removed sucessfully"}		
+			result={'status':True,'msg':"Listed removed sucessfully"}		
+			return n4d.responses.build_successful_call_response(result)		
 
 		except Exception as e:
-
-			return {'status':False,'msg':"Error removing lists",'data':str(e)}		
+			#Old n4d: return {'status':False,'msg':"Error removing lists",'data':str(e)}		
+			result={'status':False,'msg':"Error removing lists",'data':str(e)}		
+			return n4d.responses.build_successful_call_response(result)		
 							
 
 	#def remove_guardmode_list
@@ -453,10 +485,13 @@ class LliurexGuardManager(object):
 		result=self._move_guardmode_list(lists,self.active_path,self.disable_path)
 
 		if result['status']:
-			return {'status':True,'msg':"Lists activated successfully"}
+			#Old n4d: return {'status':True,'msg':"Lists activated successfully"}
+			result={'status':True,'msg':"Lists activated successfully"}
+			return n4d.build_successful_call_response(result)
+			
 		else:
-			return result			
-		
+			return n4d.build_successful_call_response(result)
+	
 	#def activate_guardmode_list
 	
 	def deactivate_guardmode_list(self,lists):
@@ -464,9 +499,12 @@ class LliurexGuardManager(object):
 		result=self._move_guardmode_list(lists,self.disable_path,self.active_path)
 		
 		if result['status']:
-			return {'status':True,'msg':"Lists deactivated successfully"}
+			#Old n4d: return {'status':True,'msg':"Lists deactivated successfully"}
+			result:{'status':True,'msg':"Lists deactivated successfully"}
+			return n4d.responses.build_successful_call_response(result)
+		
 		else:
-			return result
+			return n4d.responses.build_successful_call_response(result)
 
 	#def deactivate_guardmode_list	
 
@@ -596,8 +634,13 @@ class LliurexGuardManager(object):
 									f.write(tmp_line+"\n")	
 						f.close()
 									 					
-			return {'status':True,'msg':'The update of the dns has been carried out successfully','data':""}
+			#Old n4d: return {'status':True,'msg':'The update of the dns has been carried out successfully','data':""}
+			result={'status':True,'msg':'The update of the dns has been carried out successfully','data':""}
+			return n4d.responses.build_successful_call_response(result)
 
 		except Exception as e:
+			#Old n4d: return {'status':False,'msg':'Error updating white list dns','data':str(e)}							
+			result={'status':False,'msg':'Error updating white list dns','data':str(e)}							
+			return n4d.responses.build_successful_call_response(result)							
 
-			return {'status':False,'msg':'Error updating white list dns','data':str(e)}							
+	#def update_whitelist_dns
