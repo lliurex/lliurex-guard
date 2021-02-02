@@ -29,6 +29,13 @@ import datetime
 
 
 class EditBox(Gtk.VBox):
+
+	WAITING_EDITING_CODE=6
+	WAITING_SAVE_CHANGES_CODE=26
+	NO_MATCH_SEARCH_CODE=28
+	MATCHING_SEARCH_CODE=29
+	WAITING_COPY_CONTENT_CHANGES=32
+	UNABLE_COPY_CONTENT_CODE=33
 	
 	def __init__(self):
 		
@@ -223,7 +230,7 @@ class EditBox(Gtk.VBox):
 				self.url_tw.set_property('editable',True)
 				self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_edit.set_visible_child_name("urlTw")		
-				if self.clipboard_content['code']==33:
+				if self.clipboard_content['code']==EditBox.UNABLE_COPY_CONTENT_CODE:
 					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(self.clipboard_content['code']))
 					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
 			
@@ -255,7 +262,7 @@ class EditBox(Gtk.VBox):
 		self.data_tocheck["description"]=self.list_description_entry.get_text()
 	
 		self.edit_spinner.start()
-		self.edit_spinner_label.set_text(self.core.mainWindow.get_msg(26))			
+		self.edit_spinner_label.set_text(self.core.mainWindow.get_msg(EditBox.WAITING_SAVE_CHANGES_CODE))			
 		self.edit_spinner_label.set_name("WAITING_LABEL")
 		self.stack_edit.set_transition_duration(550)
 		self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
@@ -405,7 +412,7 @@ class EditBox(Gtk.VBox):
 		self.main_box.set_sensitive(False)
 		self.core.mainWindow.lock_quit=True
 		self.open_editor_t.start()
-		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(6))
+		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(EditBox.WAITING_EDITING_CODE))
 		self.edit_msg_label.set_name("WAITING_LABEL")
 		GLib.timeout_add(10,self.pulsate_waiting_editor_close)
 		
@@ -511,11 +518,11 @@ class EditBox(Gtk.VBox):
 			else:
 				if self.count==0:
 					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
-					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(28))
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(EditBox.NO_MATCH_SEARCH_CODE))
 				else:
 					#self.get_clipboard()
 					self.edit_msg_label.set_name("MSG_CORRECT_LABEL")
-					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(29)%self.count)	
+					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(EditBox.MATCHING_SEARCH_CODE)%self.count)	
 			
 		except:
 
@@ -532,7 +539,7 @@ class EditBox(Gtk.VBox):
 		self.core.mainWindow.lock_quit=True
 		
 		self.edit_spinner.start()
-		self.edit_spinner_label.set_text(self.core.mainWindow.get_msg(32))			
+		self.edit_spinner_label.set_text(self.core.mainWindow.get_msg(EditBox.WAITING_COPY_CONTENT_CHANGES))			
 		self.edit_spinner_label.set_name("WAITING_LABEL")
 		
 		self.stack_edit.set_transition_duration(550)

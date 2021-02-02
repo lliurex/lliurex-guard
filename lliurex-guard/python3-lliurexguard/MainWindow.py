@@ -210,15 +210,15 @@ class MainWindow:
 
 		if code==0:
 			msg_text=""
-		elif code==1:
+		elif code==-1:
 			msg_text=_("You must indicate a name for the list")
-		elif code==2:
+		elif code==-2:
 			msg_text=_("The name of the list is duplicate")
 		elif code==3:
 			msg_text=_("List created successfully")
 		elif code==4:
 			msg_text=_("List edited successfully")
-		elif code==5:
+		elif code==-5:
 			msg_text=_("Error saving the changes of the list:")
 		elif code==6:
 			msg_text=_("Waiting while viewing / editing the list")
@@ -226,57 +226,57 @@ class MainWindow:
 			msg_text=_("Changing Lliurex Guard mode. Wait a moment...")
 		elif code==8:
 			msg_text=_("The change of Lliurex Guard mode has been successful")	
-		elif code==9:
+		elif code==-9:
 			msg_text=_("Error changing Lliurex Guard mode:")
-		elif code==10:
+		elif code==-10:
 			msg_text=_("Error restarting dnsmasq. Lliurex Guard will be disabled:")
 		elif code==11:
 			msg_text=_("Loading the information from the list. Wait a moment...")
 		elif code==12:
 			msg_text=_("Information of the list loaded successfully")
-		elif code==13:
+		elif code==-13:
 			msg_text=_("Error loading the information from the list:")	
 		elif code==14:
 			msg_text=_("Loading file. Wait a moment...")
 		elif code==15:
 			msg_text=_("File loaded sucessfully")	
-		elif code==16:
+		elif code==-16:
 			msg_text=_("Error loading file:")	
 		elif code==17:
 			msg_text=_("Applying changes. Wait a moment...")
 		elif code==18:
 			msg_text=_("Changes applied successfully")	
-		elif code==19:
+		elif code==-19:
 			msg_text=_("Error removing lists:")
-		elif code==20:
+		elif code==-20:
 			msg_text=_("Error activating lists:")
-		elif code==21:
+		elif code==-21:
 			msg_text=("Error deactivating lists:")
 		elif code==22:
 			msg_text=_("Lliurex Guard mode readed sucessfully")
-		elif code==23:
+		elif code==-23:
 			msg_text=_("Error reading Lliurex Guard mode:")
 		elif code==24:
 			msg_text=_("List code readed successfully")
-		elif code==25:
+		elif code==-25:
 			msg_text=_("Error reading list headers:")
 		elif code==26:
 			msg_text=_("Saving changes. Wait a moment...")
-		elif code==27:
+		elif code==-27:
 			msg_text=_("The file loaded is empty")
 		elif code==28:
 			msg_text=_("No match found for the indicated search")
 		elif code==29:
 			msg_text=_("%s matches found for the indicated search")
-		elif code==30:
+		elif code==-30:
 			msg_text=_("It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
-		elif code==31:
+		elif code==-31:
 			msg_text=_("It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")	
 		elif code==32:
 			msg_text=_("Copying selected content. Wait a moment...")
-		elif code==33:
+		elif code==-33:
 			msg_text=_("It is not possible to copy all the selected content.\nOnly the first 2500 lines have been copied")
-		elif code==34:
+		elif code==-34:
 			msg_text=_("It is not possible to update white list dns")	
 		elif code==35:
 			msg_text=_("The white list dns update was successful")

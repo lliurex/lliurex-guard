@@ -20,6 +20,11 @@ _ = gettext.gettext
 
 class OptionsBox(Gtk.VBox):
 	
+	WAITING_CHANGE_GUARDMODE_CODE=7
+	WAITING_LOADING_LIST_CODE=11
+	WAITING_LOADING_FILE_CODE=14
+	WAITING_APPLY_CHANGES_CODE=17
+
 	def __init__(self):
 		
 		Gtk.VBox.__init__(self)
@@ -505,7 +510,7 @@ class OptionsBox(Gtk.VBox):
 		if response==Gtk.ResponseType.OK:
 			file=dialog.get_filename()
 			dialog.destroy()
-			self.manage_waiting_form(14)
+			self.manage_waiting_form(OptionsBox.WAITING_LOADING_FILE_CODE)
 			self.load_file_t=threading.Thread(target=self.load_file_info,args=(file,))
 			self.load_file_t.start()
 			GLib.timeout_add(100,self.pulsate_load_file)
@@ -679,7 +684,7 @@ class OptionsBox(Gtk.VBox):
 		dialog.destroy()
 
 		if response==Gtk.ResponseType.YES:
-			self.manage_waiting_form(7)
+			self.manage_waiting_form(OptionsBox.WAITING_CHANGE_GUARDMODE_CODE)
 			self.change_guard_mode_t=threading.Thread(target=self.change_guard_process,args=(self.mode,))
 			self.change_guard_mode_t.start()
 			GLib.timeout_add(100,self.pulsate_change_guard_mode)
@@ -780,7 +785,7 @@ class OptionsBox(Gtk.VBox):
 		self.order=hbox.get_children()[0].id
 		lines=self.list_data[self.order]["lines"]
 		self.core.editBox.init_form()
-		self.manage_waiting_form(11)
+		self.manage_waiting_form(OptionsBox.WAITING_LOADING_LIST_CODE)
 		self.load_list_info_t=threading.Thread(target=self.load_list_info)
 		self.load_list_info_t.start()
 		GLib.timeout_add(100,self.pulsate_load_list_info,lines)
@@ -829,7 +834,7 @@ class OptionsBox(Gtk.VBox):
 	
 	def apply_btn_clicked(self,widget):
 
-		self.manage_waiting_form(17)
+		self.manage_waiting_form(OptionsBox.WAITING_APPLY_CHANGES_CODE)
 		self.apply_changes_t=threading.Thread(target=self.apply_changes)
 		self.apply_changes_t.start()
 		GLib.timeout_add(100,self.pulsate_apply_changes)

@@ -101,23 +101,21 @@ class LoginBox(Gtk.VBox):
 		server="172.20.9.246"
 		'''
 
-		if server!="":
-			self.core.guardmanager.set_server(server)
-		else:
-			self.core.guardmanager.set_server("server")
+		if server=="":
+			server="server"
 		
 		self.login_msg_label.set_text(_("Validating user..."))
 		self.login_msg_label.set_name("WAITING_LABEL")
 		self.login_button.set_sensitive(False)
-		self.validate_user(user,password)	
+		self.validate_user(server,user,password)	
 
 
 	#def login_clicked	
 	
-	def validate_user(self,user,password):
+	def validate_user(self,server,user,password):
 		
 		self.login_spinner.start()
-		t=threading.Thread(target=self.core.guardmanager.validate_user,args=(user,password,))
+		t=threading.Thread(target=self.core.guardmanager.validate_user,args=(server,user,password,))
 		t.daemon=True
 		t.start()
 		GLib.timeout_add(500,self.validate_user_listener,t)

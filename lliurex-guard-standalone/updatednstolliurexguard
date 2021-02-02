@@ -31,9 +31,9 @@ c = ServerProxy('https://localhost:9779',context=context)
 key = None
 with open('/etc/n4d/key','r') as fd:
     key = fd.readline().strip()
-result = c.read_guardmode(key,'LliurexGuardManager')
+result = c.read_guardmode(key,'LliurexGuardManager')['return']
 if result['status'] and result['data'] == 'WhiteMode':
-    result = c.update_whitelist_dns(key,'LliurexGuardManager')
+    result = c.update_whitelist_dns(key,'LliurexGuardManager')['return']
     if not result['status']:
         c.change_guardmode(key,'LliurexGuardManager','DisableMode')
 o = subprocess.Popen(['systemctl','restart','dnsmasq']).communicate()
