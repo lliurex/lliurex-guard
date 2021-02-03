@@ -126,7 +126,7 @@ class LliurexGuardManager:
 
 		if self.is_server:
 			#Old n4d: dns_vars=self.n4d.get_variable("","VariablesManager","DNS_EXTERNAL")
-			dns_vars=self.core.get_variable("DNS_EXTERNAL")['return']
+			dns_vars=self.core.get_variable("DNS_EXTERNAL").get('return',None)
 
 		else:
 			dns_vars=self._get_desktop_dns()
@@ -350,14 +350,13 @@ class LliurexGuardManager:
 			for item in listdir(folder):
 				t=join(folder,item)
 				if isfile(t):
-					f=codecs.open(t,'r',encoding="utf-8")
+					f=codecs.open(t,'r')
 					tmp={}
 					tmp["id"]=item.split(".")[0]
 					tmp["active"]=True
 					match=0
 					lines=f.readlines()
 					for line in lines:
-						line=line.encode("utf-8")
 						if "NAME" in line:
 							tmp["name"]=line.split(":")[1].split("\n")[0]
 							match+=1
@@ -542,14 +541,14 @@ class LliurexGuardManager:
 		
 		try:
 			if os.path.exists(item["tmpfile"]):
-				f=codecs.open(item["tmpfile"],'r',encoding="utf-8")
+				f=codecs.open(item["tmpfile"],'r')
 				lines=f.readlines()
 				f.close()
 				f=open(item["tmpfile"],'w')
 
-				header_name="#NAME:"+unicode(item["name"]).encode("utf-8")+"\n"
+				header_name="#NAME:"+item["name"]+"\n"
 				f.write(header_name)
-				header_desc="#DESCRIPTION:"+unicode(item["description"]).encode("utf-8")+"\n"
+				header_desc="#DESCRIPTION:"+item["description"]+"\n"
 				f.write(header_desc)
 				for line in lines:
 					if line !="":
@@ -603,7 +602,7 @@ class LliurexGuardManager:
 					if isfile(t):
 						content=[]
 						format_lines=[]
-						f=codecs.open(t,'r',encoding="utf-8")
+						f=codecs.open(t,'r')
 						lines=f.readlines()
 						f.close()
 						for line in lines:
@@ -625,9 +624,9 @@ class LliurexGuardManager:
 						f=open(t,'w')
 						for line in format_lines:
 							if "NAME" in line:
-								f.write(unicode(line).encode("utf-8"))
+								f.write(line)
 							elif "DESCRIPTION" in line:
-								f.write(unicode(line).encode("utf-8"))
+								f.write(line)
 							else:
 								for dns in dns_vars:
 									tmp_line=self.whitelist_redirection+line.split("\n")[0]+"/"+dns
