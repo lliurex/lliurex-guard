@@ -151,7 +151,7 @@ class LliurexGuardManager:
 
 			if not os.path.exists("etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
 				os.system('systemctl stop systemd-resolved')
-				objects['NetworkManager'].systemd_resolved_conf()
+				self.core.get_plugin('NetworkManager').systemd_resolv_conf()
 				# Restart service to fix bug on /etc/resolv.conf search field
 				os.system('systemctl restart systemd-resolved')
 
@@ -218,7 +218,7 @@ class LliurexGuardManager:
 
 			#Old n4d:return {'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
 			result={'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
-			return n4d.respondes.build_successful_call_response(result)
+			return n4d.responses.build_successful_call_response(result)
 		
 		except Exception as e:
 			#Old n4d: return {'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
@@ -337,7 +337,7 @@ class LliurexGuardManager:
 		else:
 			return result
 		'''		
-		return n4d.build_successful_call_response(result)	
+		return n4d.responses.build_successful_call_response(result)	
 	
 
 	#def read_guardmode_list
@@ -486,10 +486,10 @@ class LliurexGuardManager:
 		if result['status']:
 			#Old n4d: return {'status':True,'msg':"Lists activated successfully"}
 			result={'status':True,'msg':"Lists activated successfully"}
-			return n4d.build_successful_call_response(result)
+			return n4d.responses.build_successful_call_response(result)
 			
 		else:
-			return n4d.build_successful_call_response(result)
+			return n4d.responses.build_successful_call_response(result)
 	
 	#def activate_guardmode_list
 	
