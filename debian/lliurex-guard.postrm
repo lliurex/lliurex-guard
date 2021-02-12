@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+	remove|purge|abort-install|disappear)
+		zero-center set-non-configured lliurex-guard-installer || true
+;;
+	upgrade|failed-upgrade|abort-upgrade)
+	;;
+	*)
+		echo "prerm called with unknown argument $1" >&2
+		exit 1
+	;;
+esac
+#DEBHELPER#
+
+exit 0
