@@ -1,0 +1,18 @@
+#!/bin/bash
+lliurexguardisinstaled="0"
+
+TEST=$( dpkg-query -s  lliurex-guard 2> /dev/null| grep Status | cut -d " " -f 4 )
+
+if ! [ "$TEST" == 'installed' ];then
+	lliurexguardisinstaled="1"
+fi
+	
+if [ "$lliurexguardisinstaled" = "1" ]; then
+    if [ -e "/usr/share/zero-lliurex-guard/lliurex-guard-standalone.epi" ]; then
+        epi-gtk /usr/share/zero-lliurex-guard/lliurex-guard-standalone.epi
+    else
+        epi-gtk /usr/share/zero-lliurex-guard/lliurex-guard.epi
+    fi
+fi
+exit 0
+
