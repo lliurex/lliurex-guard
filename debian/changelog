@@ -1,3 +1,9 @@
+lliurex-guard (4.6.6) bionic-updates; urgency=medium
+
+  * Fixed lliurex-guard zero installers
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 12 Feb 2021 10:51:00 +0100
+
 lliurex-guard (4.6.5) bionic; urgency=medium
 
   * Updated linkt to the wiki
