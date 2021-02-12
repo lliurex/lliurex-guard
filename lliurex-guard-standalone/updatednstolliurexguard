@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
-from xmlrpc.client import ServerProxy
-import ssl
+import n4d.client
 import os
 dns = []
 dns_section = False
@@ -24,16 +23,12 @@ with open('/var/lib/dnsmasq/config/extra-dns','w') as fd:
         fd.write("server=" + x + "\n")
     fd.write('\n')
 
-
-context = ssl.SSLContext()
-context.verify_mode = ssl.CERT_NONE
-c = ServerProxy('https://localhost:9779',context=context)
-key = None
-with open('/etc/n4d/key','r') as fd:
-    key = fd.readline().strip()
-result = c.read_guardmode(key,'LliurexGuardManager')['return']
-if result['status'] and result['data'] == 'WhiteMode':
-    result = c.update_whitelist_dns(key,'LliurexGuardManager')['return']
-    if not result['status']:
-        c.change_guardmode(key,'LliurexGuardManager','DisableMode')
+master_key=n4d.client.Key.master_key() 
+if(master_key.valid()):
+	c=n4d.client.Client(key=master_key) 
+	result = c.LliurexGuardManager.read_guardmode()
+	if result['status'] and result['data'] == 'WhiteMode':
+	    result = c.LliurexGuardManager.update_whitelist_dns()
+	    if not result['status']:
+	        c.LliurexGuardManager.change_guardmode('DisableMode')
 o = subprocess.Popen(['systemctl','restart','dnsmasq']).communicate()
