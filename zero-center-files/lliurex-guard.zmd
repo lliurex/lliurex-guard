@@ -1,14 +1,5 @@
 #!/bin/bash
 
-lliurexguardisinstaled=0
-dpkg -l | grep -q lliurex-guard || lliurexguardisinstaled=1
-if [ "$lliurexguardisinstaled" = "1" ]; then
-    if [ -e "/usr/share/zero-lliurex-guard/lliurex-guard-standalone.epi" ]; then
-        epi-gtk /usr/share/zero-lliurex-guard/lliurex-guard-standalone.epi
-    else
-        epi-gtk /usr/share/zero-lliurex-guard/lliurex-guard.epi
-    fi
-else
-    exec /usr/sbin/lliurex-guard
-fi
+
+exec /usr/sbin/lliurex-guard
 exit 0
