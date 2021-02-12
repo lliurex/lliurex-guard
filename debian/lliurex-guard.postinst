@@ -1,0 +1,12 @@
+#!/bin/sh
+
+case "$1" in
+	configure)
+		
+		;;
+	*)
+		echo "Unknow action"
+		;;
+esac
+
+#DEBHELPER#

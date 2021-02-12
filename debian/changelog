@@ -1,0 +1,147 @@
+lliurex-guard (4.6.5) bionic; urgency=medium
+
+  * Updated linkt to the wiki
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 22 Dec 2020 18:12:06 +0100
+
+lliurex-guard (4.6.4) bionic; urgency=medium
+
+  * Fixed improved in lite flavours
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 30 Oct 2020 09:59:54 +0100
+
+lliurex-guard (4.6.3) bionic; urgency=medium
+
+  * Move zero-center banner to lliurex-guard-zerofiles package to show on
+    desktop flavour
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 22 Oct 2019 12:44:24 +0200
+
+lliurex-guard (4.6.1) bionic; urgency=medium
+
+  * Fix typo
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Fri, 18 Oct 2019 08:47:30 +0200
+
+lliurex-guard (4.6) bionic; urgency=medium
+
+  * Create new packages
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Mon, 30 Sep 2019 17:32:51 +0200
+
+lliurex-guard (4.5.6) bionic; urgency=medium
+
+  * Added standalone funcionality
+  * Added new features: checking clipboard  and checking size file when list is imported
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 23 Sep 2019 13:00:55 +0200
+
+lliurex-guard (4.5.5) bionic; urgency=medium
+
+  * Fixed translations
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 24 Jul 2019 09:36:04 +0200
+
+lliurex-guard (4.5.4) bionic; urgency=medium
+
+  * Fixed bug to show options to remove/restore list
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 23 Jul 2019 14:36:36 +0200
+
+lliurex-guard (4.5.3) bionic; urgency=medium
+
+  * Added link to help
+  * Added valencian translations
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 23 Jul 2019 11:25:12 +0200
+
+lliurex-guard (4.5.2) bionic; urgency=medium
+
+  * Added connection check to server when restarting dnsmasq
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 28 Jun 2019 13:00:48 +0200
+
+lliurex-guard (4.5.1) bionic; urgency=medium
+
+  * Fixed bug when you try to edit a marked list to change state
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Thu, 27 Jun 2019 12:26:32 +0200
+
+lliurex-guard (4.5) bionic; urgency=medium
+
+  * New version based in dnsmasq
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 26 Jun 2019 17:30:39 +0200
+
+lliurex-guard (4.4.16) bionic; urgency=medium
+
+  * Initial release for bionic
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 15 Feb 2019 10:41:32 +0100
+
+lliurex-guard (4.4.6) xenial; urgency=high
+
+  * Adding sudo group
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 13 Feb 2019 09:22:35 +0100
+
+lliurex-guard (4.4.4) xenial; urgency=high
+
+  * Trimming elements for Customize list 
+
+ -- Daniel Duran Vecino <daduve@gmail.com>  Tue, 29 May 2018 14:36:08 +0200
+
+lliurex-guard (4.4.3) xenial; urgency=high
+
+  * Added teachers role for module
+
+ -- Jose A. Murcia <joamuran@gmail.com>  Tue, 31 Oct 2017 11:45:23 +0100
+
+lliurex-guard (4.4.2) xenial; urgency=high
+
+  * Fixed js asyncronous n4d call
+  * Fixed i18n
+
+ --  <joamuran@gmail.com>  Wed, 18 Jan 2017 14:47:36 +0100
+
+lliurex-guard (4.4.1) xenial; urgency=high
+
+  * Added short module description
+
+ --  <joamuran@gmail.com>  Wed, 14 Dec 2016 10:04:22 +0100
+
+lliurex-guard (4.4) xenial; urgency=high
+
+  * Fixed aspect for admin-center
+
+ --  <jose@gmail.com>  Fri, 09 Dec 2016 14:06:18 +0100
+
+lliurex-guard (4.3) xenial; urgency=high
+
+  * Adding foreing langugages
+
+ -- joamuran <joamuran@gmail.com>  Mon, 02 May 2016 14:20:14 +0200
+
+lliurex-guard (4.2) xenial; urgency=high
+
+  * fixed service invocation with invoke-rc.d
+
+ -- joamuran <joamuran@xen>  Mon, 02 May 2016 11:17:23 +0200
+
+lliurex-guard (4-1) xenial; urgency=medium
+
+  * Fix squid3->squid
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Fri, 08 Apr 2016 13:11:45 +0200
+
+lliurex-guard (4) xenial; urgency=medium
+
+  * Updated squid3->squid paths
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Fri, 08 Apr 2016 12:13:37 +0200
+
+lliurex-guard (3) xenial; urgency=high
+
+  * Xenial release of lliurex-guard-easy2
+
+ -- joamuran <joamuran@gmail.com>  Fri, 01 Apr 2016 10:15:21 +0200
