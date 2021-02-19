@@ -2,7 +2,7 @@
 
 case "$1" in
 	configure)
-		
+			zero-center set-configured lliurex-guard-installer || true
 		;;
 	*)
 		echo "Unknow action"

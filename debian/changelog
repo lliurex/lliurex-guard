@@ -1,3 +1,10 @@
+lliurex-guard (5.6.5) focal; urgency=medium
+
+  * Initial release for focal
+  * Integrated with new n4d client
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 19 Feb 2021 12:26:18 +0100
+
 lliurex-guard (4.6.5) bionic; urgency=medium
 
   * Updated linkt to the wiki
