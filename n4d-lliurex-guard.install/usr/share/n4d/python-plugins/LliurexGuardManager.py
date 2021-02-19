@@ -587,6 +587,7 @@ class LliurexGuardManager:
 				os.remove(item)
 
 		self.list_tmpfile=[]
+		return n4d.responses.build_successful_call_response()
 	#def _remove_tmp_file			
 
 	def update_whitelist_dns(self):
