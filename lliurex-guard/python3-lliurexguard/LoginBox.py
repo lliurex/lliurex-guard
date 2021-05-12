@@ -35,6 +35,8 @@ class LoginBox(Gtk.VBox):
 		self.user_entry=builder.get_object("user_entry")
 		self.password_entry=builder.get_object("password_entry")
 		self.server_ip_entry=builder.get_object("server_ip_entry")
+		self.login_msg_box=builder.get_object("login_msg_box")
+		self.login_error_img=builder.get_object("login_error_img")
 		self.login_msg_label=builder.get_object("login_msg_label")
 		self.login_spinner=builder.get_object("login_spinner")
 
@@ -88,7 +90,10 @@ class LoginBox(Gtk.VBox):
 	
 	
 	def login_clicked(self,widget):
-		
+
+		self.login_msg_box.set_name("HIDE_BOX")
+		self.login_error_img.hide()
+
 		user=self.user_entry.get_text()
 		password=self.password_entry.get_text()
 		server=self.server_ip_entry.get_text()
@@ -105,6 +110,7 @@ class LoginBox(Gtk.VBox):
 			server="server"
 		
 		self.login_msg_label.set_text(_("Validating user..."))
+		self.login_msg_label.set_halign(Gtk.Align.CENTER)
 		self.login_msg_label.set_name("WAITING_LABEL")
 		self.login_button.set_sensitive(False)
 		self.validate_user(server,user,password)	
@@ -124,14 +130,18 @@ class LoginBox(Gtk.VBox):
 	
 	
 	def validate_user_listener(self,thread):
-			
+		
+		error=False	
 		if thread.is_alive():
 			return True
 		
 		self.login_button.set_sensitive(True)
 		if not self.core.guardmanager.user_validated:
+			error=True
+			'''
 			self.login_spinner.stop()
 			self.login_msg_label.set_markup("<span foreground='red'>"+_("Invalid user")+"</span>")
+			'''
 		else:
 			group_found=False
 			for g in ["sudo","admins","admin"]:
@@ -146,9 +156,18 @@ class LoginBox(Gtk.VBox):
 				
 							
 			else:
+				error=True
+				'''
 				self.login_spinner.stop()
 				self.login_msg_label.set_markup("<span foreground='red'>"+_("Invalid user")+"</span>")
-				
+				'''
+		if error:
+			self.login_spinner.stop()
+			self.login_msg_box.set_name("ERROR_BOX")
+			self.login_error_img.show()
+			self.login_msg_label.set_name("FEEDBACK_LABEL")
+			self.login_msg_label.set_halign(Gtk.Align.START)
+			self.login_msg_label.set_text(_("Invalid user"))		
 		return False
 			
 	#def validate_user_listener

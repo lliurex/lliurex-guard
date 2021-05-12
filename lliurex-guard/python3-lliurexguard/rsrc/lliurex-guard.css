@@ -205,10 +205,10 @@
 	#CUSTOM-ENTRY
 	{
 		color: @default-grey;
-		border: none;
+		border: 1px solid #aaaaaa;
 		/*border-radius: 5px;*/
 		/*background-color: @arc-blue;*/
-		border-bottom: 1px solid #aaaaaa;
+		/*border-bottom: 1px solid #aaaaaa;*/
 		padding: 4px;
 		/*background: #eeeeee;*/
 		
@@ -219,7 +219,8 @@
 	#CUSTOM-ENTRY:focus
 	{
 		color: @arc-blue;
-		border-bottom: 1px solid @arc-blue-light;
+		/*border-bottom: 1px solid @arc-blue-light;*/
+		border:1px solid @arc-blue-light;
 		/*border-bottom: 2px solid rgba(0,0,0,0);*/
 		/*background-color: transparent;*/
 		
@@ -233,7 +234,8 @@
 	#CUSTOM-ENTRY:disabled
 	{
 		background-color: #bbbbbb;
-		border-bottom: 1px solid transparent;
+		/*border-bottom: 1px solid transparent;*/
+		border:1px solid transparent;
 		color: #999999;
 	}
 
@@ -243,4 +245,47 @@
 
 	#REMOVE_BOX {
 		background-color: #c9c9c9;
+	}
+
+	#FEEDBACK_LABEL{
+
+		color:#000000;
+		font: 11pt Roboto Bold;
+	}
+
+	#ERROR_BOX{
+
+		border-style:solid;
+		border-width: 1px;
+		border-radius: 0px;
+		border-color:#da4453;
+		background:#ebced2;
+	}
+
+	#HIDE_BOX{
+
+		border-style:none;
+		border-width: 0px;
+		border-radius: 0px;
+		border-color:transparent;
+		background:transparent;
+	}
+
+	#SUCCESS_BOX{
+
+		border-style:solid;
+		border-width: 1px;
+		border-radius: 0px;
+		border-color:#27ae60;
+		background:#c7e3d4;
+	}
+
+
+	#INFORMATION_BOX{
+
+		border-style:solid;
+		border-width: 1px;
+		border-radius: 0px;
+		border-color:#3daee9;
+		background:#cbe3f0;
 	}
