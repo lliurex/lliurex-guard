@@ -868,6 +868,7 @@ class OptionsBox(Gtk.VBox):
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_apply['code'])+"\n"+self.result_apply['data'])
+				self.manage_feedback_box(False,True)
 				#self.options_msg_label.set_name("MSG_ERROR_LABEL")	
 				if self.result_apply['code']!=10:
 					self.main_box.set_sensitive(True)
