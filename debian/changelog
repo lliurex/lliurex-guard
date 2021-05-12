@@ -1,3 +1,10 @@
+lliurex-guard (5.6.7) focal; urgency=medium
+
+  * Fixed n4d plugin to edit tmp list files
+  * Changed style of gui
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 12 May 2021 09:32:58 +0200
+
 lliurex-guard (5.6.6) focal; urgency=medium
 
   * Fixed response in n4d plugin
