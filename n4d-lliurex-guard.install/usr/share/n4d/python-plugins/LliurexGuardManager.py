@@ -544,6 +544,8 @@ class LliurexGuardManager:
 				f=codecs.open(item["tmpfile"],'r')
 				lines=f.readlines()
 				f.close()
+				original_file_perms=self._get_original_file_perms(item["tmpfile"])
+				os.system('chown root:root '+item['tmpfile'])
 				f=open(item["tmpfile"],'w')
 
 				header_name="#NAME:"+item["name"]+"\n"
@@ -569,6 +571,12 @@ class LliurexGuardManager:
 									f.write(tmp_line+"\n")	
 				
 				f.close()
+				try:
+					cmd='chown %s:%s %s'%(original_file_perms[0],original_file_perms[1],item["tmpfile"])
+					os.system(cmd)
+				except Exception as e:
+					print(str(e))
+					pass
 				lines=None
 				
 			return {'status':True,'msg':'List formated successfully'}
@@ -588,6 +596,7 @@ class LliurexGuardManager:
 
 		self.list_tmpfile=[]
 		return n4d.responses.build_successful_call_response()
+
 	#def _remove_tmp_file			
 
 	def update_whitelist_dns(self):
@@ -644,3 +653,24 @@ class LliurexGuardManager:
 			return n4d.responses.build_successful_call_response(result)							
 
 	#def update_whitelist_dns
+
+	def _get_original_file_perms(self,file):
+
+		perms_file=[]
+		cmd='ls -l %s'%(file)
+		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
+		result=p.communicate()[0]
+
+		if type(result) is bytes:
+			result=result.decode()
+
+		result=result.split(' ')
+		try:
+			perms_file.append(result[2])
+			perms_file.append(result[3])
+		except:
+			pass
+
+		return perms_file
+
+	#def _get_original_file_perms

@@ -101,8 +101,11 @@ class EditBox(Gtk.VBox):
 		self.content_box.pack_start(self.stack_edit,True,True,5)
 
 		self.label_list=[list_name_label,list_description_label,url_label,url_editor_label]
+		self.edit_msg_box=builder.get_object("edit_msg_box")
+		self.edit_error_img=builder.get_object("edit_error_img")
+		self.edit_ok_img=builder.get_object("edit_ok_img")
+		self.edit_info_img=builder.get_object("edit_info_img")
 		self.edit_msg_label=builder.get_object("edit_msg_label")
-		self.edit_pbar=builder.get_object("edit_pbar")
 		self.save_btn=builder.get_object("save_btn")
 		self.cancel_btn=builder.get_object("cancel_btn")
 		self.edit=False
@@ -114,11 +117,10 @@ class EditBox(Gtk.VBox):
 			self.core.editBox.url_search_entry.show()
 		else:
 			self.core.editBox.url_search_entry.hide()	
-		self.edit_msg_label.set_text("")
-		self.edit_pbar.hide()
 		self.count=1
 		self.process_block=125
 		self.waiting_search=False
+		self.manage_edit_msg_box(True,False)
 		self.pack_start(self.main_box,True,True,0)
 		self.set_css_info()
 		self.connect_signals()
@@ -232,7 +234,7 @@ class EditBox(Gtk.VBox):
 				self.stack_edit.set_visible_child_name("urlTw")		
 				if self.clipboard_content['code']==EditBox.UNABLE_COPY_CONTENT_CODE:
 					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(self.clipboard_content['code']))
-					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
+					self.manage_edit_msg_box(False,True)
 			
 			return False	
 	
@@ -255,7 +257,7 @@ class EditBox(Gtk.VBox):
 
 	def gather_values(self,widget):
 
-		self.edit_msg_label.set_text("")
+		self.manage_edit_msg_box(True,False)
 		self.data_tocheck={}
 		self.data_tocheck["id"]=self.core.guardmanager.get_listId(self.list_name_entry.get_text())
 		self.data_tocheck["name"]=self.list_name_entry.get_text()
@@ -286,7 +288,6 @@ class EditBox(Gtk.VBox):
 			if not self.check["result"]:
 
 				self.main_box.set_sensitive(True)
-				#self.edit_pbar.hide()
 				self.edit_spinner.stop()
 				self.stack_edit.set_transition_duration(550)
 				self.stack_edit.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
@@ -295,7 +296,7 @@ class EditBox(Gtk.VBox):
 				else:
 					self.stack_edit.set_visible_child_name("urlEditor")	
 				msg_text=self.core.mainWindow.get_msg(self.check["code"])
-				self.edit_msg_label.set_name("MSG_ERROR_LABEL")
+				self.manage_edit_msg_box(False,True)
 				self.edit_msg_label.set_text(msg_text)
 				return False
 			else:	
@@ -345,14 +346,12 @@ class EditBox(Gtk.VBox):
 		'''
 
 		if self.saving_data_t.is_alive():
-			self.edit_pbar.pulse()
 			return True
 			
 		else:
 			self.edit_spinner.stop()
 			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
-			self.edit_pbar.hide()
 			if self.saving['status']:
 				tmp_list=self.args[0]
 				replaced_to=""
@@ -381,11 +380,13 @@ class EditBox(Gtk.VBox):
 
 				self.core.optionsBox.draw_list("edit")
 				self.core.optionsBox.options_msg_label.set_text(self.core.mainWindow.get_msg(msg_code))
-				self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")
+				self.core.optionsBox.manage_feedback_box(False,False)
+				#self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")
 				
 			else:
 				self.core.optionsBox.options_msg_label.set_text(self.core.mainWindow.get_msg(self.saving['code'])+'\n'+self.saving['data'])
-				self.core.optionsBox.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.core.optionsBox.manage_feedback_box(False,True)
+				#self.core.optionsBox.options_msg_label.set_name("MSG_ERROR_LABEL")
 
 			self.core.optionsBox.main_box.set_sensitive(True)
 			self.core.optionsBox.search_entry.set_text("")
@@ -413,7 +414,7 @@ class EditBox(Gtk.VBox):
 		self.core.mainWindow.lock_quit=True
 		self.open_editor_t.start()
 		self.edit_msg_label.set_text(self.core.mainWindow.get_msg(EditBox.WAITING_EDITING_CODE))
-		self.edit_msg_label.set_name("WAITING_LABEL")
+		self.manage_edit_msg_box(False,False,True)
 		GLib.timeout_add(10,self.pulsate_waiting_editor_close)
 		
 		
@@ -428,8 +429,7 @@ class EditBox(Gtk.VBox):
 		else:
 			self.core.mainWindow.lock_quit=False
 			self.main_box.set_sensitive(True)
-			self.edit_msg_label.set_text("")
-
+			self.manage_edit_msg_box(True,False)
 			return False
 
 	#def pulsate_waiting_editor_close		
@@ -445,7 +445,7 @@ class EditBox(Gtk.VBox):
 
 		self.core.optionsBox.main_box.set_sensitive(True)
 		self.core.editBox.remove(self.core.editBox.main_box)
-		self.core.optionsBox.options_msg_label.set_text("")
+		self.core.optionsBox.manage_feedback_box(True,False)
 		self.core.mainWindow.stack_window.set_transition_type(Gtk.StackTransitionType.SLIDE_RIGHT)
 		self.core.mainWindow.stack_window.set_visible_child_name("bannerBox")
 		self.core.mainWindow.stack_banner.set_visible_child_name("optionsBox")
@@ -458,8 +458,10 @@ class EditBox(Gtk.VBox):
 
 		self.waiting=0
 		if not self.waiting_search:
+			self.manage_edit_msg_box(True,False)
 			self.edit_msg_label.set_name("WAITING_LABEL")
 			self.edit_msg_label.set_text(_("Searching. Wait a moment..."))
+			self.edit_msg_label.set_halign(Gtk.Align.CENTER)
 			self.waiting_search=True
 			self.cancel_btn.set_sensitive(False)
 			self.save_btn.set_sensitive(False)
@@ -477,7 +479,7 @@ class EditBox(Gtk.VBox):
 		 	self.waiting_search=False
 		 	self.cancel_btn.set_sensitive(True)
 		 	self.save_btn.set_sensitive(True)
-		 	self.edit_msg_label.set_text("")
+		 	self.manage_edit_msg_box(True,False)
 		 	self.url_search_entry_changed()
 		 	return False
 
@@ -517,11 +519,11 @@ class EditBox(Gtk.VBox):
 				self.search_and_mark(text, match_end)
 			else:
 				if self.count==0:
-					self.edit_msg_label.set_name("MSG_ERROR_LABEL")
+					self.manage_edit_msg_box(False,True)
 					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(EditBox.NO_MATCH_SEARCH_CODE))
 				else:
 					#self.get_clipboard()
-					self.edit_msg_label.set_name("MSG_CORRECT_LABEL")
+					self.manage_edit_msg_box(False,False)
 					self.edit_msg_label.set_text(self.core.mainWindow.get_msg(EditBox.MATCHING_SEARCH_CODE)%self.count)	
 			
 		except:
@@ -587,7 +589,38 @@ class EditBox(Gtk.VBox):
 
 		self.url_tw.set_property('editable',True)	
 
-	#def urltw_key_clicked				
+	#def urltw_key_clicked
+
+	def manage_edit_msg_box(self,hide,error,info=False):
+
+		if hide:
+			self.edit_msg_box.set_name("HIDE_BOX")
+			self.edit_error_img.hide()
+			self.edit_ok_img.hide()
+			self.edit_info_img.hide()
+			self.edit_msg_label.set_text("")
+		else:
+			self.edit_msg_label.set_halign(Gtk.Align.START)
+			self.edit_msg_label.set_name("FEEDBACK_LABEL")
+
+			if error:
+				self.edit_msg_box.set_name("ERROR_BOX")
+				self.edit_error_img.show()
+				self.edit_ok_img.hide()
+				self.edit_info_img.hide()
+			else:
+				if not info:
+					self.edit_msg_box.set_name("SUCCESS_BOX")
+					self.edit_error_img.hide()
+					self.edit_ok_img.show()
+					self.edit_info_img.hide()
+				else:
+					self.edit_msg_box.set_name("INFORMATION_BOX")
+					self.edit_error_img.hide()
+					self.edit_ok_img.hide()
+					self.edit_info_img.show()
+
+	#def manage_edit_msg_box
 
 #class EditBox
 

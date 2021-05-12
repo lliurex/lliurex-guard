@@ -49,7 +49,7 @@ class MainWindow:
 		
 		self.main_window=builder.get_object("main_window")
 		self.main_window.set_title("Lliurex Guard")
-		self.main_window.resize(802,745)
+		self.main_window.resize(802,775)
 		self.main_box=builder.get_object("main_box")
 		
 		self.banner_box=builder.get_object("banner_box")
@@ -77,11 +77,14 @@ class MainWindow:
 		self.connect_signals()
 		self.lock_quit=False
 		self.core.optionsBox.options_pbar.hide()
+		self.core.optionsBox.feedback_error_img.hide()
+		self.core.optionsBox.feedback_ok_img.hide()
 
 		self.main_window.show()
 		self.stack_window.set_transition_type(Gtk.StackTransitionType.NONE)
 		self.stack_window.set_visible_child_name("bannerBox")
 		self.stack_banner.set_visible_child_name("loginBox")
+		self.core.loginBox.login_error_img.hide()
 
 		if self.core.guardmanager.is_desktop:
 			if not self.core.guardmanager.is_client or not self.core.guardmanager.is_server:
@@ -107,7 +110,7 @@ class MainWindow:
 		f=Gio.File.new_for_path(self.css_file)
 		self.style_provider.load_from_file(f)
 		Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),self.style_provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-		self.main_window.set_name("WINDOW")
+		#self.main_window.set_name("WINDOW")
 		self.image_banner_box.set_name("IMAGE_BANNER")
 		
 	#def set_css_info	
@@ -174,11 +177,14 @@ class MainWindow:
 			if error:
 				self.core.optionsBox.add_button.set_sensitive(False)
 				self.core.optionsBox.apply_btn.set_sensitive(False)
-				self.core.optionsBox.options_msg_label.set_name("MSG_ERROR_LABEL")
+				#self.core.optionsBox.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.core.optionsBox.manage_feedback_box(False,True)
 			else:
-				self.core.optionsBox.main_box.set_sensitive(True)
-				self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")
-				
+				if msg!="":
+					#self.core.optionsBox.options_msg_label.set_name("MSG_CORRECT_LABEL")
+					self.core.optionsBox.manage_feedback_box(False,False)
+
+			self.core.optionsBox.main_box.set_sensitive(True)
 			self.core.optionsBox.options_msg_label.set_text(msg)
 				
 			if action=="login":

@@ -132,7 +132,7 @@ msgstr "No s'ha trobat cap coincidència per a la cerca indicada"
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:270
 #, python-format
 msgid "%s matches found for the indicated search"
-msgstr "% coincidències trobades per a la cerca indicada"
+msgstr "%s coincidències trobades per a la cerca indicada"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:272
 msgid ""

@@ -55,7 +55,7 @@ class GuardManager(object):
 
 		super(GuardManager, self).__init__()
 
-		self.dbg=1
+		self.dbg=0
 		self.user_validated=False
 		self.user_groups=[]
 		self.validation=None

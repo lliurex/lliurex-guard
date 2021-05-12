@@ -87,6 +87,9 @@ class OptionsBox(Gtk.VBox):
 		self.option_spinner=builder.get_object("option_spinner")
 		self.option_spinner_label=builder.get_object("option_spinner_label")
 
+		self.feedback_msg_box=builder.get_object("feedback_msg_box")
+		self.feedback_error_img=builder.get_object("feedback_error_img")
+		self.feedback_ok_img=builder.get_object("feedback_ok_img")
 		self.options_msg_label=builder.get_object("options_msg_label")
 		self.options_pbar=builder.get_object("options_pbar")
 		self.apply_btn=builder.get_object("apply_btn")
@@ -126,6 +129,7 @@ class OptionsBox(Gtk.VBox):
 		self.search_entry.set_name("CUSTOM-ENTRY")
 		self.mode_header_label.set_name("OPTION_LABEL")
 		self.mode_set_label.set_name("OPTION_LABEL")
+		self.list_item_box.set_name("WINDOW")
 
 	#def set_css_info	
 
@@ -483,6 +487,7 @@ class OptionsBox(Gtk.VBox):
 
 	def add_list(self,widget):
 
+		self.manage_feedback_box(True,False)
 		self.add_list_popover.show()
 
 	#def add_list	
@@ -557,7 +562,8 @@ class OptionsBox(Gtk.VBox):
 				self.core.mainWindow.lock_quit=False
 				self.main_box.set_sensitive(True)
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_file['code'])+"\n"+self.read_file['data'])
-				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				#self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.manage_feedback_box(False,True)
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_opt.set_visible_child_name("listBox")
 				return False			
@@ -573,6 +579,7 @@ class OptionsBox(Gtk.VBox):
 
 	def global_management(self,widget,event=None):
 
+		self.manage_feedback_box(True,False)
 		self.global_management_popover.show()
 
 	#def global_management	
@@ -643,12 +650,14 @@ class OptionsBox(Gtk.VBox):
 
 
 			if self.result_update_wl_dns['status']:
-				self.options_msg_label.set_name("MSG_CORRECT_LABEL")
+				#self.options_msg_label.set_name("MSG_CORRECT_LABEL")
+				self.manage_feedback_box(False,False)
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_update_wl_dns['code']))
 				self.list_data=self.result_update_wl_dns['data']
 
 			else:
-				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.manage_feedback_box(False,True)
+				#self.options_msg_label.set_name("MSG_ERROR_LABEL")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_update_wl_dns['code'])+'\n'+self.result_update_wl_dns['data'])
 	
 
@@ -669,6 +678,7 @@ class OptionsBox(Gtk.VBox):
 
 	def change_mode(self,widget,event,mode):
 
+		self.manage_feedback_box(True,False)
 		self.mode_popover.hide()
 		self.mode=mode
 		if self.mode=="BlackMode":
@@ -710,7 +720,7 @@ class OptionsBox(Gtk.VBox):
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_mode['code'])+'\n'+self.result_mode['data'])
-				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				#self.options_msg_label.set_name("MSG_ERROR_LABEL")
 				#self.options_pbar.hide()
 				return False			
 
@@ -738,7 +748,8 @@ class OptionsBox(Gtk.VBox):
 	#def list_toggled 	
 
 	def manage_list_options(self,button,hbox,event=None):
-	
+		
+		self.manage_feedback_box(True,False)
 		button.popover.show()
 
 	#def manage_list_options
@@ -817,7 +828,7 @@ class OptionsBox(Gtk.VBox):
 				self.core.mainWindow.lock_quit=False
 				self.main_box.set_sensitive(True)
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.read_list['code'])+"\n"+self.read_list['data'])
-				self.options_msg_label.set_name("MSG_ERROR_LABEL")
+				self.manage_feedback_box(False,True)
 				self.option_spinner.stop()
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_opt.set_visible_child_name("listBox")
@@ -848,7 +859,6 @@ class OptionsBox(Gtk.VBox):
 
 		else:
 			self.core.mainWindow.lock_quit=False
-			
 			if self.result_apply['status']:
 				self.core.mainWindow.load_info("apply")
 				return False
@@ -858,7 +868,8 @@ class OptionsBox(Gtk.VBox):
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_apply['code'])+"\n"+self.result_apply['data'])
-				self.options_msg_label.set_name("MSG_ERROR_LABEL")	
+				self.manage_feedback_box(False,True)
+				#self.options_msg_label.set_name("MSG_ERROR_LABEL")	
 				if self.result_apply['code']!=10:
 					self.main_box.set_sensitive(True)
 				return False
@@ -868,20 +879,19 @@ class OptionsBox(Gtk.VBox):
 	def apply_changes(self):
 
 		self.result_apply=self.core.guardmanager.apply_changes(self.list_data,self.core.mainWindow.list_info)
-
 	#def apply_changes		
 
 	def search_entry_changed(self,widget):
 
 		self.search_list={}
 		self.search_list=self.list_data.copy()
-		self.options_msg_label.set_text("")
 		
 		search=self.search_entry.get_text().lower()
 		
 		if search=="":
 			self.draw_list("edit")
 		else:
+			self.manage_feedback_box(True,False)
 			for item in self.list_data:
 				name=self.list_data[item]["name"].lower()
 				desc=self.list_data[item]["description"].lower()
@@ -933,6 +943,7 @@ class OptionsBox(Gtk.VBox):
 
 		self.main_box.set_sensitive(False)
 		self.core.mainWindow.lock_quit=True
+		self.manage_feedback_box(True,False)
 		self.options_msg_label.set_text("")
 		self.option_spinner_label.set_name("WAITING_LABEL")
 		self.option_spinner_label.set_text(self.core.mainWindow.get_msg(msg_code))
@@ -942,7 +953,30 @@ class OptionsBox(Gtk.VBox):
 		self.stack_opt.set_visible_child_name("waitingBox")
 		self.init_threads()
 
-	#def manage_waiting_form 
+	#def manage_waiting_form
+
+	def manage_feedback_box(self,hide,error):
+
+		if hide:
+			self.feedback_msg_box.set_name("HIDE_BOX")
+			self.feedback_error_img.hide()
+			self.feedback_ok_img.hide()
+			self.options_msg_label.set_text("")
+		else:
+			if error:
+				self.feedback_msg_box.set_name("ERROR_BOX")
+				self.feedback_error_img.show()
+				self.feedback_ok_img.hide()
+			else:
+				self.feedback_msg_box.set_name("SUCCESS_BOX")
+				self.feedback_error_img.hide()
+				self.feedback_ok_img.show()
+			self.options_msg_label.set_name("FEEDBACK_LABEL")
+
+
+	#def manage_feedback_box
+
+
 
 	
 #class OptionsBox
