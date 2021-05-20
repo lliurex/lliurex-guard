@@ -13,6 +13,9 @@ if [ "$lliurexguardisinstaled" = "1" ]; then
     else
         epi-gtk /usr/share/zero-lliurex-guard/lliurex-guard.epi
     fi
-fi
+else
+	zero-center set-configured lliurex-guard-installer || true
+	exec /usr/sbin/lliurex-guard
+fi	
 exit 0
 
