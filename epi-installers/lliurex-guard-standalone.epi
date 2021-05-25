@@ -1,7 +1,8 @@
 
 {
 	"type":"apt",
-	"pkg_list": [{"name":"lliurex-guard-standalone","key_store":"zero-lliurex-guard-standalone"}],
+	"pkg_list": [{"name":"lliurex-guard-standalone","key_store":"zero-lliurex-guard-standalone","custom_name":"Lliurex Guard: web content filter","custom_icon":"lliurex-guard"}],
+	"custom_icon_path":"/usr/share/zero-lliurex-guard/",
 	"script": {"name":"/usr/share/zero-lliurex-guard/lliurex-guard-standalone_script","remove":true},
 	"zomando":"lliurex-guard-installer"
 
