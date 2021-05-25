@@ -1,3 +1,9 @@
+lliurex-guard (5.6.10) focal; urgency=medium
+
+  * Fixed lliurex-guard-standalone-zero-files deb
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 25 May 2021 16:08:51 +0200
+
 lliurex-guard (5.6.9) focal; urgency=medium
 
   * Improved lliurex-guard-installer epi files
