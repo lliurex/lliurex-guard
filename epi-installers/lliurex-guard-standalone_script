@@ -4,13 +4,20 @@
 ACTION="$1"
 
 case $ACTION in
+
+	preInstall)
+		apt-get install -y lliurex-guard-data
+	;;
+	
 	remove)
 
-		apt-get remove -y lliurex-guard-standalone
+		apt-get remove -y lliurex-guard-standalone lliurex-guard-data
 		TEST=$( dpkg-query -s  lliurex-guard-standalone 2> /dev/null| grep Status | cut -d " " -f 4 )
 		if [ "$TEST" == 'installed' ];then
 			exit 1
 		fi
+
+
 				
 	;;	
 esac
