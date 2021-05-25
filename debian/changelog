@@ -1,3 +1,9 @@
+lliurex-guard (5.6.9) focal; urgency=medium
+
+  * Improved lliurex-guard-installer epi files
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 25 May 2021 15:43:36 +0200
+
 lliurex-guard (5.6.8) focal; urgency=medium
 
   * Fixed lliurex-guard-installer zmd
