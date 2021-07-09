@@ -1,3 +1,9 @@
+lliurex-guard (5.6.11) focal; urgency=medium
+
+  * Fixed count of list entries in WhiteMode
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 09 Jul 2021 11:23:57 +0200
+
 lliurex-guard (5.6.10) focal; urgency=medium
 
   * Fixed lliurex-guard-standalone-zero-files deb
