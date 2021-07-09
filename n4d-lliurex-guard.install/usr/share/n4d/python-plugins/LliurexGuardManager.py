@@ -370,7 +370,7 @@ class LliurexGuardManager:
 
 							else:
 								num_lines=(len(lines)-2)/2
-								tmp["lines"]=num_lines
+								tmp["lines"]=int(num_lines)
 							break	
 
 
