@@ -1,3 +1,9 @@
+lliurex-guard (4.6.7) bionic-updates; urgency=medium
+
+  * Updated help link
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 27 Sep 2021 10:15:53 +0200
+
 lliurex-guard (4.6.6) bionic-updates; urgency=medium
 
   * Fixed lliurex-guard zero installers
