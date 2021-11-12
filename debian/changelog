@@ -1,3 +1,9 @@
+lliurex-guard (5.6.13) focal; urgency=medium
+
+  * Integrated with n4d-qt-agent
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 12 Nov 2021 09:01:32 +0100
+
 lliurex-guard (5.6.12) focal; urgency=medium
 
   * Updated help link
