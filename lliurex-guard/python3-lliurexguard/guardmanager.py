@@ -57,34 +57,14 @@ class GuardManager(object):
 
 		self.dbg=0
 		self.user_validated=False
-		self.user_groups=[]
-		self.validation=None
 		self.limit_lines=2500
 		self.limit_file_size=28000000
 		self.garbage_files=[]
-
+		self.credentials=[]
 		self.detect_flavour()
-
-		'''
-		if server!=None:
-			self.set_server(server)
-		
-		context=ssl._create_unverified_context()
-		self.n4d_local = n4dclient.ServerProxy("https://localhost:9779",context=context,allow_none=True)	
-		'''
 	
 	#def __init__	
-	
-	'''
-	def set_server(self):	
-		
-		self.server_ip=server
-		context=ssl._create_unverified_context()	
-		self.n4d=n4dclient.ServerProxy("https://"+self.server_ip+":9779",context=context,allow_none=True)
-	
-	'''
-	#def set_server
-		
+			
 	def detect_flavour(self):
 		
 		self.is_server=""
@@ -113,42 +93,29 @@ class GuardManager(object):
 
 	#def detect_flavour
 
-	def validate_user(self,server,user,password):
-		
-		try:
-			self.server_ip=server
-			self.client=n4d.client.Client("https://%s:9779"%server,user,password)
-
-			ret=self.client.validate_user()
-			self.user_validated=ret[0]
-			self.user_groups=ret[1]
-			self.credentials=[user,password]
-		
-			if self.user_validated:
-				session_user=os.environ["USER"]
-				self.ticket=self.client.get_ticket()
-				if self.ticket.valid():
-					self.client=n4d.client.Client(ticket=self.ticket)
-					msg_log="Session User: %s"%session_user+" LlxGuard User: %s"%user
-					self.write_log(msg_log)
-					
-					self.local_client=n4d.client.Client("https://localhost:9779",user,password)
-					local_t=self.local_client.get_ticket()
-					if local_t.valid():
-						self.local_client=n4d.client.Client(ticket=local_t)
-					else:
-						self.user_validated=False	
-				else:
-					self.user_validated=False
-
-		except Exception as e:
-			msg_log="Session User Error: %s"%(str(e))
-			self.write_log(msg_log)
-			self.user_validated=False
 	
-		#return self.user_validated
-		
-	#def validate_user
+	def create_n4dClient(self,ticket,passwd):
+
+		ticket=ticket.replace('##U+0020##',' ')
+		self.credentials.append(ticket.split(' ')[2])
+		self.credentials.append(passwd)
+
+		self.tk=n4d.client.Ticket(ticket)
+		self.client=n4d.client.Client(ticket=self.tk)
+
+		self.local_client=n4d.client.Client("https://localhost:9779",self.credentials[0],self.credentials[1])
+		local_t=self.local_client.get_ticket()
+		if local_t.valid():
+			self.local_client=n4d.client.Client(ticket=local_t)
+			self.user_validated=True
+		else:
+			self.user_validated=False
+
+		msg_log='Session user: %s Lliurex-Guard user: %s'%(os.environ["USER"],self.credentials[0])
+		self.write_log(msg_log)
+
+
+	#def create_n4dClient
 
 	def _debug(self,function,msg):
 
@@ -513,11 +480,6 @@ class GuardManager(object):
 				if restart_dnsmasq['status']:
 					return {'status':True,'code':GuardManager.CHANGES_APPLIED_SUCCESSFUL}
 				else:
-					'''
-					disable_llxguard=self.n4d.change_guardmode(self.validation,"LliurexGuardManager","DisableMode")
-					if disable_llxguard['status']:
-						restart=self.n4d.restart_dnsmasq(self.validation,"LliurexGuardManager")
-					'''
 					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restart_dnsmasq['data']}
 			else:
 				return {'status':False,'code':code,'data':data}									
@@ -550,7 +512,7 @@ class GuardManager(object):
 
 			
 		#self.set_server(self.server_ip)	
-		self.client=n4d.client.Client(ticket=self.ticket)
+		self.client=n4d.client.Client(ticket=self.tk)
 		self._debug(msg,restart_dnsmasq)
 		msg_log=msg+str(restart_dnsmasq)
 		self.write_log(msg_log)

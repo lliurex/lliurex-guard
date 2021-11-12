@@ -86,11 +86,12 @@ class MainWindow:
 		self.stack_banner.set_visible_child_name("loginBox")
 		self.core.loginBox.login_error_img.hide()
 
+		'''
 		if self.core.guardmanager.is_desktop:
 			if not self.core.guardmanager.is_client or not self.core.guardmanager.is_server:
 				self.core.loginBox.server_ip_entry.set_text("localhost")
 				self.core.loginBox.server_ip_entry.hide()
-
+		'''
 		
 	#def load_gui
 
