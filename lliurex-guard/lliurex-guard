@@ -108,7 +108,8 @@ class Tunnel(QObject):
 	def on_ticket(self, ticket):
 	
 		tk=ticket.replace(' ','##U+0020##')
-		os.system("/usr/sbin/lliurex-guard-gui %s %s &"%(tk,self.passwd))
+		passwd="'"+self.passwd+"'"
+		os.system("/usr/sbin/lliurex-guard-gui %s %s &"%(tk,passwd))
 		app.quit()
 	
 	#def on_ticket

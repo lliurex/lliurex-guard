@@ -67,10 +67,23 @@ class LoginBox(Gtk.VBox):
 		self.login_error_img.hide()
 		self.login_spinner.start()
 				
-		t=threading.Thread(target=self.core.guardmanager.create_n4dClient(sys.argv[1],sys.argv[2]))
-		t.daemon=True
-		t.start()
-		GLib.timeout_add(500,self.load_listener,t)
+		try:
+			t=threading.Thread(target=self.core.guardmanager.create_n4dClient(sys.argv[1],sys.argv[2]))
+			t.daemon=True
+			t.start()
+			GLib.timeout_add(500,self.load_listener,t)
+		except Exception as e:
+			msg="Error caused by sys.arg. Number of arguments received: %s"%len(sys.argv)
+			self.core.guardmanager._debug("LOADING",msg)
+			self.core.guardmanager.write_log(msg)
+			self.login_spinner.stop()
+			self.login_error_img.show()
+			self.login_msg_box.set_name("ERROR_BOX")
+			self.login_msg_label.set_name("FEEDBACK_LABEL")
+			self.login_msg_label.set_halign(Gtk.Align.START)
+			self.login_msg_label.set_text(_("Unable to load LliureX-Guard. The number of parametres received is not correct"))		
+
+
 
 	#def load
 
