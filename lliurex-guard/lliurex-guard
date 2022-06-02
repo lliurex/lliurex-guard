@@ -21,10 +21,14 @@ class Tunnel(QObject):
 
 		clear=False
 		user=os.environ["USER"]
-		versionFile="/home/%s/.config/lliurex-guard.conf"%user
+		configPath="/home/%s/.config/"%user
+		versionFile=os.path.join(configPath,"lliurex-guard.conf")
 		cachePath="/home/%s/.cache/lliurex-guard"%user
 		installedVersion=self.getPackageVersion()
 
+		if not os.path.exists(configPath):
+			os.mkdir(configPath)
+			
 		if not os.path.exists(versionFile):
 			with open(versionFile,'w') as fd:
 				fd.write(installedVersion)
