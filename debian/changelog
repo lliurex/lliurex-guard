@@ -1,3 +1,9 @@
+lliurex-guard (5.6.15) focal; urgency=medium
+
+  * Fixed function to clear cache
+ 
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Thu, 02 Jun 2022 11:07:50 +0200
+
 lliurex-guard (5.6.14) focal; urgency=medium
 
   * Fixed bug when password has special chars
