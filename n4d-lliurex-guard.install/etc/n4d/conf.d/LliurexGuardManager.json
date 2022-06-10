@@ -14,13 +14,15 @@
        "change_guardmode": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         },
         "restart_dnsmasq": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         },
         "read_guardmode_headers": {
@@ -38,31 +40,36 @@
         "remove_guardmode_list": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         },
         "activate_guardmode_list": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         },
         "deactivate_guardmode_list": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         },
         "remove_tmp_file": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         },
         "update_whitelist_dns": {
             "allowed_groups": [
                 "sudo",
-                "admins"
+                "admins",
+		"teachers"
             ]
         }
     }
