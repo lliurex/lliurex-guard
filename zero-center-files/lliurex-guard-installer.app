@@ -13,5 +13,5 @@ Category=System
 ReplacedWith=lliurex-guard
 Using=pkexec
 ScriptPath=lliurex-guard-installer.zmd
-Groups=admins;admin;sudo
+Groups=admins;admin;sudo;teachers;
 

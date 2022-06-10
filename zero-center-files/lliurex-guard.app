@@ -12,5 +12,5 @@ Icon=lliurex-guard
 Category=System
 Replaces=lliurex-guard-installer
 ScriptPath=lliurex-guard.zmd
-Groups=admins;admin;sudo
+Groups=admins;admin;sudo;teachers;
 
