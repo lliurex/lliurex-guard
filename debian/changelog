@@ -1,3 +1,9 @@
+lliurex-guard (5.6.17) lliurex22; urgency=medium
+
+  * Fix bug with os.exit
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 24 Jan 2023 15:58:32 +0100
+
 lliurex-guard (5.6.16) lliurex22; urgency=medium
 
   * Add teachers to allowed group
