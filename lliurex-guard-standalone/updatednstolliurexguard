@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
 import n4d.client
-import os
+import sys
 dns = []
 dns_section = False
 p = subprocess.Popen(['systemd-resolve','--status'],stdout=subprocess.PIPE)
@@ -16,7 +16,7 @@ for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
             continue
         dns.append(aux_dns)
 if len(dns) <= 0 :
-    os.exit(0)
+    sys.exit(0)
 
 with open('/var/lib/dnsmasq/config/extra-dns','w') as fd:
     for x in dns:
@@ -25,10 +25,10 @@ with open('/var/lib/dnsmasq/config/extra-dns','w') as fd:
 
 master_key=n4d.client.Key.master_key() 
 if(master_key.valid()):
-	c=n4d.client.Client(key=master_key) 
-	result = c.LliurexGuardManager.read_guardmode()
-	if result['status'] and result['data'] == 'WhiteMode':
-	    result = c.LliurexGuardManager.update_whitelist_dns()
-	    if not result['status']:
-	        c.LliurexGuardManager.change_guardmode('DisableMode')
+    c=n4d.client.Client(key=master_key) 
+    result = c.LliurexGuardManager.read_guardmode()
+    if result['status'] and result['data'] == 'WhiteMode':
+        result = c.LliurexGuardManager.update_whitelist_dns()
+        if not result['status']:
+            c.LliurexGuardManager.change_guardmode('DisableMode')
 o = subprocess.Popen(['systemctl','restart','dnsmasq']).communicate()
