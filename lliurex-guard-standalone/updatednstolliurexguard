@@ -2,7 +2,7 @@
 import subprocess
 from xmlrpc.client import ServerProxy
 import ssl
-import os
+import sys
 dns = []
 dns_section = False
 p = subprocess.Popen(['systemd-resolve','--status'],stdout=subprocess.PIPE)
@@ -17,7 +17,7 @@ for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
             continue
         dns.append(aux_dns)
 if len(dns) <= 0 :
-    os.exit(0)
+    sys.exit(0)
 
 with open('/var/lib/dnsmasq/config/extra-dns','w') as fd:
     for x in dns:
