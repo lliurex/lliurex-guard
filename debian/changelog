@@ -1,3 +1,9 @@
+lliurex-guard (4.6.8) bionic; urgency=medium
+
+  * Fix bug with os.exit
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 24 Jan 2023 16:05:22 +0100
+
 lliurex-guard (4.6.7) bionic-updates; urgency=medium
 
   * Updated help link
