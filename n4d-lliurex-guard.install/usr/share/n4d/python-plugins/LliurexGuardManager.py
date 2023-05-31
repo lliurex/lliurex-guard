@@ -422,8 +422,8 @@ class LliurexGuardManager:
 						if "DESCRIPTION" not in line:
 							if self.guardMode=="BlackMode":
 								if self.redirection in line:
-									line=line.split(self.redirection)[1].split(" ")[1]
-									content.append(line)	
+									line=line.split("/%s"%self.redirection)[0].split("address=/")[1]
+									content.append(line+"\n")	
 									count_lines+=1
 							else:
 								if self.redirection in line:
@@ -558,7 +558,8 @@ class LliurexGuardManager:
 								f.write(line)
 						else:		
 							if self.guardMode=="BlackMode":
-								tmp_line=self.redirection+" "+line
+								line=line.strip()
+								tmp_line="address=/%s/%s\n"%(line,self.redirection)
 								f.write(tmp_line)
 							else:
 								if "https" in line:
