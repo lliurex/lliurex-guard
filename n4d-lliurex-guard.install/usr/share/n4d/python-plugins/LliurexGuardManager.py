@@ -21,8 +21,8 @@ class LliurexGuardManager:
 		self.conf_dir="/etc/lliurex-guard"
 		self.blacklist_dir=os.path.join(self.conf_dir,"blacklist")
 		self.blacklist_disable_dir=os.path.join(self.conf_dir,"blacklist.d")
-		self.set_bm_mode="addn-hosts = /etc/lliurex-guard/blacklist"
-		self.disable_bm_mode="#addn-hosts = /etc/lliurex-guard/blacklist"
+		self.set_bm_mode="conf-dir = /etc/lliurex-guard/blacklist"
+		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard/blacklist"
 		self.blacklist_redirection="169.254.254.254"
 		self.whitelist_dir=os.path.join(self.conf_dir,"whitelist")
 		self.whitelist_disable_dir=os.path.join(self.conf_dir,"whitelist.d")
@@ -201,7 +201,7 @@ class LliurexGuardManager:
 				if "#" in line:
 					count+=1
 				else:
-					if "addn-hosts" in line:
+					if "blacklist" in line:
 						guardMode="BlackMode"
 					else:
 						guardMode="WhiteMode"
