@@ -83,13 +83,16 @@ class GuardManager(object):
 			if 'server' in item:
 				self.is_server=True
 				self.is_desktop=False
+				self.server_ip="server"
 				break
 			elif 'client' in item:
 				self.is_client=True
 				self.is_desktop=False
+				self.server_ip="server"
 				break
 			elif 'desktop' in item:
-				self.is_desktop=True	
+				self.is_desktop=True
+				self.server_ip="localhost"	
 
 	#def detect_flavour
 
