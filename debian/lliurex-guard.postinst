@@ -4,8 +4,7 @@ case "$1" in
 	configure)
 	                zero-center set-configured lliurex-guard-installer || true
 	                if dpkg --compare-versions "$2" lt 5.7; then
-	                        sed -i -e "s/^\([^#][0-9.]*\)\W\+\(.*\)/address=\/\2\/\1/g" /etc/lliurex-guard/blacklist/*.list
-				sed -i -e "s/^\([^#][0-9.]*\)\W\+\(.*\)/address=\/\2\/\1/g" /etc/lliurex-guard/blacklist.d/*.list
+				/usr/sbin/lliurex-guard-fix-blacklist
 				if [ -e /etc/dnsmasq.d/lliurex-guard.conf ]; then
 					sed -i -e "s/addn-hosts/conf-dir/g" /etc/dnsmasq.d/lliurex-guard.conf
 				fi
