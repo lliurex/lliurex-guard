@@ -270,7 +270,7 @@ class MainWindow:
 		elif code==26:
 			msg_text=_("Saving changes. Wait a moment...")
 		elif code==-27:
-			msg_text=_("The file loaded is empty")
+			msg_text=_("The file loaded is empty or the url than containt do not have the correct format")
 		elif code==28:
 			msg_text=_("No match found for the indicated search")
 		elif code==29:
@@ -284,7 +284,9 @@ class MainWindow:
 		elif code==-33:
 			msg_text=_("It is not possible to copy all the selected content.\nOnly the first 2500 lines have been copied")
 		elif code==-34:
-			msg_text=_("It is not possible to update white list dns")	
+			msg_text=_("It is not possible to update white list dns")
+		elif code==-35:
+			msg_text=_("The url list is empty. Urls entered with wrong format have been removed")	
 		elif code==35:
 			msg_text=_("The white list dns update was successful")
 		elif code==36:
