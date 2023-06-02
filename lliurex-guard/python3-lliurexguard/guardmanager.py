@@ -40,6 +40,7 @@ class GuardManager(object):
 	EDIT_FILE_OFF_LIMITS_ERROR=-31
 	LINES_TO_COPY_OFF_LIMITS_ERROR=-33
 	READ_FILE_ERROR=-34
+	EMPTY_LIST_ERROR=-35
 
 	ALL_CORRECT_CODE=0
 	CHANGE_GUARDMODE_SUCCESSFUL=8
@@ -248,7 +249,7 @@ class GuardManager(object):
 		count_lines=0
 		tmp_file=""
 		try:
-			if os.path.exists(file) and os.path.getsize(file)>0:
+			if os.path.exists(file):
 				if create_tmpfile:
 					if os.path.getsize(file)>self.limit_file_size:
 						return {'status':False,'code':GuardManager.LOAD_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}	
@@ -259,27 +260,31 @@ class GuardManager(object):
 						if "DESCRIPTION" not in line:
 							if line !="":
 								line=self._format_line(line)
-								content.append(line)	
-								count_lines+=1
+								if line!="":
+									content.append(line)	
+									count_lines+=1
 				f.close()
 				lines=None
 				tmp_file=file
 				
 				if create_tmpfile:
-					tmp_file=self._create_tmp_file(os.path.basename(file))
-					f=open(tmp_file,'w')
-					f.write("".join(content))
-					f.close()
-					if count_lines>self.limit_lines:
-						content=None
+					if count_lines==0:
+						return {'status':False,'code':GuardManager.EMPTY_FILE_ERROR,'data':''}
+					else:	
+						tmp_file=self._create_tmp_file(os.path.basename(file))
+						f=open(tmp_file,'w')
+						f.write("".join(content))
+						f.close()
+						if count_lines>self.limit_lines:
+							content=None
 
 				self.garbage_files.append(tmp_file)		
-
+				
 				return {'status':True,'code':GuardManager.LOAD_FILE_SUCCESSFUL,'data':[content,count_lines,tmp_file]}
 			else:
-				return {'status':False,'code':GuardManager.EMPTY_FILE_ERROR,'data':''}	
+				return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}	
 
-		except Exception as e:		
+		except Exception as e:
 			return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}
 
 	#def read_local_file		
@@ -290,6 +295,8 @@ class GuardManager(object):
 		result={}
 		info=args[0]
 		content=args[1]
+		count_lines=0
+
 		try:
 			if args[2]==None:
 				tmp_list=self._create_tmp_file(info["id"])
@@ -306,24 +313,34 @@ class GuardManager(object):
 				for line in lines:
 					if line!="":
 						line=self._format_line(line)
-						f.write(line)
+						if line!="":
+							f.write(line)
+							count_lines+=1
 		
 				f.close()		
-				result["lines"]=len(lines)
+				
 			else:
 				format_content=[]	
 				content=content.split("\n")	
 				for line in content:
 					if line !="":
 						line=self._format_line(line)
-						format_content.append(line+"\n")	
+						if line!="":
+							format_content.append(line+"\n")
+							count_lines+=1	
 				f=open(tmp_list,"w")
 				f.write("".join(format_content))
 				f.close()
 			content=None
 			format_content=None
-			result["status"]=True
+			if count_lines>0:
+				result["status"]=True
+			else:
+				result["status"]=False
+				result["code"]=GuardManager.EMPTY_LIST_ERROR
 			result["tmpfile"]=tmp_list
+			result["lines"]=count_lines
+			result["data"]=""
 			
 		except Exception as e:
 			result['status']=False
@@ -503,7 +520,7 @@ class GuardManager(object):
 			time.sleep(1)
 			try:
 				if self.is_server or self.is_client:
-					res=urllib.request.urlopen("http://"+self.server_ip)
+					res=urllib.request.urlopen("http://%s"%self.server_ip)
 				self.connection=True
 			except Exception as e:
 				if self.count<self.timeout:
@@ -575,6 +592,14 @@ class GuardManager(object):
 		
 		if firstchar in [".","_","-","+","*","$"," ","&","!","¡","#","%","?","¿"]:
 			line=line[1:]
+		
+		if "https" in line:
+			line=line.replace("https://","")
+		else:
+			line=line.replace("http://","")
+
+		if len(line.strip().split("/"))>1:
+			line=""
 		
 		return line
 

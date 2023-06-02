@@ -601,7 +601,7 @@ class OptionsBox(Gtk.VBox):
 		self.global_management_popover.hide()
 
 		dialog = Gtk.MessageDialog(None,0,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, "Lliurex Guard")
-		dialog.format_secondary_text(_("Do you want delete all lists"))
+		dialog.format_secondary_text(_("Do you want delete all lists?"))
 		response=dialog.run()
 		dialog.destroy()
 
@@ -879,6 +879,7 @@ class OptionsBox(Gtk.VBox):
 	def apply_changes(self):
 
 		self.result_apply=self.core.guardmanager.apply_changes(self.list_data,self.core.mainWindow.list_info)
+	
 	#def apply_changes		
 
 	def search_entry_changed(self,widget):
