@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+from os import write
+import re
+from pathlib import Path
+import tempfile
+import shutil
+
+def write_line(l, fd):
+    fd.write(l + "\n" )
+
+def process_folder(folder):
+    for blacklist_file in folder.iterdir():
+        fd_temp = tempfile.NamedTemporaryFile(mode="w",encoding="utf-8")
+        with blacklist_file.open("r",encoding="utf-8") as fd:
+            while line := fd.readline():
+                line = line.strip()
+                if line.startswith("#"):
+                    write_line(line,fd_temp)
+                    continue
+                re_line = re.match("^([0-9.]+)\W(.*)",line)
+                if re_line is None:
+                    if line.startswith( "address" ):
+                        # hay que contar las lineas
+                        if line.count("/") > 2 :
+                            continue
+                        else:
+                            write_line( line, fd_temp )
+                            continue
+                else:
+                    if re_line[2].count("/") > 0:
+                        continue
+                    line = "address=/{url}/{ip}".format(url=re_line[1],ip=re_line[2])
+                    write_line( line, fd_temp)
+                    continue
+        shutil.move(fd_temp.name, str(blacklist_file))
+
+def main():
+    blacklist_path = Path("/etc/lliurex-guard/blacklist")
+    blacklist_path_d = Path("/etc/lliurex-guard/blacklist.d")
+    process_folder(blacklist_path)
+    process_folder(blacklist_path_d)
+
+
+if __name__ == "__main__":
+    main()
+
+        
