@@ -47,7 +47,7 @@ if __name__ == '__main__':
 		package_dir = {'lliurexguard':'lliurex-guard/python3-lliurexguard'},
 		package_data = {'lliurexguard':['rsrc/*']},
 		data_files = [('sbin',['lliurex-guard/lliurex-guard']),('sbin',['lliurex-guard/lliurex-guard-gui']),('sbin',['lliurex-guard/lliurex-guard-fix-blacklist'])
-					+ polist ,]
+					+ polist],
 		classifiers=[
 			'Development Status :: 4 - Beta',
 			'Environment :: Console'
