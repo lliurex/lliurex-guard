@@ -556,20 +556,22 @@ class LliurexGuardManager:
 					if line !="":
 						if self.redirection in line:
 								f.write(line)
-						else:		
-							if self.guardMode=="BlackMode":
-								line=line.strip()
-								tmp_line="address=/%s/%s\n"%(line,self.redirection)
-								f.write(tmp_line)
+						else:
+							if "https" in line:
+								line=line.replace("https://","")
 							else:
-								if "https" in line:
-									line=line.replace("https://","")
+								line=line.replace("http://","")	
+							
+							if len(line.split("/"))==1:
+							
+								if self.guardMode=="BlackMode":
+									line=line.strip()
+									tmp_line="address=/%s/%s\n"%(line,self.redirection)
+									f.write(tmp_line)
 								else:
-									line=line.replace("http://","")	
-								
-								for dns in self.dns_vars:
-									tmp_line=self.redirection+line.split("\n")[0]+"/"+dns
-									f.write(tmp_line+"\n")	
+									for dns in self.dns_vars:
+										tmp_line=self.redirection+line.split("\n")[0]+"/"+dns
+										f.write(tmp_line+"\n")	
 				
 				f.close()
 				try:

@@ -324,7 +324,12 @@ class EditBox(Gtk.VBox):
 			content_lines="".join(content).split("\n")
 			while "" in content_lines:
 				content_lines.remove("")
-				
+			try:
+				for i in range(len(content_lines)-1,-1,-1):
+					if "/" in content_lines[i]:
+						content_lines.pop(i)
+			except:
+				pass
 			list_info["lines"]=len(content_lines)
 			content_lines=None
 		

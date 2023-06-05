@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-02 12:52+0100\n"
-"PO-Revision-Date: 2022-03-02 12:59+0100\n"
+"POT-Creation-Date: 2023-06-02 10:57+0200\n"
+"PO-Revision-Date: 2023-06-02 10:59+0200\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -122,8 +122,11 @@ msgid "Saving changes. Wait a moment..."
 msgstr "S'estan guardant els canvis. Espereu..."
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:273
-msgid "The file loaded is empty"
-msgstr "El fitxer carregat està buit"
+msgid ""
+"The file loaded is empty or the url than containt do not have the correct "
+"format"
+msgstr ""
+"El fitxer carregat està buit o les url que conté no tenen el format correcte"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:275
 msgid "No match found for the indicated search"
@@ -167,15 +170,21 @@ msgid "It is not possible to update white list dns"
 msgstr "No és possible actualitzar els dns de la llista blanca"
 
 #: lliurex-guard/python3-lliurexguard/MainWindow.py:289
+msgid "The url list is empty. Urls entered with wrong format have been removed"
+msgstr ""
+"La llista de *url està buida. Les url introduïdes amb format incorrecte han "
+"sigut eliminades"
+
+#: lliurex-guard/python3-lliurexguard/MainWindow.py:291
 msgid "The white list dns update was successful"
 msgstr ""
 "L'actualització dels dns de les llistes blanques s'ha realitzat correctament"
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:291
+#: lliurex-guard/python3-lliurexguard/MainWindow.py:293
 msgid "Updating white list dns. Wait a moment..."
 msgstr "Actualitzant els dns de les llistes blanques. Espereu..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:312
+#: lliurex-guard/python3-lliurexguard/MainWindow.py:314
 msgid ""
 "There are pending changes to apply.\n"
 "Do you want to close the application and lose the changes or cancel and "
@@ -306,7 +315,7 @@ msgstr "Llista nova"
 msgid "Edit list"
 msgstr "Edita la llista"
 
-#: lliurex-guard/python3-lliurexguard/EditBox.py:463
+#: lliurex-guard/python3-lliurexguard/EditBox.py:468
 msgid "Searching. Wait a moment..."
 msgstr "S'està buscant. Espereu..."
 
