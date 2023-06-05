@@ -1,3 +1,9 @@
+lliurex-guard (5.8) focal; urgency=medium
+
+  * Add script to fix blacklist files
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Mon, 05 Jun 2023 18:38:22 +0200
+
 lliurex-guard (5.7.1) focal; urgency=medium
 
   * Fix regex
