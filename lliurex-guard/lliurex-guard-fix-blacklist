@@ -32,7 +32,7 @@ def process_folder(folder):
                     line = "address=/{url}/{ip}".format(url=re_line[2],ip=re_line[1])
                     write_line( line, fd_temp)
                     continue
-        shutil.move(fd_temp.name, str(blacklist_file))
+        shutil.copy(fd_temp.name, str(blacklist_file))
 
 def main():
     blacklist_path = Path("/etc/lliurex-guard/blacklist")
