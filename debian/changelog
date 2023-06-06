@@ -1,3 +1,10 @@
+lliurex-guard (5.8.1) focal; urgency=medium
+
+  * Replace python move funtion by copy. Tempfile python function delete file 
+    and when move file, tempfile fail
+
+ -- Raul Rodrigo Segura <raurodse@gmail.com>  Tue, 06 Jun 2023 12:39:42 +0200
+
 lliurex-guard (5.8) focal; urgency=medium
 
   * Add script to fix blacklist files
