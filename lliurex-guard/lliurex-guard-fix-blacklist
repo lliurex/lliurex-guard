@@ -29,7 +29,7 @@ def process_folder(folder):
                 else:
                     if re_line[2].count("/") > 0:
                         continue
-                    line = "address=/{url}/{ip}".format(url=re_line[1],ip=re_line[2])
+                    line = "address=/{url}/{ip}".format(url=re_line[2],ip=re_line[1])
                     write_line( line, fd_temp)
                     continue
         shutil.move(fd_temp.name, str(blacklist_file))
