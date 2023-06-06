@@ -24,7 +24,7 @@ def process_folder(folder):
                         if line.count("/") > 2 :
                             continue
                         else:
-                            write_line( line, fd_temp )
+                            write_line( line, fd_temp.file )
                             continue
                 else:
                     if re_line[2].count("/") > 0:
