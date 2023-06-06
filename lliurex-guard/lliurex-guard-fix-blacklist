@@ -15,7 +15,7 @@ def process_folder(folder):
             while line := fd.readline():
                 line = line.strip()
                 if line.startswith("#"):
-                    write_line(line,fd_temp)
+                    write_line(line,fd_temp.file)
                     continue
                 re_line = re.match("^([0-9.]+)\W(.*)",line)
                 if re_line is None:
@@ -30,9 +30,11 @@ def process_folder(folder):
                     if re_line[2].count("/") > 0:
                         continue
                     line = "address=/{url}/{ip}".format(url=re_line[2],ip=re_line[1])
-                    write_line( line, fd_temp)
+                    write_line( line, fd_temp.file)
                     continue
+        fd_temp.file.close()
         shutil.copy(fd_temp.name, str(blacklist_file))
+        fd_temp.close()
 
 def main():
     blacklist_path = Path("/etc/lliurex-guard/blacklist")
