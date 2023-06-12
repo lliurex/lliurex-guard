@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 from os import write
 import re
 from pathlib import Path
@@ -9,6 +10,8 @@ def write_line(l, fd):
     fd.write(l + "\n" )
 
 def process_folder(folder):
+    if not os.path.exists(folder):
+        return False
     for blacklist_file in folder.iterdir():
         fd_temp = tempfile.NamedTemporaryFile(mode="w",encoding="utf-8")
         with blacklist_file.open("r",encoding="utf-8") as fd:
