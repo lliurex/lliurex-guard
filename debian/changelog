@@ -1,3 +1,9 @@
+lliurex-guard (5.8.3) focal; urgency=medium
+
+  * lliurex-guard-blacklist-fix checks if folder exists before processing
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 12 Jun 2023 14:56:36 +0200
+
 lliurex-guard (5.8.2) focal; urgency=medium
 
   * Replace python move funtion by copy. Tempfile python function delete file 
