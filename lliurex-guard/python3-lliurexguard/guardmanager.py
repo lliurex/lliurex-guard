@@ -152,11 +152,15 @@ class GuardManager(object):
 		
 		if change_guardmode['status']:
 			msg="LliureX Guard Mode changed. Dnsmasq restarted "
-			restart_dnsmasq=self.restart_dnsmasq(msg)
-			if restart_dnsmasq['status']:
-				return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
+			if mode !="DisableMode":
+				restart_dnsmasq=self.restart_dnsmasq(msg)
+				if restart_dnsmasq['status']:
+					return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
+				else:
+					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restart_dnsmasq['data']}
 			else:
-				return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restart_dnsmasq['data']}	
+				return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
+			
 		else:
 			return {'status':False,'code':GuardManager.CHANGE_GUARDMODE_ERROR,'data':change_guardmode['data']}		
 				
