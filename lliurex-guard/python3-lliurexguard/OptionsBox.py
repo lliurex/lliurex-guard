@@ -720,6 +720,7 @@ class OptionsBox(Gtk.VBox):
 				self.stack_opt.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 				self.stack_opt.set_visible_child_name("listBox")
 				self.options_msg_label.set_text(self.core.mainWindow.get_msg(self.result_mode['code'])+'\n'+self.result_mode['data'])
+				self.manage_feedback_box(False,True)
 				#self.options_msg_label.set_name("MSG_ERROR_LABEL")
 				#self.options_pbar.hide()
 				return False			
