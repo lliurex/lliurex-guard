@@ -684,7 +684,6 @@ class LliurexGuardManager:
 	
 	def _manage_dnsmasq_service(self,enable_service):
 		
-		self._detect_flavour()
 		error=False
 		data=""
 		
