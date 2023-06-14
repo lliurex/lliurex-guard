@@ -148,13 +148,7 @@ class LliurexGuardManager:
 				os.makedirs("/var/lib/dnsmasq/config")
 
 			self._check_dnsmasq_conf()
-
-			if not os.path.exists("etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
-				os.system('systemctl stop systemd-resolved')
-				self.core.get_plugin('NetworkManager').systemd_resolv_conf()
-				# Restart service to fix bug on /etc/resolv.conf search field
-				os.system('systemctl restart systemd-resolved')
-
+			
 		fd = open("/var/lib/lliurex-guard/first_init","w")
 		fd.close()
 
@@ -244,6 +238,9 @@ class LliurexGuardManager:
 	
 	def change_guardmode(self,mode_to_set,rescue=False):
 
+		self._detect_flavour()
+		ret={}
+		
 		try:
 			f=open(self.mode_file_path,'w')
 
@@ -263,10 +260,17 @@ class LliurexGuardManager:
 			
 			f.close()
 			self._create_guardmode_conf_dir(mode_to_set)
-			if rescue:
-				restart=self.restart_dnsmasq(True)
+			
+			if not self.is_server:
+				if mode_to_set !="DisableMode":
+					ret=self._manage_dnsmasq_service(True)
+				else:
+					ret=self._manage_dnsmasq_service(False)
+			else:		
+				if rescue:
+					restart=self.restart_dnsmasq(True)
 			#Old n4d:return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
-			result={'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
+			result={'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data': ret}
 			return n4d.responses.build_successful_call_response(result)
 	
 		except Exception as e:
@@ -677,3 +681,85 @@ class LliurexGuardManager:
 		return perms_file
 
 	#def _get_original_file_perms
+	
+	def _manage_dnsmasq_service(self,enable_service):
+		
+		self._detect_flavour()
+		error=False
+		data=""
+		
+		if not self.is_server:
+			if enable_service:
+				action="enable"
+				cmd="systemctl enable dnsmasq.service 1>/dev/null"
+			else:
+				action="disable"
+				ret=self._stop_dnsmasq_service()
+				if not ret[0]:
+					cmd="systemctl disable dnsmasq.service 1>/dev/null"
+				else:
+					result={'status':False,'msg':"Error disabling Dnsmaq",'data':ret[1]}
+					return result
+
+			try:
+				ret=os.system(cmd)
+				if ret !=0:
+					error=True
+					data=str(ret)
+				else:
+					self._manage_resolvconf(enable_service)
+						
+			except Exception as e:
+				error=True
+				data=str(e)
+				
+			if not error:			
+				msg="Dnsmasq %s successfully"%action
+				result={'status':True,'msg':msg}
+				return result
+			else:
+				msg="Error: Dnsmasq %s failed"%action
+				result={'status':False,'msg':msg,'data':data}
+				return result
+				
+		return {'status':True,'msg':"Nothing to do"}
+
+	
+	#def manage_dnsmasq_service
+	
+	def _stop_dnsmasq_service(self):
+		
+		error=False
+		data=""
+		
+		cmd="systemctl stop dnsmasq.service 1>/dev/null"
+		try:
+			ret=os.system(cmd)
+			if ret!=0:
+				error=True
+				data=str(ret)
+				
+		except Exception as e:
+			error=True
+			data=str(e)
+			
+		return [error,data]
+	
+	#def stop_dnsmasq_service
+	
+	def _manage_resolvconf(self,active):
+		
+		if active:
+			if not os.path.exists("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
+				os.system('systemctl stop systemd-resolved')
+				self.core.get_plugin('NetworkManager').systemd_resolv_conf()
+				# Restart service to fix bug on /etc/resolv.conf search field
+				os.system('systemctl restart systemd-resolved')
+		else:
+			if os.path.exists("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
+				os.remove("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
+				os.system('systemctl restart systemd-resolved')
+				
+	#def _manage_resolvconf
+				
+		
