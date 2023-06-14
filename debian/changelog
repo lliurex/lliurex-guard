@@ -1,3 +1,9 @@
+lliurex-guard (5.8.4) focal; urgency=medium
+
+  * Disabled dnsmasq when lliurex-guard is off in desktop
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 14 Jun 2023 17:10:07 +0200
+
 lliurex-guard (5.8.3) focal; urgency=medium
 
   * lliurex-guard-blacklist-fix checks if folder exists before processing
