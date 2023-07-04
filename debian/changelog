@@ -1,3 +1,9 @@
+lliurex-guard (5.8.5) focal; urgency=medium
+
+  * Fixed postinstall to disable dnsmasq in desktop when lliurex-guard is off.
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 04 Jul 2023 13:43:39 +0200
+
 lliurex-guard (5.8.4) focal; urgency=medium
 
   * Disabled dnsmasq when lliurex-guard is off in desktop
