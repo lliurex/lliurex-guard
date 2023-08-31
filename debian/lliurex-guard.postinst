@@ -1,0 +1,61 @@
+#!/bin/sh
+
+case "$1" in
+	configure)
+	                zero-center set-configured lliurex-guard-installer || true
+	                if dpkg --compare-versions "$2" lt 5.7; then
+				/usr/sbin/lliurex-guard-fix-blacklist
+				if [ -e /etc/dnsmasq.d/lliurex-guard.conf ]; then
+					sed -i -e "s/addn-hosts/conf-dir/g" /etc/dnsmasq.d/lliurex-guard.conf
+				fi
+	                fi
+
+	                if dpkg --compare-versions "$2" lt 5.8.5; then
+	                	version=$(lliurex-version)
+	                	match=0
+	                	case $version in
+	                		*server*)
+	                			match=1
+	                		;;
+	                		*client*)
+	                			match=1
+	                		;;
+	                	esac
+
+	                	if [ $match -eq 0 ];then
+	                		if ! [ -e /etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf ];then
+	                			systemctl stop dnsmasq.service || true
+	                			systemctl disable dnsmasq.service || true
+	                		
+	                		else
+		                		if [ -e /etc/dnsmasq.d/lliurex-guard.conf ];then
+		                			count=0
+		                			while IFS= read -r line;
+		                			do
+		                				case $line in
+		                					*#conf-dir*)
+		                						count=$((count+1))
+		                					;;
+		                				esac
+		                			done < /etc/dnsmasq.d/lliurex-guard.conf
+
+		                			if [ $count -eq 2 ];then
+		                				if [ -e /etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf ];then
+		                					systemctl stop dnsmasq.service || true
+		                					systemctl disable dnsmasq.service || true
+		                					rm -f /etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf
+		                					systemctl restart systemd-resolved || true
+		                				fi
+		                			fi
+		                		fi
+		                	fi
+	                	fi
+	                fi
+
+		;;
+	*)
+		echo "Unknow action"
+		;;
+esac
+
+#DEBHELPER#

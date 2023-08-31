@@ -1,0 +1,44 @@
+Source: lliurex-guard
+Section: utils
+Priority: optional
+Maintainer: Equipo LliureX <lliurex@gva.es>
+Uploaders: Equipo LliureX <lliurex@gva.es>
+Build-Depends: llxsrchelper,debhelper (>= 10),dh-python, python3-poinstaller,python3-setuptools,python3-all,zero-dev
+Standards-Version: 4.1.2
+
+Package: lliurex-guard
+Architecture: all
+Depends: n4d,n4d-lliurex-base,python3-n4d-client,python3-jsondiff,xclip,lliurex-guard-zerofiles,n4d-qt-agent
+Description: Contains lliurex-guard
+ This package contains the : lliurex-guard gui
+
+Package: n4d-lliurex-guard
+Architecture: all
+Depends: ${misc:Depends},${python3:Depends},n4d,dnsmasq,n4d-network
+Description: Lliurx Guard plugin
+  Plugins supporting lliurex guard functionality
+
+Package: lliurex-guard-standalone
+Architecture: all
+Depends: ${misc:Depends},${python3:Depends},n4d-lliurex-guard, lliurex-guard
+Description: Metapackage and fix scripts to lliurex-guard on desktop flavour
+ This package has dependency with lliurex-guard backend and frontend and
+ install scripts to update lliurex-guard whitelist and update dns list of 
+ dnsmasq
+
+Package: lliurex-guard-zerofiles
+Architecture: all
+Depends: ${misc:Depends},${python3:Depends}
+Replaces: lliurex-guard
+Description: Files to open or install lliurex-guard from Zero-center
+ Zero launcher to install zero center, and execute lliurex-guard if this is
+ installed on system
+
+Package: lliurex-guard-standalone-zerofiles
+Architecture: all
+Depends: ${misc:Depends},${python3:Depends}, lliurex-guard-zerofiles
+Description: Files to open or install lliurex-guard-standalone from Zero-center
+ Zero launcher to install zero center, and execute lliurex-guard if this is
+ installed on system
+
+
