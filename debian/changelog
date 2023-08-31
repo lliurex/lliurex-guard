@@ -1,3 +1,9 @@
+lliurex-guard (5.18.5) jammy; urgency=medium
+
+  * Initial release for Jammy
+
+ -- Juan Ramon Pelegrina <juapesi@hotmail.com>  Thu, 31 Aug 2023 14:32:16 +0200
+
 lliurex-guard (5.8.5) focal; urgency=medium
 
   * Fixed postinstall to disable dnsmasq in desktop when lliurex-guard is off.
