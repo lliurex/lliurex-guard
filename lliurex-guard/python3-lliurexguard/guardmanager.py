@@ -41,6 +41,8 @@ class GuardManager(object):
 	LINES_TO_COPY_OFF_LIMITS_ERROR=-33
 	READ_FILE_ERROR=-34
 	EMPTY_LIST_ERROR=-35
+	USER_NOT_VALID_ERROR=-36
+	LOAD_LLIUREXGUARD_ERROR=-37
 
 	ALL_CORRECT_CODE=0
 	CHANGE_GUARDMODE_SUCCESSFUL=8
@@ -57,16 +59,21 @@ class GuardManager(object):
 		super(GuardManager, self).__init__()
 
 		self.dbg=0
-		self.user_validated=False
+		self.userValidated=False
 		self.limit_lines=2500
 		self.limit_file_size=28000000
 		self.garbage_files=[]
 		self.credentials=[]
-		self.detect_flavour()
+		self.guardMode="DisableMode"
+		self.listsConfig={}
+		self.listsConfigData=[]
+		self.detectFlavour()
+		self._getSystemLocale()
+
 	
 	#def __init__	
 			
-	def detect_flavour(self):
+	def detectFlavour(self):
 		
 		self.is_server=""
 		self.is_client=""
@@ -97,8 +104,19 @@ class GuardManager(object):
 
 	#def detect_flavour
 
+	def _getSystemLocale(self):
+
+		language=os.environ["LANGUAGE"]
+
+		if language!="":
+			tmpLang=language.split(":")
+			self.systemLocale=tmpLang[0]
+		else:
+			self.systemLocale=os.environ["LANG"]
+
+	#def _getSystemLocale	
 	
-	def create_n4dClient(self,ticket,passwd):
+	def createN4dClient(self,ticket,passwd):
 
 		ticket=ticket.replace('##U+0020##',' ')
 		self.credentials.append(ticket.split(' ')[2])
@@ -107,13 +125,13 @@ class GuardManager(object):
 		self.tk=n4d.client.Ticket(ticket)
 		self.client=n4d.client.Client(ticket=self.tk)
 
-		self.local_client=n4d.client.Client("https://localhost:9779",self.credentials[0],self.credentials[1])
-		local_t=self.local_client.get_ticket()
+		self.localClient=n4d.client.Client("https://localhost:9779",self.credentials[0],self.credentials[1])
+		local_t=self.localClient.get_ticket()
 		if local_t.valid():
-			self.local_client=n4d.client.Client(ticket=local_t)
-			self.user_validated=True
+			self.localClient=n4d.client.Client(ticket=local_t)
+			self.userValidated=True
 		else:
-			self.user_validated=False
+			self.userValidated=False
 
 		msg_log='Session user: %s Lliurex-Guard user: %s'%(os.environ["USER"],self.credentials[0])
 		self.write_log(msg_log)
@@ -128,17 +146,18 @@ class GuardManager(object):
 
 	#def _debug		
 
-	def read_guardmode(self):
+	def readGuardmode(self):
 			
-		read_guardmode=self.client.LliurexGuardManager.read_guardmode(True)
+		readGuardmode=self.client.LliurexGuardManager.read_guardmode(True)
 		msg="Read LliureX Guard Mode: "
-		self._debug(msg,read_guardmode)
-		msg_log=msg+str(read_guardmode)
-		self.write_log(msg_log)
-		if read_guardmode['status']:
-			return {'status':True,'code':GuardManager.READ_GUARDMODE_SUCCESSFUL,'data':read_guardmode['data']}
+		self._debug(msg,readGuardmode)
+		msgLog=msg+str(readGuardmode)
+		self.write_log(msgLog)
+		if readGuardmode['status']:
+			self.guardMode=readGuardmode['data']
+			return {'status':True,'code':GuardManager.READ_GUARDMODE_SUCCESSFUL,'data':readGuardmode['data']}
 		else:
-			return {'status':False,'code':GuardManager.READ_GUARDMODE_ERROR,'data':read_guardmode['data']}
+			return {'status':False,'code':GuardManager.READ_GUARDMODE_ERROR,'data':readGuardmode['data']}
 
 	#def read_guardmode
 
@@ -174,28 +193,49 @@ class GuardManager(object):
 				
 	#def change_guardmode 		
 
-	def read_guardmode_headers(self):
+	def readGuardmodeHeaders(self):
 
-		read_guardmode_headers=self.client.LliurexGuardManager.read_guardmode_headers()
+		readGuardmodeHeaders=self.client.LliurexGuardManager.read_guardmode_headers()
 		msg="LliureX Guard mode lists readed "
-		self._debug(msg,read_guardmode_headers)
-		msg_log=msg+str(read_guardmode_headers)
-		self.write_log(msg_log)
-		if read_guardmode_headers['status']:
-			tmp_list=read_guardmode_headers['data']
-			for item in tmp_list:
+		self._debug(msg,readGuardmodeHeaders)
+		msgLog=msg+str(readGuardmodeHeaders)
+		self.write_log(msgLog)
+		if readGuardmodeHeaders['status']:
+			self.listsConfig=readGuardmodeHeaders['data']
+			for item in self.listsConfig:
 				#tmp_list[item]['edited']=False
-				tmp_list[item]['remove']=False
-				tmp_list[item]["replaced_to"]=""
-				tmp_list[item]["tmpfile"]=""
+				self.listsConfig[item]['remove']=False
+				self.listsConfig[item]["replaced_to"]=""
+				self.listsConfig[item]["tmpfile"]=""
 
-			return {'status':True,'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,'data':tmp_list}	
+			print(self.listsConfig)
+			self._getListsConfig()
+
+			return {'status':True,'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,'data':""}	
 
 		else:
-			return {'status':False,'code':GuardManager.READ_GUARDMODE_HEADERS_ERROR,'data':str(read_guardmode_headers['data'])}
+			return {'status':False,'code':GuardManager.READ_GUARDMODE_HEADERS_ERROR,'data':str(readGuardmodeHeaders['data'])}
 		
+	#def readGuardmodeHeaders
 
-	#def read_guardmode_headers	
+	def _getListsConfig(self):
+
+		orderList=self._getOrderList()
+		
+		for item in orderList:
+			tmp={}
+			tmp["order"]=item
+			tmp["id"]=self.listsConfig[item]["id"]
+			tmp["name"]=self.listsConfig[item]["name"]
+			tmp["entries"]=self.listsConfig[item]["lines"]
+			tmp["description"]=self.listsConfig[item]["description"]
+			tmp["activated"]=self.listsConfig[item]["active"]
+			tmp["delete"]=False
+			tmp["metaInfo"]=tmp["name"]+tmp["description"]
+
+			self.listsConfigData.append(tmp) 
+
+	#def _getListsConfig	
 
 	def read_guardmode_list(self,order,data):
 			
@@ -405,24 +445,32 @@ class GuardManager(object):
 
 	#def get_siteId
 
-	def get_order_list(self,info):
+	def _getOrderList(self,info=None):
 
 		tmp=[]
-		order_list=[]
+		orderList=[]
 
-		for item in info:
-			name=info[item]["name"].lower()
-			x=()
-			x=item,name
-			tmp.append(x)
-
+		if info==None:
+			if len(self.listsConfig)>0:
+				for item in self.listsConfig:
+					name=self.listsConfig[item]["name"].lower()
+					x=()
+					x=item,name
+					tmp.append(x)
+		else:
+			for item in info:
+				name=self.listsConfig[item]["name"].lower()
+				x=()
+				x=item,name
+				tmp.append(x)
+			
 		tmp.sort(key=lambda list:list[1])
 		for	item in tmp:
-			order_list.append(item[0])
+			orderList.append(item[0])
 
-		return order_list
+		return orderList
 
-	#def get_order_list		
+	#def _getOrderList		
 
 
 	def apply_changes(self,list_data,orig_data):
@@ -555,7 +603,7 @@ class GuardManager(object):
 
 	def send_tmpfile_toserver(self,tmp_file):
 
-		send_tmpfile=self.local_client.ScpManager.send_file(self.credentials[0],self.credentials[1],"server",tmp_file,"/tmp")
+		send_tmpfile=self.localClient.ScpManager.send_file(self.credentials[0],self.credentials[1],"server",tmp_file,"/tmp")
 		msg_log="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
 		self.write_log(msg_log)
 		

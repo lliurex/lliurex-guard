@@ -5,11 +5,9 @@ import os
 
 
 from . import guardmanager
-from . import MainWindow
-from . import LoginBox
-from . import OptionsBox
-from . import EditBox
-from . import settings
+from . import ListStack
+from . import GuardOptionsStack
+from . import MainStack
 
 
 class Core:
@@ -37,20 +35,13 @@ class Core:
 	
 	def init(self):
 
-		self.rsrc_dir= settings.RSRC_DIR + "/"
-		self.ui_path= settings.RSRC_DIR + "/lliurex-guard.ui"
+	
+		self.guardManager=guardmanager.GuardManager()
+		self.listStack=ListStack.Bridge()
+		self.guardOptionsStack=GuardOptionsStack.Bridge()
+		self.mainStack=MainStack.Bridge()
 		
-		self.guardmanager=guardmanager.GuardManager()
-		self.loginBox=LoginBox.LoginBox()
-		self.optionsBox=OptionsBox.OptionsBox()
-		self.editBox=EditBox.EditBox()
-		self.mainWindow=MainWindow.MainWindow()
-
-		self.mainWindow=MainWindow.MainWindow()
-
-		self.mainWindow.load_gui()
-		self.mainWindow.start_gui()
-			
+		self.mainStack.initBridge()			
 		
 		
 	#def init
@@ -64,3 +55,5 @@ class Core:
 			print("[CORE] %s"%msg)
 	
 	#def  dprint
+
+#class Core
