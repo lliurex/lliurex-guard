@@ -60,15 +60,17 @@ class GuardManager(object):
 
 		self.dbg=0
 		self.userValidated=False
-		self.limit_lines=2500
-		self.limit_file_size=28000000
-		self.garbage_files=[]
+		self.limitLines=2500
+		self.limitFileSize=28000000
+		self.garbageFiles=[]
 		self.credentials=[]
 		self.guardMode="DisableMode"
 		self.listsConfig={}
 		self.listsConfigData=[]
+		self.urlConfigData=[]
 		self.detectFlavour()
 		self._getSystemLocale()
+		self.initValues()
 
 	
 	#def __init__	
@@ -144,7 +146,19 @@ class GuardManager(object):
 		if self.dbg==1:
 			print("[LLIUREX_GUARD]: "+ str(function) + str(msg))
 
-	#def _debug		
+	#def _debug
+
+	def initValues(self):
+
+		self.listToLoad=[]
+		self.listName=""
+		self.listDescription=""
+		self.currentListConfig={}
+		self.currentListConfig["name"]=self.listName
+		self.currentListConfig["description"]=self.listDescription
+		self.urlConfigData=[]
+		
+	#def initValues		
 
 	def readGuardmode(self):
 			
@@ -234,55 +248,39 @@ class GuardManager(object):
 
 			self.listsConfigData.append(tmp) 
 
-	#def _getListsConfig	
+	#def _getListsConfig
 
-	def read_guardmode_list(self,order,data):
-			
-		tmpfile=False
+	def loadListConfig(self,listToLoad):
+
+		self.listToLoad=str(listToLoad)
+		self.currentListConfig=self.listsConfig[self.listToLoad]
+		self.listName=self.currentListConfig["name"]
+		self.listDescription=self.currentListConfig["description"]
+
+		return self._readGuardModeList()
+
+	#def loadListConfig
+
+	'''
+	def _readGuardModeList(self):
+
 		status=True
-		tmp_file=""
-		lines=[]
 		error_info=[]
-		listId=data[order]["id"]
-		if data[order]["tmpfile"]!="":
-			read_tmp_file=self.read_local_file(data[order]["tmpfile"],False)
-			msg="List %s. Readed local file (%s)"%(listId,data[order]["tmpfile"])
-			self._debug(msg,read_tmp_file)
-			if read_tmp_file['status']:
-				content=read_tmp_file['data'][0]
-				count_lines=read_tmp_file['data'][1]
-				tmpfile=True
-
-			else:
-				status=False
-				error_info=read_tmp_file['data']
+		listId=self.currentListConfig["id"]
+		active=self.currentListConfig["active"]		
+		readGuardmodeList=self.client.LliurexGuardManager.read_guardmode_list(listId,active)
+		msg="List %s. Readed file"%listId
+		self._debug(msg,readGuardmodeList)
+		if readGuardmodeList['status']:
+			self._getUrlConfig(readGuardmodeList['data'][0])
 		else:
-			read_guardmode_list=self.client.LliurexGuardManager.read_guardmode_list(listId,data[order]['active'])
-			msg="List %s. Readed file"%listId
-			self._debug(msg,read_guardmode_list)
-			if read_guardmode_list['status']:
-				content=read_guardmode_list['data'][0]
-				count_lines=read_guardmode_list['data'][1]
-			else:
-				status=False
-				error_info=read_guardmode_list['data']
-			read_guardmode_list=None	
+			status=False
+			error_info=readGuardmodeList['data']
+		
+		readGuardmodeList=None
+
 		if status:
 			code=GuardManager.READ_LIST_INFO_SUCCESSFUL		
-			if count_lines>self.limit_lines:
-				if not tmpfile:
-					tmp_file=self._create_tmp_file(listId)
-					f=open(tmp_file,'w')
-					tmp_content="".join(content)
-					f.write(tmp_content)
-					f.close()
-					tmp_content=None
-					self.garbage_files.append(tmp_file)
-				else:
-					tmp_file=read_tmp_file['data'][2]	
-				content=None
-				read_tmp_file=None	
-			result=[content,tmp_file]
 			msg_log=msg + " successfully"
 		else:
 			code=GuardManager.READ_LIST_INFO_ERROR
@@ -290,19 +288,89 @@ class GuardManager(object):
 			msg_log=msg+ "with errors. Error details: "+str(error_info)
 		
 		self.write_log(msg_log)
+		
+		return status
+
+	#def _readGuardModeList
+	'''
+	def _readGuardModeList(self):
+			
+		isTmpFile=False
+		status=True
+		tmpFile=""
+		result=""
+		lines=[]
+		errorInfo=[]
+		countLines=0
+		listId=self.currentListConfig["id"]
+		active=self.currentListConfig["active"]
+
+		if self.currentListConfig["tmpfile"]!="":
+			readTmpFile=self.readLocalFile(self.currentListConfig["tmpfile"],False)
+			msg="List %s. Readed local file (%s)"%(listId,self.currentListConfig["tmpfile"])
+			self._debug(msg,readTmpFile)
+
+			if readTmpFile['status']:
+				content=readTmpFile['data'][0]
+				countLines=readTmpFile['data'][1]
+				isTmpFile=True
+
+			else:
+				status=False
+				errorInfo=readTmpFile['data']
+		else:
+			readGuardmodeList=self.client.LliurexGuardManager.read_guardmode_list(listId,active)
+			msg="List %s. Readed file"%listId
+			self._debug(msg,readGuardmodeList)
+
+			if readGuardmodeList['status']:
+				content=readGuardmodeList['data'][0]
+				countLines=readGuardmodeList['data'][1]
+			else:
+				status=False
+				errorInfo=readGuardmodeList['data']
+
+			readGuardmodeList=None	
+		if status:
+			code=GuardManager.READ_LIST_INFO_SUCCESSFUL
+
+			if countLines>self.limitLines:
+				if not isTmpFile:
+					tmpFile=self._createTmpFile(listId)
+					f=open(tmpFile,'w')
+					tmpContent="".join(content)
+					f.write(tmpContent)
+					f.close()
+					tmpContent=None
+					self.garbageFiles.append(tmpFile)
+				else:
+					tmpFile=readTmpFile['data'][2]	
+				content=None
+				readTmpFile=None
+				result=tmpFile
+			else:
+				self._getUrlConfig(content)
+				content=None	
+			msg_log=msg + " successfully"
+		else:
+			code=GuardManager.READ_LIST_INFO_ERROR
+			result=errorInfo
+			msg_log=msg+ "with errors. Error details: "+str(errorInfo)
+		
+		self.write_log(msg_log)
 		return {'status':status,'code':code,'data':result}
 
-	#def read_guardmode_list	
+	#def readGuardmodeList	
 			
-	def read_local_file(self,file,create_tmpfile):
+	def readLocalFile(self,file,createTmpfile):
 
 		content=[]
-		count_lines=0
-		tmp_file=""
+		countLines=0
+		tmpFile=""
 		try:
 			if os.path.exists(file):
-				if create_tmpfile:
-					if os.path.getsize(file)>self.limit_file_size:
+				if createTmpfile:
+					if os.path.getsize(file)>self.limitFileSize:
 						return {'status':False,'code':GuardManager.LOAD_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}	
 				f=open(file,'r')
 				lines=f.readlines()
@@ -313,32 +381,44 @@ class GuardManager(object):
 								line=self._format_line(line)
 								if line!="":
 									content.append(line)	
-									count_lines+=1
+									countLines+=1
 				f.close()
 				lines=None
-				tmp_file=file
+				tmpFile=file
 				
-				if create_tmpfile:
-					if count_lines==0:
+				if createTmpfile:
+					if countLines==0:
 						return {'status':False,'code':GuardManager.EMPTY_FILE_ERROR,'data':''}
 					else:	
-						tmp_file=self._create_tmp_file(os.path.basename(file))
-						f=open(tmp_file,'w')
+						tmpFile=self._createTmpFile(os.path.basename(file))
+						f=open(tmpFile,'w')
 						f.write("".join(content))
 						f.close()
-						if count_lines>self.limit_lines:
+						if countLines>self.limitLines:
 							content=None
 
-				self.garbage_files.append(tmp_file)		
+				self.garbageFiles.append(tmpFile)		
 				
-				return {'status':True,'code':GuardManager.LOAD_FILE_SUCCESSFUL,'data':[content,count_lines,tmp_file]}
+				return {'status':True,'code':GuardManager.LOAD_FILE_SUCCESSFUL,'data':[content,countLines,tmpFile]}
 			else:
 				return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}	
 
 		except Exception as e:
 			return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}
 
-	#def read_local_file		
+	#def readLocalFile
+
+	def _getUrlConfig(self,content):
+
+		count=1
+		for item in content:
+			tmp={}
+			tmp["id"]=count
+			tmp["url"]=item.strip()
+			self.urlConfigData.append(tmp)
+			count+=1
+
+	#def _getUrlConfig		
 
 	def save_conf(self,args):
 
@@ -350,8 +430,8 @@ class GuardManager(object):
 
 		try:
 			if args[2]==None:
-				tmp_list=self._create_tmp_file(info["id"])
-				self.garbage_files.append(tmp_list)
+				tmp_list=self._createTmpFile(info["id"])
+				self.garbageFiles.append(tmp_list)
 			else:
 				tmp_list=args[2]
 
@@ -426,7 +506,7 @@ class GuardManager(object):
 						return {"result":False,"code":GuardManager.LIST_NAME_DUPLICATE,"data":""}
 
 			if loaded_file !=None:
-				if os.path.getsize(loaded_file)>self.limit_file_size:
+				if os.path.getsize(loaded_file)>self.limitFileSize:
 					return {'result':False,'code':GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}			
 
 		return {"result":True,"code":GuardManager.ALL_CORRECT_CODE}			
@@ -610,14 +690,14 @@ class GuardManager(object):
 
 	#def send_tmpfile_toserver		
 
-	def _create_tmp_file(self,listId):
+	def _createTmpFile(self,listId):
 	
-		tmp_file=tempfile.mkstemp("_"+listId)
-		tmp_file=tmp_file[1]
+		tmpFile=tempfile.mkstemp("_"+listId)
+		tmpFile=tmpFile[1]
 		
-		return tmp_file
+		return tmpFile
 
-	#def _create_tmp_file	
+	#def _createTmpFile	
 
 	def remove_tmp_file(self):
 
@@ -627,11 +707,11 @@ class GuardManager(object):
 				if os.path.exists(item):
 					os.remove(item)
 		'''
-		for item in self.garbage_files:
+		for item in self.garbageFiles:
 			if os.path.exists(item):
 				os.remove(item)
 		
-		self.garbage_files=[]	
+		self.garbageFiles=[]	
 
 		self.client.LliurexGuardManager.remove_tmp_file()			
 
@@ -684,7 +764,7 @@ class GuardManager(object):
 		if result!="":	
 			text=result.split("\n")
 			   		
-			if len(text)<=self.limit_lines:
+			if len(text)<=self.limitLines:
 				for item in text:
 					text_to_copy.append(item+"\n")
 				
@@ -713,13 +793,13 @@ class GuardManager(object):
 			if read_guardmode_list['status']:
 				content=read_guardmode_list['data'][0]
 				count_lines=read_guardmode_list['data'][1]
-				tmp_file=self._create_tmp_file(list_data[item]["id"])
+				tmp_file=self._createTmpFile(list_data[item]["id"])
 				f=open(tmp_file,'w')
 				tmp_content="".join(content)
 				f.write(tmp_content)
 				f.close()
 				tmp_content=None
-				self.garbage_files.append(tmp_file)
+				self.garbageFiles.append(tmp_file)
 				list_data[item]["tmpfile"]=tmp_file
 
 			else:

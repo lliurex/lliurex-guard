@@ -112,6 +112,13 @@ class Bridge(QObject):
 
 	#def changeGuardMode
 
+	@Slot()
+	def addCustomList(self):
+
+		self.core.mainStack.currentStack=2
+
+	#def addCustomList
+
 	on_showMainMessage=Signal()
 	showMainMessage=Property('QVariantList',_getShowMainMessage,_setShowMainMessage, notify=on_showMainMessage)
 	
