@@ -50,7 +50,7 @@ GridLayout{
         property int currentIndex:mainStackBridge.mainCurrentOption
         Layout.fillWidth:true
         Layout.fillHeight:true
-        initialItem:bellsView
+        initialItem:guardView
 
         onCurrentIndexChanged:{
             switch(currentIndex){

@@ -208,7 +208,6 @@ class GuardManager(object):
 				self.listsConfig[item]["replaced_to"]=""
 				self.listsConfig[item]["tmpfile"]=""
 
-			print(self.listsConfig)
 			self._getListsConfig()
 
 			return {'status':True,'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,'data':""}	

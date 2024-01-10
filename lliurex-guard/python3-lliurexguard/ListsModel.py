@@ -76,7 +76,7 @@ class ListsModel(QtCore.QAbstractListModel):
 		tmpN=na.strip()
 		if i not in tmpId and na !="" and len(tmpN)>0:
 			self.beginInsertRows(QtCore.QModelIndex(), self.rowCount(),self.rowCount())
-			self._entries.append(dict(order=od,id=i,name=na,entries=en,description=de,activated=ac,delete=de,metaInfo=mt))
+			self._entries.append(dict(order=od,id=i,name=na,entries=en,description=des,activated=ac,delete=de,metaInfo=mt))
 			self.endInsertRows()
 
 	#def appendRow

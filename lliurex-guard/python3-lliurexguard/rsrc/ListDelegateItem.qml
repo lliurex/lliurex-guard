@@ -47,21 +47,20 @@ Components.ListItem{
             Column{
                 id:description
                 anchors.verticalCenter:parent.verticalCenter
-                anchors.leftMargin:5
+                anchors.leftMargin:15
                 spacing:10
                 width:{
                     if (listItem.ListView.isCurrentItem){
-                        parent.width-(entriesText.width+listState.width+manageListBtn.width+15)
+                        parent.width-(entriesText.width+listState.width+manageListBtn.width+80)
                     }else{
-                        parent.width-(entriesText.width+listState.width+15)
+                        parent.width-(entriesText.width+listState.width+60)
                     }
                 }
                
                 Text{
                     id:nameText
                     text:listName
-                    font.family: "Quattrocento Sans Bold"
-                    font.pointSize: 14
+                    font.pointSize: 12
                     horizontalAlignment:Text.AlignLeft
                     elide:Text.ElideMiddle
                     width:parent.width
@@ -70,8 +69,7 @@ Components.ListItem{
                 Text{
                     id:descriptionText
                     text:listDescription
-                    font.family:"Quattrocento Sans Bold"
-                    font.pointSize: 11
+                    font.pointSize: 10
                     horizontalAlignment:Text.AlignLeft
                     elide:Text.ElideMiddle
                     width:parent.width
@@ -82,9 +80,8 @@ Components.ListItem{
             Text{
                 id:entriesText
                 text:listEntries+" "+i18nd("lliurex-guard","entries")
-                font.family:"Quattrocento Sans Bold"
-                font.pointSize: 14
-                width:50
+                font.pointSize: 12
+                width:150
                 anchors.left:description.right
                 anchors.verticalCenter:parent.verticalCenter
                 anchors.leftMargin:30
