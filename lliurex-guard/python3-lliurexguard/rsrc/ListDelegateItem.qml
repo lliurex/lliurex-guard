@@ -120,7 +120,7 @@ Components.ListItem{
                     x:-(optionsMenu.width-manageListBtn.width/2)
 
                     MenuItem{
-                        icon.name:listActivated?"security-low.svg":"security-high.svg"
+                        icon.name:listActivated?"lliurex-guard-disable-mode.svg":"security-high.svg"
                         text:listActivated?i18nd("lliurex-guard","Disable list"):i18nd("lliurex-guard","Enable list")
                         enabled:listDelete?false:true
                         onClicked:guardOptionsStackBridge.changeListStatus([false,!listActivated,listOrder])

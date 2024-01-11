@@ -57,6 +57,7 @@ GridLayout{
                 case 0:
                     optionsView.replace(guardView)
                     break;
+            }
          }
         replaceEnter: Transition {
             PropertyAnimation {

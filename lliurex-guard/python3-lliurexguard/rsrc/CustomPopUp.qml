@@ -50,10 +50,10 @@ Popup {
     function getTextMessage(){
         switch (mainStackBridge.closePopUp[1]){
             case 7:
-                var msg=i18nd("lliurex-guard",""Changing Lliurex Guard mode. Wait a moment..."");
+                var msg=i18nd("lliurex-guard","Changing Lliurex Guard mode. Wait a moment...")
                 break;
             case 11:
-                var msg=i18nd("lliurex-guard","Loading the information from the list. Wait a moment...");
+                var msg=i18nd("lliurex-guard","Loading the information from the list. Wait a moment...")
                 break;
             case 14:
                 var msg=i18nd("lliurex-guard","Loading file. Wait a moment...")
@@ -61,7 +61,10 @@ Popup {
             case 15:
                 var msg=i18nd("lliurex-guard","Applying changes. Wait a moment...")
                 break;
-              default:
+            case 17:
+                var msg=i18nd("lliurex-guard","Changing Lliurex Guard mode. Wait a moment...")
+                break;
+             default:
                 var msg=""
                 break;
         }

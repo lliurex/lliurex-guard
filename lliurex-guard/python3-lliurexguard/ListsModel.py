@@ -92,7 +92,7 @@ class ListsModel(QtCore.QAbstractListModel):
 		
 		if role == QtCore.Qt.EditRole:
 			row = index.row()
-			if param in ["activated"]:
+			if param in ["activated","delete"]:
 				if self._entries[row][param]!=value:
 					self._entries[row][param]=value
 					self.dataChanged.emit(index,index)

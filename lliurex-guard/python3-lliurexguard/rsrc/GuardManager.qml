@@ -24,8 +24,8 @@ Rectangle{
         Kirigami.InlineMessage {
             id: messageLabel
             visible:guardOptionsStackBridge.showMainMessage[0]
-            text:getTextMessage(guardOptionsStackBridge.showMainMessage[1])
-            type:getTypeMessage(guardOptionsStackBridge.showMainMessage[2])
+            text:getTextMessage()
+            type:getTypeMessage()
             Layout.minimumWidth:650
             Layout.fillWidth:true
             Layout.topMargin: 40
@@ -59,6 +59,13 @@ Rectangle{
             Keys.onReturnPressed: applyBtn.clicked()
             Keys.onEnterPressed: applyBtn.clicked()
             onClicked:editMenu.open()
+            enabled:{
+                if (guardOptionsStackBridge.guardMode!="DisableMode"){
+                    true
+                }else{
+                    false
+                }
+            }
 
             Menu{
                 id:editMenu
@@ -113,6 +120,12 @@ Rectangle{
                     text:i18nd("lliurex-guard","Delete all lists")
                     onClicked:guardOptionsStackBridge.removeList([true])
                 }
+                MenuItem{
+                    icon.name:""
+                    text:i18nd("lliurex-guard","Update white list dns")
+                    onClicked:guardOptionsStackBridge.updateWhiteListDNS()
+                    visible:guardOptionsStackBridge.showUpdateDnsOption
+                }
             }
            
         }
@@ -127,10 +140,10 @@ Rectangle{
                         "security-high.svg"
                         break
                     case "WhiteMode":
-                        "security-high.svg"
+                        "lliurex-guard-white-mode.svg"
                         break
                     case "DisableMode":
-                        "security-low.svg"
+                        "lliurex-guard-disable-mode.svg"
                         break
                 }
             }
@@ -173,7 +186,7 @@ Rectangle{
                }
 
                MenuItem{
-                    icon.name:"security-high.svg"
+                    icon.name:"lliurex-guard-white-mode.svg"
                     text:i18nd("lliurex-guard","Activate WhiteList mode")
                     visible:{
                         if (guardOptionsStackBridge.guardMode=="WhiteMode"){
@@ -186,7 +199,7 @@ Rectangle{
                }
 
                MenuItem{
-                    icon.name:"security-low.svg"
+                    icon.name:"lliurex-guard-disable-mode.svg"
                     text:i18nd("lliurex-guard","Disable LliureX-Guard")
                     visible:{
                         if (guardOptionsStackBridge.guardMode=="DisableMode"){
@@ -217,9 +230,64 @@ Rectangle{
         
     }
 
+    ChangesDialog{
+        id:changeModeDialog
+        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Change Mode")
+        dialogMsg:{
+            switch(guardOptionsStackBridge.showChangeModeDialog[1]){
+                case "BlackMode":
+                    i18nd("lliurex-guard","Do yo want to change to black list mode?\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
+                    break;
+                case "WhiteMode":
+                    i18nd("lliurex-guard","Do yo want to change to white list mode?\nIf you activate this mode, you can only access the urls contained in the active lists")
+                    break;
+                case "DisableMode":
+                    i18nd("lliurex-guard","Do you want to deactivate LliureX Guard?\nIf you deactivate it, no filter will be applied")
+                    break;
+                default:
+                    ""
+                    break
+            }
+        }
+        dialogVisible:guardOptionsStackBridge.showChangeModeDialog[0]
+        dialogWidth:650
+        btnAcceptVisible:false
+        btnAcceptText:""
+        btnDiscardText:i18nd("lliurex-guard","Accept")
+        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardVisible:true
+        btnCancelText:i18nd("lliurex-guard","Cancel")
+        btnCancelIcon:"dialog-cancel.svg"
+        Connections{
+           target:changeModeDialog
+           function onDiscardDialogClicked(){
+                guardOptionsStackBridge.manageChangeModeDialog('Accept')         
+           }
+           function onRejectDialogClicked(){
+                guardOptionsStackBridge.manageChangeModeDialog('Cancel')       
+           }
+
+        }
+    }    
  
-    function getTextMessage(msgCode){
-        switch (msgCode){
+    function getTextMessage(){
+        switch (guardOptionsStackBridge.showMainMessage[1]){
+            case -9:
+                var msg=i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -10:
+                var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard will be disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -23:
+                var msg=i18nd("lliurex-guard","Error reading Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -25:
+                var msg=i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case 8:
+                var msg=i18nd("lliurex-guard","The change of Lliurex Guard mode has been successfull")
+                break;
           default:
               var msg=""
               break;
@@ -227,9 +295,9 @@ Rectangle{
         return msg
     } 
 
-    function getTypeMessage(msgType){
+    function getTypeMessage(){
 
-        switch (msgType){
+        switch (guardOptionsStackBridge.showMainMessage[2]){
             case "Information":
                 return Kirigami.MessageType.Information
             case "Ok":

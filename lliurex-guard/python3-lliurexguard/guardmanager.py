@@ -175,39 +175,44 @@ class GuardManager(object):
 
 	#def read_guardmode
 
-	def change_guardmode(self,mode):
+	def changeGuardmode(self,mode):
 
-		change_guardmode=self.client.LliurexGuardManager.change_guardmode(mode)
+		changeGuardmode=self.client.LliurexGuardManager.change_guardmode(mode)
 		msg="LliureX Guard Mode changed to %s"%mode
-		self._debug(msg,change_guardmode)
-		msg_log=msg+str(change_guardmode)
-		self.write_log(msg_log)
+		self._debug(msg,changeGuardmode)
+		msgLog=msg+str(changeGuardmode)
+		self.write_log(msgLog)
 		
-		if change_guardmode['status']:
+		if changeGuardmode['status']:
 			msg="LliureX Guard Mode changed. Dnsmasq restarted "
-			force_restart_dnsmasq=False
-			
+			forceRestartDnsmasq=False
+			self.listsConfig={}
+			self.listsConfigData=[]
+
 			if mode !="DisableMode" :
-				force_restart_dnsmasq=True
+				forceRestartDnsmasq=True
 			else:
 				if self.is_server:
-					force_restart_dnsmasq=True
+					forceRestartDnsmasq=True
 			
-			if force_restart_dnsmasq:
-				restart_dnsmasq=self.restart_dnsmasq(msg)
-				if restart_dnsmasq['status']:
+			if forceRestartDnsmasq:
+				restartDnsmasq=self.restartDnsmasq(msg)
+				if restartDnsmasq['status']:
 					return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
 				else:
-					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restart_dnsmasq['data']}
+					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restartDnsmasq['data']}
 			else:
 				return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
 			
 		else:
 			return {'status':False,'code':GuardManager.CHANGE_GUARDMODE_ERROR,'data':change_guardmode['data']}		
 				
-	#def change_guardmode 		
+	#def changeGuardmode 		
 
 	def readGuardmodeHeaders(self):
+
+		self.listsConfig={}
+		self.listsConfigData=[]
 
 		readGuardmodeHeaders=self.client.LliurexGuardManager.read_guardmode_headers()
 		msg="LliureX Guard mode lists readed "
@@ -261,38 +266,6 @@ class GuardManager(object):
 
 	#def loadListConfig
 
-	'''
-	def _readGuardModeList(self):
-
-		status=True
-		error_info=[]
-		listId=self.currentListConfig["id"]
-		active=self.currentListConfig["active"]		
-		readGuardmodeList=self.client.LliurexGuardManager.read_guardmode_list(listId,active)
-		msg="List %s. Readed file"%listId
-		self._debug(msg,readGuardmodeList)
-		if readGuardmodeList['status']:
-			self._getUrlConfig(readGuardmodeList['data'][0])
-		else:
-			status=False
-			error_info=readGuardmodeList['data']
-		
-		readGuardmodeList=None
-
-		if status:
-			code=GuardManager.READ_LIST_INFO_SUCCESSFUL		
-			msg_log=msg + " successfully"
-		else:
-			code=GuardManager.READ_LIST_INFO_ERROR
-			result=error_info
-			msg_log=msg+ "with errors. Error details: "+str(error_info)
-		
-		self.write_log(msg_log)
-		
-		return status
-
-	#def _readGuardModeList
-	'''
 	def _readGuardModeList(self):
 			
 		isTmpFile=False
@@ -635,11 +608,11 @@ class GuardManager(object):
 			if not error:
 				#self.remove_tmp_file(tmpfile_list)
 				msg="Lliurex Guard applied changes. Dnsmasq restart"
-				restart_dnsmasq=self.restart_dnsmasq(msg)
-				if restart_dnsmasq['status']:
+				restartDnsmasq=self.restartDnsmasq(msg)
+				if restartDnsmasq['status']:
 					return {'status':True,'code':GuardManager.CHANGES_APPLIED_SUCCESSFUL}
 				else:
-					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restart_dnsmasq['data']}
+					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restartDnsmasq['data']}
 			else:
 				return {'status':False,'code':code,'data':data}									
 
@@ -648,9 +621,9 @@ class GuardManager(object):
 
 	#def apply_changes
 
-	def restart_dnsmasq(self,msg):
+	def restartDnsmasq(self,msg):
 
-		restart_dnsmasq=self.client.LliurexGuardManager.restart_dnsmasq()
+		restartDnsmasq=self.client.LliurexGuardManager.restart_dnsmasq()
 		self.connection=False
 		self.timeout=120
 		self.count=0
@@ -672,13 +645,13 @@ class GuardManager(object):
 			
 		#self.set_server(self.server_ip)	
 		self.client=n4d.client.Client(ticket=self.tk)
-		self._debug(msg,restart_dnsmasq)
-		msg_log=msg+str(restart_dnsmasq)
+		self._debug(msg,restartDnsmasq)
+		msg_log=msg+str(restartDnsmasq)
 		self.write_log(msg_log)
 		
-		return restart_dnsmasq				
+		return restartDnsmasq				
 
-	#def restart_dnsmasq()	
+	#def restartDnsmasq()	
 
 	def send_tmpfile_toserver(self,tmp_file):
 
@@ -816,8 +789,24 @@ class GuardManager(object):
 
 		return {'status':status,'code':code,'data':result}
 		
-				
+	#def update_list_dns
 
-	#def update_list_dns	
+	def checkGlobalOptionStatus(self):
+
+		if len(self.listsConfig)>0 and self.guardMode!="DisableMode":
+			return True
+		else:
+			return False
+			
+	#def checkGlobalOptionStatus
+
+	def checkUpdateDnsOptionStatus(self):
+
+		if self.guardMode=="WhiteMode" and self.is_desktop:
+			return True
+		else:
+			return False
+
+	#def checkUpdateDnsOptionStatus	
 
 #class GuardManager

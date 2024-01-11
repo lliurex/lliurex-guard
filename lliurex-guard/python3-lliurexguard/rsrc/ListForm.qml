@@ -77,7 +77,7 @@ Rectangle{
                 visible:!listStackBridge.showUrlsList
                 focus:true
                 display:AbstractButton.TextBesideIcon
-                icon.name:"dialog-ok.svg"
+                icon.name:"dialog-edit.svg"
                 text:i18nd("lliurex-guard","Clic to see/edit the list")
                 Layout.preferredHeight:40
                 Layout.alignment:Qt.AlignLeft

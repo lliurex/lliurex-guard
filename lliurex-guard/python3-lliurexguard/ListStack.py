@@ -10,6 +10,9 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 from . import UrlModel
 
+WAITING_LOADING_LIST_CODE=11
+
+
 class LoadList(QThread):
 
 	def __init__(self,*args):
@@ -176,7 +179,8 @@ class Bridge(QObject):
 
 	@Slot(int)
 	def loadList(self,listToLoad):
-		self.core.mainStack.closePopUp=[False,""]
+		
+		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
 		self.core.guardOptionsStack.showMainMessage=[False,"","Ok"]
 		self.editList=LoadList(False,listToLoad)
 		self.editList.start()
