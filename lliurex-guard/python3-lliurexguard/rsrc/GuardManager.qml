@@ -109,7 +109,7 @@ Rectangle{
                 }
 
                 MenuItem{
-                    icon.name:"security-low.svg"
+                    icon.name:"lliurex-guard-disable-mode.svg"
                     text:i18nd("lliurex-guard","Disable all lists")
                     onClicked:guardOptionsStackBridge.changeListStatus([true,false])
 
