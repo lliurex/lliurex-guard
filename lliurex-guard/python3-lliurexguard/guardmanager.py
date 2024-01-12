@@ -20,6 +20,7 @@ from os import listdir
 from os.path import isfile,isdir,join
 from jsondiff import diff
 import n4d.client
+import copy
 
 class GuardManager(object):
 
@@ -66,6 +67,7 @@ class GuardManager(object):
 		self.credentials=[]
 		self.guardMode="DisableMode"
 		self.listsConfig={}
+		self.listsConfigOrig={}
 		self.listsConfigData=[]
 		self.urlConfigData=[]
 		self.detectFlavour()
@@ -187,6 +189,7 @@ class GuardManager(object):
 			msg="LliureX Guard Mode changed. Dnsmasq restarted "
 			forceRestartDnsmasq=False
 			self.listsConfig={}
+			self.listsConfigOrig={}
 			self.listsConfigData=[]
 
 			if mode !="DisableMode" :
@@ -212,6 +215,7 @@ class GuardManager(object):
 	def readGuardmodeHeaders(self):
 
 		self.listsConfig={}
+		self.listsConfigOrig={}
 		self.listsConfigData=[]
 
 		readGuardmodeHeaders=self.client.LliurexGuardManager.read_guardmode_headers()
@@ -227,6 +231,7 @@ class GuardManager(object):
 				self.listsConfig[item]["replaced_to"]=""
 				self.listsConfig[item]["tmpfile"]=""
 
+			self.listsConfigOrig=copy.deepcopy(self.listsConfig)
 			self._getListsConfig()
 
 			return {'status':True,'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,'data':""}	
@@ -248,7 +253,7 @@ class GuardManager(object):
 			tmp["entries"]=self.listsConfig[item]["lines"]
 			tmp["description"]=self.listsConfig[item]["description"]
 			tmp["activated"]=self.listsConfig[item]["active"]
-			tmp["delete"]=False
+			tmp["remove"]=False
 			tmp["metaInfo"]=tmp["name"]+tmp["description"]
 
 			self.listsConfigData.append(tmp) 
@@ -380,6 +385,53 @@ class GuardManager(object):
 			return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}
 
 	#def readLocalFile
+
+	def changeListsStatus(self,allLists,active,listToEdit):
+
+		if allLists:
+			for item in self.listsConfig:
+				self.listsConfig[item]["active"]=active
+		else:
+			self.listsConfig[str(listToEdit)]["active"]=active
+
+		self._updateListsConfigData("activated",active,listToEdit)
+	
+	#def changeListsStatus
+
+	def removeLists(self,allLists,listToRemove):
+
+		if allLists:
+			for item in self.listsConfig:
+				self.listsConfig[item]["remove"]=True
+		else:
+			self.listsConfig[str(listToEdit)]["remove"]=True
+
+		self._updateListsConfigData("remove",True,listToRemove)
+	
+	#def removeLists
+
+	def restoreList(self,listToRestore):
+
+		self.listsConfig[str(listToRestore)]["remove"]=False
+
+		self._updateListsConfigData("remove",False,listToRestore)
+
+	#def restoreList
+
+	def _updateListsConfigData(self,param,value,listToEdit):
+		
+		if listToEdit!=None:
+			for item in self.listsConfigData:
+				if item["order"]==str(listToEdit):
+					if item[param]!=value:
+						item[param]=value
+					break
+		else:
+			for item in self.listsConfigData:
+				if item[param]!=value:
+					item[param]=value
+
+	#def _updateListsConfigData		
 
 	def _getUrlConfig(self,content):
 
@@ -808,5 +860,40 @@ class GuardManager(object):
 			return False
 
 	#def checkUpdateDnsOptionStatus	
+
+	def checkChangeStatusListsOption(self):
+
+		allActivated=False
+		allDeactivated=False
+		countActivated=0
+		countDeactivated=0
+		result=[]
+		if len(self.listsConfig)>0:
+			for item in self.listsConfig:
+				if self.listsConfig[item]['active']:
+					countActivated+=1
+				else:
+					countDeactivated+=1
+
+			if countActivated==0:
+				allDeactivated=True
+
+			if countDeactivated==0:
+				allActivated=True
+
+		result=[allActivated,allDeactivated]
+
+		return result
+
+	#def checkChangeStatusListsOption
+
+	def checkRemoveListsOption(self):
+
+		for item in self.listsConfig:
+			if not self.listsConfig[item]["remove"]:
+				return True
+		return False
+
+	#def checkRemoveListsOption
 
 #class GuardManager

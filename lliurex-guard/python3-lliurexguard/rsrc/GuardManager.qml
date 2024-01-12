@@ -105,12 +105,14 @@ Rectangle{
                 MenuItem{
                     icon.name:"security-high.svg"
                     text:i18nd("lliurex-guard","Enable all list")
+                    enabled:!guardOptionsStackBridge.enableListsStatusOptions[0]
                     onClicked:guardOptionsStackBridge.changeListStatus([true,true])
                 }
 
                 MenuItem{
                     icon.name:"lliurex-guard-disable-mode.svg"
                     text:i18nd("lliurex-guard","Disable all lists")
+                    enabled:!guardOptionsStackBridge.enableListsStatusOptions[1]
                     onClicked:guardOptionsStackBridge.changeListStatus([true,false])
 
                 }
@@ -118,7 +120,8 @@ Rectangle{
                MenuItem{
                     icon.name:"delete.svg"
                     text:i18nd("lliurex-guard","Delete all lists")
-                    onClicked:guardOptionsStackBridge.removeList([true])
+                    enabled:guardOptionsStackBridge.enableRemoveListsOption
+                    onClicked:guardOptionsStackBridge.removeLists([true])
                 }
                 MenuItem{
                     icon.name:""
@@ -218,7 +221,7 @@ Rectangle{
             id:applyBtn
             visible:true
             focus:true
-            enabled:true
+            enabled:guardOptionsStackBridge.arePendingChanges
             display:AbstractButton.TextBesideIcon
             icon.name:"dialog-ok.svg"
             text:i18nd("lliurex-guard","Apply")
@@ -269,8 +272,65 @@ Rectangle{
            }
 
         }
-    }    
- 
+    } 
+
+    ChangesDialog{
+
+        id:pendingChangesDialog
+        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Pending changes")
+        dialogMsg:i18nd("lliurex-guard","There are pendin changes to apply.\nDo you want to apply the changes or discard them?")
+        dialogVisible:guardOptionsStackBridge.showPendingChangesDialog
+        dialogWidth:500
+        btnAcceptVisible:true
+        btnAcceptText:i18nd("lliurex-guard","Apply")
+        btnDiscardText:i18nd("lliurex-guard","Discard")
+        btnDiscardIcon:"delete.svg"
+        btnDiscardVisible:true
+        btnCancelText:i18nd("lliurex-guard","Cancel")
+        btnCancelIcon:"dialog-cancel.svg"
+        Connections{
+           target:pendingChangesDialog
+           function onApplyDialogClicked(){
+                guardOptionsStackBridge.managePendingChangesDialog("Accept")
+           }
+           function onDiscardDialogClicked(){
+                guardOptionsStackBridge.managePendingChangesDialog('Discard')         
+           }
+           function onRejectDialogClicked(){
+                closeTimer.stop()
+                guardOptionsStackBridge.managePendingChangesDialog('Cancel')       
+           }
+
+        }
+    } 
+
+    ChangesDialog{
+        id:removeListsDialog
+        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Remove Lists")
+        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog[1]?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove")
+        dialogVisible:guardOptionsStackBridge.showRemoveListsDialog[0]
+        dialogWidth:500
+        btnAcceptVisible:false
+        btnAcceptText:""
+        btnDiscardText:i18nd("lliurex-guard","Yes")
+        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardVisible:true
+        btnCancelText:i18nd("lliurex-guard","No")
+        btnCancelIcon:"dialog-cancel.svg"
+        Connections{
+           target:removeListsDialog
+           function onDiscardDialogClicked(){
+                guardOptionsStackBridge.manageRemoveListsDialog('Apply')         
+           }
+           function onRejectDialogClicked(){
+                guardOptionsStackBridge.manageRemoveListsDialog('Cancel')       
+           }
+
+        }
+    } 
+
     function getTextMessage(){
         switch (guardOptionsStackBridge.showMainMessage[1]){
             case -9:

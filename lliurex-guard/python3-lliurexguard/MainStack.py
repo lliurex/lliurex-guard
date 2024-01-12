@@ -72,7 +72,6 @@ class Bridge(QObject):
 	
 	def _loadConfig(self):
 
-		self.closeGui=True
 		if self.gatherInfo.readGuardmode['status']:
 			if self.gatherInfo.readGuardmodeHeaders['status']:
 				self.core.guardOptionsStack.loadConfig()
@@ -83,6 +82,8 @@ class Bridge(QObject):
 		else:
 			self.showLoadErrorMessage=[True,self.gatherInfo.readGuardmode['code'].self.gatherInfo.readGuarMode['data']]
 	
+		self.closeGui=True
+
 	#def _loadConfig
 
 	def _getSystemLocale(self):
@@ -204,7 +205,11 @@ class Bridge(QObject):
 	@Slot()
 	def closeLliureXGuard(self):
 
-		self.closeGui=True
+		if self.core.guardOptionsStack.arePendingChanges:
+			self.closeGui=False
+			self.core.guardOptionsStack.showPendingChangesDialog=True
+		else:
+			self.closeGui=True
 
 	#def closeLliurexGuard
 	

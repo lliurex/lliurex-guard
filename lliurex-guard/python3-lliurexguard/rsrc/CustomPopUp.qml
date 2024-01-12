@@ -64,7 +64,16 @@ Popup {
             case 17:
                 var msg=i18nd("lliurex-guard","Changing Lliurex Guard mode. Wait a moment...")
                 break;
-             default:
+            case 18:
+                var msg=i18nd("lliurex-guard","Selecting lists to change the activation status. Wait a moment...")
+                break;
+            case 19:
+                var msg=i18nd("lliurex-guard","Selecting lists to be deleted. Wait a moment...")
+                break;
+            case 20:
+                var msg=i18nd("lliurex-guard","Selecting lists not to be deleted. Wait a moment...")
+                break;
+            default:
                 var msg=""
                 break;
         }

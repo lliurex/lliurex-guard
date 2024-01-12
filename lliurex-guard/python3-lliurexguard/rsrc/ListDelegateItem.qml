@@ -12,7 +12,7 @@ Components.ListItem{
     property int listEntries
     property string listDescription
     property bool listActivated
-    property bool listDelete
+    property bool listRemove
     property string metaInfo
 
     enabled:true
@@ -32,8 +32,8 @@ Components.ListItem{
         height:visible?60:0
         width:parent.width
         color:{
-            if (listDelete){
-                "#a9a9a9"
+            if (listRemove){
+                "#d3d3d3"
             }else{
                 "transparent"
             }
@@ -122,7 +122,7 @@ Components.ListItem{
                     MenuItem{
                         icon.name:listActivated?"lliurex-guard-disable-mode.svg":"security-high.svg"
                         text:listActivated?i18nd("lliurex-guard","Disable list"):i18nd("lliurex-guard","Enable list")
-                        enabled:listDelete?false:true
+                        enabled:listRemove?false:true
                         onClicked:guardOptionsStackBridge.changeListStatus([false,!listActivated,listOrder])
                     }
 
@@ -132,9 +132,9 @@ Components.ListItem{
                         onClicked:listStackBridge.loadList(listOrder)
                     }
                     MenuItem{
-                        icon.name:listDelete?"restoration.svg":"delete.svg"
-                        text:listDelete?i18nd("lliurex-guard","Restore the list"):i18nd("lliurex-guard","Delete the list")
-                        onClicked:listDelete?guardOptionsStackBridge.restoreList(listOrder):guardOptionsStackBridge.restoreList([false,listOrder])
+                        icon.name:listRemove?"restoration.svg":"delete.svg"
+                        text:listRemove?i18nd("lliurex-guard","Restore the list"):i18nd("lliurex-guard","Delete the list")
+                        onClicked:listRemove?guardOptionsStackBridge.restoreList(listOrder):guardOptionsStackBridge.removeList([false,listOrder])
                     }
                 }
             }

@@ -18,7 +18,7 @@ Dialog {
     property alias btnDiscardIcon:dialogDiscardBtn.icon.name
     property alias btnCancelText:dialogCancelBtn.text
     property alias btnCancelIcon:dialogCancelBtn.icon.name
-    signal dialogApplyClicked
+    signal applyDialogClicked
     signal discardDialogClicked
     signal rejectDialogClicked
 
@@ -99,7 +99,7 @@ Dialog {
             }
 
             onApplied:{
-                dialogApplyClicked()
+                applyDialogClicked()
             }
 
             onDiscarded:{

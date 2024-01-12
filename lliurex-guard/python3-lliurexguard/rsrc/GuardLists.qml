@@ -76,7 +76,7 @@ Rectangle {
                             listEntries:model.entries
                             listDescription:model.description
                             listActivated:model.activated
-                            listDelete:model.delete
+                            listRemove:model.remove
                             metaInfo:model.metaInfo
                            
                         }

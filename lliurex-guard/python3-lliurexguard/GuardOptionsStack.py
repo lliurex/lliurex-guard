@@ -11,6 +11,65 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 from . import ListsModel
 
 WAITING_CHANGE_GUARDMODE_CODE=7
+WAITING_APPLY_LISTS_CHANGES_CODE=18
+WAITING_REMOVE_LISTS_CODE=19
+WAITING_RESTORE_LIST_CODE=20
+
+class ChangeListStatus(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.allLists=args[0]
+		self.active=args[1]
+		self.listToEdit=args[2]
+
+	#def __init__
+
+	def run(self,*args):
+		time.sleep(0.5)
+		ret=Bridge.guardManager.changeListsStatus(self.allLists,self.active,self.listToEdit)
+
+	#def run
+
+#class ChangeListsStatus
+
+class RemoveLists(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.allLists=args[0]
+		self.listToRemove=args[1]
+
+	#def __init__
+
+	def run(self,*args):
+		
+		time.sleep(0.5)
+		ret=Bridge.guardManager.removeLists(self.allLists,self.listToRemove)
+
+	#def run
+
+#class RemoveLists
+
+class RestoreList(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.listToRestore=args[0]
+
+	#def __init__
+
+	def run(self,*args):
+
+		time.sleep(0.5)
+		ret=Bridge.guardManager.restoreList(self.listToRestore)
+
+	#def run
+
+#class RestoreLists
 
 class ChangeMode(QThread):
 
@@ -51,6 +110,11 @@ class Bridge(QObject):
 		self._guardMode="DisableMode"
 		self._showChangeModeDialog=[False,""]
 		self._showUpdateDnsOption=False
+		self._enableListsStatusOptions=[True,True]
+		self._arePendingChanges=False
+		self._showPendingChangesDialog=False
+		self._showRemoveListsDialog=[False,False]
+		self._enableRemoveListsOption=True
 	
 	#def _init__
 	
@@ -59,6 +123,7 @@ class Bridge(QObject):
 		self.guardMode=Bridge.guardManager.guardMode
 		self._updateListsModel()
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
+		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
 
 	#def loadConfig
@@ -96,6 +161,20 @@ class Bridge(QObject):
 			self.on_enableGlobalOptions.emit()
 
 	#def _setEnableGlobalOptions
+
+	def _getEnableListsStatusOptions(self):
+
+		return self._enableListsStatusOptions
+
+	#def _getEnableListsStatusOptions
+
+	def _setEnableListsStatusOptions(self,enableListsStatusOptions):
+
+		if self._enableListsStatusOptions!=enableListsStatusOptions:
+			self._enableListsStatusOptions=enableListsStatusOptions
+			self.on_enableListsStatusOptions.emit()
+
+	#def _setEnableListsStatusOptions
 
 	def _getShowUpdateDnsOption(self):
 
@@ -139,29 +218,186 @@ class Bridge(QObject):
 
 	#def _setShowChangeModeDialog
 
+	def _getArePendingChanges(self):
+
+		return self._arePendingChanges
+
+	#def _getArePendingChanges
+
+	def _setArePendingChanges(self,arePendingChanges):
+
+		if self._arePendingChanges!=arePendingChanges:
+			self._arePendingChanges=arePendingChanges
+			self.on_arePendingChanges.emit()
+
+	#def _setArePendingChanges
+
+	def _getShowPendingChangesDialog(self):
+
+		return self._showPendingChangesDialog
+
+	#def _getShowPendingChangesDialog
+
+	def _setShowPendingChangesDialog(self,showPendingChangesDialog):
+
+		if self._showPendingChangesDialog!=showPendingChangesDialog:
+			self._showPendingChangesDialog=showPendingChangesDialog
+			self.on_showPendingChangesDialog.emit()
+
+	#def _setShowPendingChangesDialog
+
+	def _getShowRemoveListsDialog(self):
+
+		return self._showRemoveListsDialog
+
+	#def _getShowRemoveListsDialog
+
+	def _setShowRemoveListsDialog(self,showRemoveListsDialog):
+
+		if self._showRemoveListsDialog!=showRemoveListsDialog:
+			self._showRemoveListsDialog=showRemoveListsDialog
+			self.on_showRemoveListsDialog.emit()
+
+	#def _setShowRemoveListsDialog
+
+	def _getEnableRemoveListsOption(self):
+
+		return self._enableRemoveListsOption
+
+	#def _getEnableRemoveListsOption
+
+	def _setEnableRemoveListsOption(self,enableRemoveListsOption):
+
+		if self._enableRemoveListsOption!=enableRemoveListsOption:
+			self._enableRemoveListsOption=enableRemoveListsOption
+			self.on_enableRemoveListsOption.emit()
+
+	#def _setEnableRemoveListsOption
+
 	def _updateListsModel(self):
 
 		ret=self._listsModel.clear()
 		listsEntries=Bridge.guardManager.listsConfigData
 		for item in listsEntries:
 			if item["id"]!="":
-				self._listsModel.appendRow(item["order"],item["id"],item["name"],item["entries"],item["description"],item["activated"],item["delete"],item["metaInfo"])
+				self._listsModel.appendRow(item["order"],item["id"],item["name"],item["entries"],item["description"],item["activated"],item["remove"],item["metaInfo"])
 	
 	#def _updateListsModel
+
+	def _updateListsModelInfo(self,param):
+
+		updatedInfo=Bridge.guardManager.listsConfigData
+		if len(updatedInfo)>0:
+			for i in range(len(updatedInfo)):
+				index=self._listsModel.index(i)
+				self._listsModel.setData(index,param,updatedInfo[i][param])
+
+	#def _updateListsModelInfo
 
 	@Slot('QVariantList')
 	def changeListStatus(self,data):
 
-		print(data)
+		self.core.mainStack.closeGui=False
+		self.showMainMessage=[False,"","Ok",""]
+		self.changeAllLists=data[0]
+		active=data[1]
+		if self.changeAllLists:
+			listToEdit=None
+		else:
+			listToEdit=data[2]
+
+		self.core.mainStack.closePopUp=[False,WAITING_APPLY_LISTS_CHANGES_CODE]
+		self.changeStatusT=ChangeListStatus(self.changeAllLists,active,listToEdit)
+		self.changeStatusT.start()
+		self.changeStatusT.finished.connect(self._changeStatusRet)		
 
 	#def changeListStatus
 
+	def _changeStatusRet(self):
+
+		self._updateListsModelInfo('activated')
+		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+		
+		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
+			self.arePendingChanges=True
+		else:
+			self.arePendingChanges=False
+		
+		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.closeGui=True
+
+	#def _changeStatusRet
+
 	@Slot('QVariantList')
-	def removeList(self,data):
+	def removeLists(self,data):
 
-		print(data)
+		self.showMainMessage=[False,"","Ok",""]
+		self.removeAllLists=data[0]
 
-	#def removeList
+		if self.removeAllLists:
+			self.listToRemove=None
+		else:
+			self.listToRemove=data[1]
+
+		self.showRemoveListsDialog=[True,self.removeAllLists]
+
+	#def removeLists
+
+	@Slot(str)
+	def manageRemoveListsDialog(self,response):
+
+		self.showRemoveListsDialog=[False,False]
+		if response=="Apply":
+			self.core.mainStack.closeGui=False
+			self.core.mainStack.closePopUp=[False,WAITING_REMOVE_LISTS_CODE]
+			self.removeListsT=RemoveLists(self.removeAllLists,self.listToRemove)
+			self.removeListsT.start()
+			self.removeListsT.finished.connect(self._removeListsRet)	
+
+	#def manageRemoveListsDialog
+
+	def _removeListsRet(self):
+
+		self._updateListsModelInfo('remove')
+		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
+		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+
+		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
+			self.arePendingChanges=True
+		else:
+			self.arePendingChanges=False
+		
+		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.closeGui=True
+
+	#def _removeListRet
+
+	@Slot(str)
+
+	def restoreList(self,listToRestore):
+
+		self.showMainMessage=[False,"","Ok",""]
+		self.core.mainStack.closePopUp=[False,WAITING_RESTORE_LIST_CODE]
+		self.restoreListT=RestoreList(listToRestore)
+		self.restoreListT.start()
+		self.restoreListT.finished.connect(self._restoreListRet)
+
+	#def restoreList
+
+	def _restoreListRet(self):
+
+		self._updateListsModelInfo('remove')
+		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+
+		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
+			self.arePendingChanges=True
+		else:
+			self.arePendingChanges=False
+
+		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.closeGui=True
+
+	#def _restoreListRet
 
 	@Slot()
 	def updateWhiteListDNS(self):
@@ -208,6 +444,7 @@ class Bridge(QObject):
 			self.showMainMessage=[True,self.changeModeT.retChange['code'],"Error",self.changeModeT.ret['data']]
 
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
+		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
 		self.core.mainStack.closePopUp=[True,""]
 		self.core.mainStack.closeGui=True
@@ -221,11 +458,29 @@ class Bridge(QObject):
 
 	#def addCustomList
 
+	@Slot(str)
+	def managePendingChangesDialog(self,response):
+
+		self.showPendingChangesDialog=False
+
+		if response=="Acdept":
+			print("apply")
+		elif response=="Discard":
+			self.arePendingChanges=False
+			self.core.mainStack.closeGui=True
+		elif response=="Cancel":
+			self.arePendingChanges=False
+
+	#def managePendingChangesDialog
+	 
 	on_showMainMessage=Signal()
 	showMainMessage=Property('QVariantList',_getShowMainMessage,_setShowMainMessage, notify=on_showMainMessage)
 	
 	on_enableGlobalOptions=Signal()
 	enableGlobalOptions=Property(bool,_getEnableGlobalOptions,_setEnableGlobalOptions,notify=on_enableGlobalOptions)
+
+	on_enableListsStatusOptions=Signal()
+	enableListsStatusOptions=Property('QVariantList',_getEnableListsStatusOptions,_setEnableListsStatusOptions,notify=on_enableListsStatusOptions)
 
 	on_showUpdateDnsOption=Signal()
 	showUpdateDnsOption=Property(bool,_getShowUpdateDnsOption,_setShowUpdateDnsOption,notify=on_showUpdateDnsOption)
@@ -235,6 +490,18 @@ class Bridge(QObject):
 	
 	on_showChangeModeDialog=Signal()
 	showChangeModeDialog=Property('QVariantList',_getShowChangeModeDialog,_setShowChangeModeDialog,notify=on_showChangeModeDialog)
+
+	on_arePendingChanges=Signal()
+	arePendingChanges=Property(bool,_getArePendingChanges,_setArePendingChanges,notify=on_arePendingChanges)
+
+	on_showPendingChangesDialog=Signal()
+	showPendingChangesDialog=Property(bool,_getShowPendingChangesDialog,_setShowPendingChangesDialog,notify=on_showPendingChangesDialog)
+
+	on_showRemoveListsDialog=Signal()
+	showRemoveListsDialog=Property('QVariantList',_getShowRemoveListsDialog,_setShowRemoveListsDialog,notify=on_showRemoveListsDialog)
+
+	on_enableRemoveListsOption=Signal()
+	enableRemoveListsOption=Property(bool,_getEnableRemoveListsOption,_setEnableRemoveListsOption,notify=on_enableRemoveListsOption)
 
 	listsModel=Property(QObject,_getListsModel,constant=True)
 

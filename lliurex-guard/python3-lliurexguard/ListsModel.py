@@ -11,7 +11,7 @@ class ListsModel(QtCore.QAbstractListModel):
 	EntriesRole=QtCore.Qt.UserRole+1003
 	DescriptionRole=QtCore.Qt.UserRole+1004
 	ActivatedRole=QtCore.Qt.UserRole+1005
-	DeleteRole=QtCore.Qt.UserRole+1006
+	RemoveRole=QtCore.Qt.UserRole+1006
 	MetaInfoRole=QtCore.Qt.UserRole+1007
 	
 	def __init__(self,parent=None):
@@ -45,8 +45,8 @@ class ListsModel(QtCore.QAbstractListModel):
 				return item["description"]
 			elif role == ListsModel.ActivatedRole:
 				return item["activated"]
-			elif role == ListsModel.DeleteRole:
-				return item["delete"]
+			elif role == ListsModel.RemoveRole:
+				return item["remove"]
 			elif role == ListsModel.MetaInfoRole:
 				return item["metaInfo"]
 			
@@ -62,13 +62,13 @@ class ListsModel(QtCore.QAbstractListModel):
 		roles[ListsModel.EntriesRole] = b"entries"
 		roles[ListsModel.DescriptionRole] = b"description"
 		roles[ListsModel.ActivatedRole] = b"activated"
-		roles[ListsModel.DeleteRole] = b"delete"
+		roles[ListsModel.RemoveRole] = b"remove"
 		roles[ListsModel.MetaInfoRole]=b"metaInfo"
 		return roles
 
 	#def roleNames
 
-	def appendRow(self,od,i,na,en,des,ac,de,mt):
+	def appendRow(self,od,i,na,en,des,ac,re,mt):
 		
 		tmpId=[]
 		for item in self._entries:
@@ -76,7 +76,7 @@ class ListsModel(QtCore.QAbstractListModel):
 		tmpN=na.strip()
 		if i not in tmpId and na !="" and len(tmpN)>0:
 			self.beginInsertRows(QtCore.QModelIndex(), self.rowCount(),self.rowCount())
-			self._entries.append(dict(order=od,id=i,name=na,entries=en,description=des,activated=ac,delete=de,metaInfo=mt))
+			self._entries.append(dict(order=od,id=i,name=na,entries=en,description=des,activated=ac,remove=re,metaInfo=mt))
 			self.endInsertRows()
 
 	#def appendRow
@@ -92,7 +92,7 @@ class ListsModel(QtCore.QAbstractListModel):
 		
 		if role == QtCore.Qt.EditRole:
 			row = index.row()
-			if param in ["activated","delete"]:
+			if param in ["activated","remove"]:
 				if self._entries[row][param]!=value:
 					self._entries[row][param]=value
 					self.dataChanged.emit(index,index)
