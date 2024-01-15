@@ -209,8 +209,10 @@ class Bridge(QObject):
 			self.closeGui=False
 			self.core.guardOptionsStack.showPendingChangesDialog=True
 		else:
-			self.closeGui=True
-
+			if self.core.listStack.changesInList:
+				self.closeGui=False
+				self.core.listStack.showChangesInListDialog=True
+				
 	#def closeLliurexGuard
 	
 	on_currentStack=Signal()

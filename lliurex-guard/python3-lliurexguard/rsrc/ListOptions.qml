@@ -18,6 +18,7 @@ GridLayout{
             optionText:i18nd("lliurex-guard","Home")
             optionFontSize:14
             optionIcon:"/usr/share/icons/breeze/actions/24/arrow-left.svg"
+            enabled:listStackBridge.enableForm
             Connections{
                 function onMenuOptionClicked(){
                     listStackBridge.goHome();

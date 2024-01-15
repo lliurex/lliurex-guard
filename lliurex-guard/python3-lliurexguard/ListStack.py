@@ -11,6 +11,8 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 from . import UrlModel
 
 WAITING_LOADING_LIST_CODE=11
+WAITING_OPEN_FILE_CODE=6
+WAITING_SAVE_CHANGES=26
 
 
 class LoadList(QThread):
@@ -35,6 +37,46 @@ class LoadList(QThread):
 
 #class LoadList
 
+class OpenListFile(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.fileToLoad=args[0]
+
+	#def __init__
+
+	def run(self,*args):
+
+		cmd="kwrite %s"%self.fileToLoad
+		os.system(cmd)
+
+	#def run
+
+#class OpenListFile
+
+class CheckListChanges(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		print(args)
+		self.dataToCheck=args[0]
+		self.edit=args[1]
+		self.fileToCheck=args[2]
+		self.ret={}
+
+	#def __init__
+
+	def run(self,*args):
+
+		self.ret=Bridge.guardManager.checkData(self.dataToCheck,self.edit,self.fileToCheck)
+
+	#def run
+
+#class CheckListChanges
+
+
 class Bridge(QObject):
 
 	
@@ -48,8 +90,12 @@ class Bridge(QObject):
 		self._listDescription=Bridge.guardManager.listDescription
 		self._showListFormMessage=[False,"","Ok"]
 		self._changesInList=False
+		self.changesInHeaders=False
+		self.changesInFile=False
 		self._listCurrentOption=0
 		self._showUrlsList=False
+		self._enableForm=True
+		self._showChangesInListDialog=False
 
 	#def _init__
 
@@ -143,13 +189,41 @@ class Bridge(QObject):
 
 	#def _setShowUrlsList
 
+	def _getEnableForm(self):
+
+		return self._enableForm
+
+	#def _getEnableForm
+
+	def _setEnableForm(self,enableForm):
+
+		if self._enableForm!=enableForm:
+			self._enableForm=enableForm
+			self.on_enableForm.emit()
+
+	#def _setEnableForm
+
+	def _getShowChangesInListDialog(self):
+
+		return self._showChangesInListDialog
+
+	#def _getShowChangesInListDialog
+
+	def _setShowChangesInListDialog(self,showChangesInListDialog):
+
+		if self._showChangesInListDialog!=showChangesInListDialog:
+			self._showChangesInListDialog=showChangesInListDialog
+			self.on_showChangesInListDialog.emit()
+
+	#def _setShowChangesInListDialog
+
 	def updateUrlModel(self):
 
 		ret=self._urlModel.clear()
-		urlEntries=Bridge.guardManager.urlConfigData
+		urlEntries=self.contentOfList
 		for item in urlEntries:
 			if item["url"]!="":
-				self._urlModel.appendRow(item["id"],item["url"])
+				self._urlModel.appendRow(item["url"])
 	
 	#def updateUrlModel
 
@@ -159,6 +233,10 @@ class Bridge(QObject):
 		self.listDescription=Bridge.guardManager.listDescription
 		self.showListFormMessage=[False,"","Ok"]
 		self.changesInList=False
+		self.changesInHeaders=False
+		self.fileToLoad=None
+		self.lastChangeFromFile=""
+		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 		self._urlModel.clear()
 
 	#def _initializeVars
@@ -172,7 +250,7 @@ class Bridge(QObject):
 			self.listCurrentOption=0
 			self.core.mainStack.moveToStack=""
 		else:
-			#self.showChangesInListDialog=True
+			self.showChangesInListDialog=True
 			self.core.mainStack.moveToStack=1
 
 	#def goHome
@@ -191,18 +269,164 @@ class Bridge(QObject):
 	def _loadListRet(self):
 
 		self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
+		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 		if self.editList.ret["status"]:
 			self._initializeVars()
 			if self.editList.ret["data"]=="":
 				self.updateUrlModel()
 				self.showUrlsList=True
 			else:
+				self.fileToLoad=self.editList.ret["data"]
+				self.lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
 				self.showUrlsList=False
 			self.core.mainStack.closePopUp=[True,""]
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
 
 	#def _loadListRet
+
+	@Slot()
+	def openListFile(self):
+
+		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage=[True,WAITING_OPEN_FILE_CODE,"Information"]
+		self.core.mainStack.closeGui=False
+		self.enableForm=False
+		self.openFileT=OpenListFile(self.fileToLoad)
+		self.openFileT.start()
+		self.openFileT.finished.connect(self._openFileRet)
+
+	#def openListFile
+
+	def _openFileRet(self):
+
+		self.core.mainStack.closeGui=True
+		self.showListFormMessage=[False,"","Ok"]
+		self.enableForm=True
+		lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
+
+		if lastChangeFromFile!=self.lastChangeFromFile:
+			self.changesInFile=True
+			self.changesInList=True
+			self.lastChangeFromFile=lastChangeFromFile
+		else:
+			if not self.changesInHeaders:
+				self.changesInFile=False
+
+	#def _openFileRet
+
+	@Slot(str)
+	def updateListName(self,listName):
+
+		if listName!=self.listName:
+			self.listName=listName
+			self.currentListConfig["id"]=Bridge.guardManager.getListId(listName)
+			self.currentListConfig["name"]=self.listName
+
+		if self.currentListConfig!=Bridge.guardManager.currentListConfig:
+			self.changesInHeaders=True
+			self.changesInList=True
+		else:
+			if not self.changesInFile:
+				self.changesInList=False
+
+	#def updateListName
+
+	@Slot(str)
+	def updateListDescription(self,listDescription):
+
+		if listDescription!=self.listDescription:
+			self.listDescription=listDescription
+			self.currentListConfig["description"]=self.listDescription
+
+		if self.currentListConfig!=Bridge.guardManager.currentListConfig:
+			self.changesInHeaders=True
+			self.changesInList=True
+		else:
+			if not self.changesInFile:
+				self.changesInList=False
+
+	#def updateListDescription
+
+	@Slot(str)
+	def addNewUrl(self,urlToAdd):
+
+		self.showListFormMessage=[False,"","Ok"]
+		tmpNewUrl=urlToAdd.split(" ")
+		
+		for item in tmpNewUrl:
+			if item!="":
+				self._urlModel.appendRow(item)
+				tmp={}
+				tmp["url"]=item
+				self.contentOfList.append(tmp)
+
+		if self.contentOfList!= Bridge.guardManager.urlConfigData:
+			self.changesInList=True
+		else:
+			self.changesInList=False 
+
+	#def AddNewUrl
+
+	@Slot(int)
+	def removeUrl(self,urltoRemove):
+
+		self.showListFormMessage=[False,"","Ok"]
+		tmpUrl=self._urlModel._entries[urltoRemove]["url"]
+		self._urlModel.removeRow(urltoRemove)
+
+		for i in range(len(self.contentOfList)-1,-1,-1):
+			if tmpUrl==self.contentOfList[i]["url"]:
+				self.contentOfList.pop(i)
+
+		if self.contentOfList!=Bridge.guardManager.urlConfigData:
+			Bridge.guardManager.urlConfigData=self.contentOfList
+			self.changesInList=True
+		else:
+			self.changesInList=False 
+
+	#def removeUrl
+
+	@Slot(str)
+	def manageChangesInListDialog(self,response):
+
+		self.showChangesInListDialog=False
+
+		if response=="Apply":
+			self.saveChanges()
+		elif response=="Discard":
+			print("Discard")
+			self.changesInList=False
+			self.core.mainStack.closeGui=True
+			self.core.mainStack.moveToStack=1
+			self.core.mainStack.manageGoToStack()
+		elif response=="Cancel":
+			print("Cancel")
+
+	#def manageChangesInListDialog
+
+	@Slot() 
+	def saveListChanges(self):
+
+		self.core.mainStack.closeGui=False
+		self.showListFormMessage=[False,"","Ok"]
+		self.core.mainStack.closePopUp=[False,WAITING_SAVE_CHANGES]
+		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"]]
+		self.checkListChangesT=CheckListChanges(dataToCheck,True,self.fileToLoad)
+		self.checkListChangesT.start()
+		self.checkListChangesT.finished.connect(self._checkListChangesRet)
+
+	#def saveListChanges
+
+	def _checkListChangesRet(self):
+
+		self.core.mainStack.closePopUp=[True,""]
+		if self.checkListChangesT.ret["result"]:
+			self.changesInList=False
+		else:
+			self.showListFormMessage=[True,self.checkListChangesT.ret["code"],"Error"]
+
+	#def _checkListChangesRet				
 
 	on_listName=Signal()
 	listName=Property(str,_getListName,_setListName,notify=on_listName)
@@ -218,6 +442,12 @@ class Bridge(QObject):
 
 	on_changesInList=Signal()
 	changesInList=Property(bool,_getChangesInList,_setChangesInList,notify=on_changesInList)
+
+	on_enableForm=Signal()
+	enableForm=Property(bool,_getEnableForm,_setEnableForm,notify=on_enableForm)
+
+	on_showChangesInListDialog=Signal()
+	showChangesInListDialog=Property(bool,_getShowChangesInListDialog,_setShowChangesInListDialog,notify=on_showChangesInListDialog)
 
 	on_showUrlsList=Signal()
 	showUrlsList=Property(bool,_getShowUrlsList,_setShowUrlsList,notify=on_showUrlsList)

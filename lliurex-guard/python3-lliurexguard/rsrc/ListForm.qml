@@ -25,7 +25,7 @@ Rectangle{
             id: messageLabel
             visible:listStackBridge.showListFormMessage[0]
             text:getMessageText()
-            type:Kirigami.MessageType.Error
+            type:getTypeMessage()
             Layout.minimumWidth:650
             Layout.fillWidth:true
             Layout.topMargin: 40
@@ -36,6 +36,7 @@ Rectangle{
             columns:2
             flow: GridLayout.LeftToRight
             columnSpacing:5
+            enabled:listStackBridge.enableForm
             Layout.topMargin: messageLabel.visible?0:40
             Layout.alignment:Qt.AlignHCenter
 
@@ -50,6 +51,9 @@ Rectangle{
                 horizontalAlignment:TextInput.AlignLeft
                 focus:true
                 implicitWidth:400
+                onTextChanged:{
+                    listStackBridge.updateListName(nameEntry.text)
+                }
 
             }
             Text{
@@ -63,6 +67,9 @@ Rectangle{
                 horizontalAlignment:TextInput.AlignLeft
                 focus:true
                 implicitWidth:400
+                onTextChanged:{
+                    listStackBridge.updateListDescription(descriptionEntry.text)
+                }
 
             }
             Text{
@@ -84,6 +91,7 @@ Rectangle{
                 enabled:true
                 Keys.onReturnPressed: applyBtn.clicked()
                 Keys.onEnterPressed: applyBtn.clicked()
+                onClicked:listStackBridge.openListFile()
 
             }
        
@@ -121,7 +129,7 @@ Rectangle{
             
             onClicked:{
                 closeTimer.stop()
-                listStackBridge.applyListChanges()
+                listStackBridge.saveListChanges()
                 
             }
         }
@@ -143,11 +151,11 @@ Rectangle{
             
         }
     } 
-    /*
+
     ChangesDialog{
         id:settingsChangesDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard","List")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard","List edition")
         dialogVisible:listStackBridge.showChangesInListDialog
         dialogMsg:i18nd("lliurex-guard","The are pending changes to save.\nDo you want save the changes or discard them?")
         dialogWidth:400
@@ -160,32 +168,56 @@ Rectangle{
         btnCancelIcon:"dialog-cancel.svg"
         Connections{
             target:settingsChangesDialog
-            function onDialogApplyClicked(){
-                listStackBridge.manageChangesDialog("Accept")
+            function onApplyDialogClicked(){
+                listStackBridge.manageChangesInListDialog("Accept")
             }
             function onDiscardDialogClicked(){
-                listStackBridge.manageChangesDialog("Discard")           
+                listStackBridge.manageChangesInListDialog("Discard")           
             }
             function onRejectDialogClicked(){
                 closeTimer.stop()
-                listStackBridge.manageChangesDialog("Cancel")       
+                listStackBridge.manageChangesInListDialog("Cancel")       
             }
 
         }
    }
-   */
 
+   function getMessageText(){
 
-    function getMessageText(){
-
-         switch (listStackBridge.showListFormMessage[1]){
+        switch (listStackBridge.showListFormMessage[1]){
                 
+            case -1:
+                var msg=i18nd("lliurex-guard","You must indicate a name for the list")
+                break;
+            case -2:
+                var msg=i18nd("lliurex-guard","The name of the list is duplicate")
+                break;
+            case -31:
+                var msg=i18nd("lliurex-guard","It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")
+                break;
+            case 6:
+                var msg=i18nd("lliurex-guard","Waiting while viewing / editing the list. To continue close the file")
+                break
             default:
                 var msg=""
                 break
         }
         return msg    
 
+    }
+
+    function getTypeMessage(){
+
+        switch (listStackBridge.showListFormMessage[2]){
+            case "Information":
+                return Kirigami.MessageType.Information
+            case "Ok":
+                return Kirigami.MessageType.Positive
+            case "Error":
+                return Kirigami.MessageType.Error
+            case "Warning":
+                return Kirigami.MessageType.Warning
+        }
     }
    
 }

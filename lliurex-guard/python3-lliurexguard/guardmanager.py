@@ -38,7 +38,7 @@ class GuardManager(object):
 	READ_GUARDMODE_HEADERS_ERROR=-25
 	EMPTY_FILE_ERROR=-27
 	LOAD_FILE_SIZE_OFF_LIMITS_ERROR=-30
-	EDIT_FILE_OFF_LIMITS_ERROR=-31
+	EDIT_FILE_SIZE_OFF_LIMITS_ERROR=-31
 	LINES_TO_COPY_OFF_LIMITS_ERROR=-33
 	READ_FILE_ERROR=-34
 	EMPTY_LIST_ERROR=-35
@@ -156,8 +156,6 @@ class GuardManager(object):
 		self.listName=""
 		self.listDescription=""
 		self.currentListConfig={}
-		self.currentListConfig["name"]=self.listName
-		self.currentListConfig["description"]=self.listDescription
 		self.urlConfigData=[]
 		
 	#def initValues		
@@ -276,7 +274,8 @@ class GuardManager(object):
 		isTmpFile=False
 		status=True
 		tmpFile=""
-		result=""
+		content=None
+		result=[]
 		lines=[]
 		errorInfo=[]
 		countLines=0
@@ -325,10 +324,10 @@ class GuardManager(object):
 					tmpFile=readTmpFile['data'][2]	
 				content=None
 				readTmpFile=None
-				result=tmpFile
 			else:
 				self._getUrlConfig(content)
-				content=None	
+
+			result=tmpFile
 			msg_log=msg + " successfully"
 		else:
 			code=GuardManager.READ_LIST_INFO_ERROR
@@ -435,13 +434,10 @@ class GuardManager(object):
 
 	def _getUrlConfig(self,content):
 
-		count=1
 		for item in content:
 			tmp={}
-			tmp["id"]=count
 			tmp["url"]=item.strip()
 			self.urlConfigData.append(tmp)
-			count+=1
 
 	#def _getUrlConfig		
 
@@ -514,31 +510,31 @@ class GuardManager(object):
 			
 	#def save_conf		
 
-	def check_data(self,list_data,data,edit,loaded_file,orig_id=None):
+	def checkData(self,data,edit,loadedFile):
 
-		if data["name"]=="":
+		if data[1]=="":
 			return {"result":False,"code":GuardManager.MISSING_LIST_NAME_ERROR,"data":""}
 
 		else:
-			check_duplicates=True
+			checkDuplicates=True
 			if edit:
-				if data["id"]==orig_id:
-					check_duplicates=False
+				if data[0]==self.currentListConfig["id"]:
+					checkDuplicates=False
 
-			if check_duplicates:		
-				for item in list_data:
-					if list_data[item]["id"]==data["id"]:
+			if checkDuplicates:		
+				for item in self.listsConfig:
+					if self.listsConfig[item]["id"]==data[0]:
 						return {"result":False,"code":GuardManager.LIST_NAME_DUPLICATE,"data":""}
 
-			if loaded_file !=None:
-				if os.path.getsize(loaded_file)>self.limitFileSize:
+			if loadedFile !=None:
+				if os.path.getsize(loadedFile)>self.limitFileSize:
 					return {'result':False,'code':GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}			
 
 		return {"result":True,"code":GuardManager.ALL_CORRECT_CODE}			
 			 			
-	#def check_data
+	#def checkData
 	
-	def get_listId(self,name):
+	def getListId(self,name):
 
 		listId= ''.join((c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn'))
 		listId=listId.lower().replace(" ","_")
@@ -547,7 +543,7 @@ class GuardManager(object):
 
 		return listId
 
-	#def get_siteId
+	#def getListId
 
 	def _getOrderList(self,info=None):
 
@@ -895,5 +891,16 @@ class GuardManager(object):
 		return False
 
 	#def checkRemoveListsOption
+
+	def getLastChangeInFile(self,fileToCheck):
+
+		lastChange=""
+		try:
+			if os.path.exists(fileToCheck):
+				lastChange=os.path.getmtime(fileToCheck)
+		except:
+			pass
+
+		return lastChange
 
 #class GuardManager

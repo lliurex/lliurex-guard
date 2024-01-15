@@ -6,7 +6,6 @@ import QtQml.Models 2.8
 Components.ListItem{
 
     id: listItem
-    property int urlId
     property string url
 
     enabled:true
@@ -61,6 +60,7 @@ Components.ListItem{
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
                 ToolTip.text:i18nd("lliurex-guard","Click to delete this url")
+                onClicked:listStackBridge.removeUrl(index)
           
             }
         }

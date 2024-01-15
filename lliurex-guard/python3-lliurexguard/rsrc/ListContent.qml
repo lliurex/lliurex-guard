@@ -71,6 +71,7 @@ Rectangle {
                 ToolTip.text:i18nd("lliurex-guard","Click to add the urls to list")
                 Keys.onReturnPressed: applyUserBtn.clicked()
                 Keys.onEnterPressed: applyUserBtn.clicked()
+                onClicked:listStackBridge.addNewUrl(urlEntry.text)
             }
 
             Button{
@@ -127,7 +128,6 @@ Rectangle {
 
                             delegate: ListDelegateUrlItem{
                                 width:listsTable.width
-                                urlId:model.id
                                 url:model.url
                                 
                             }
