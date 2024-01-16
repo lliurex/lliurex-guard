@@ -333,11 +333,23 @@ Rectangle{
 
     function getTextMessage(){
         switch (guardOptionsStackBridge.showMainMessage[1]){
+            case -5:
+                var msg=i18nd("lliurex-guard","Error saving the changes of the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
             case -9:
                 var msg=i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
             case -10:
                 var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard will be disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -19:
+                var msg=i18nd("lliurex-guard","Error removing lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -20:
+                var msg=i18nd("lliurex-guard","Error activating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -21:
+                var msg=i18nd("lliurex-guard","Error deactivating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
             case -23:
                 var msg=i18nd("lliurex-guard","Error reading Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
@@ -345,8 +357,20 @@ Rectangle{
             case -25:
                 var msg=i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
+            case -35:
+                var msg=i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")
+                break;
+            case 3:
+                var msg=i18nd("lliurex-guard","List created successfully")
+                break;
+            case 4:
+                var msg=i18nd("lliurex-guard","List edited successfully")
+                break;
             case 8:
                 var msg=i18nd("lliurex-guard","The change of Lliurex Guard mode has been successfull")
+                break;
+            case 18:
+                var msg=i18nd("lliurex-guard","Changes applied successfully")
                 break;
           default:
               var msg=""

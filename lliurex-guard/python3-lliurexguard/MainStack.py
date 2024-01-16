@@ -209,7 +209,7 @@ class Bridge(QObject):
 			self.closeGui=False
 			self.core.guardOptionsStack.showPendingChangesDialog=True
 		else:
-			if self.core.listStack.changesInList:
+			if self.core.listStack.arePendingChangesInList:
 				self.closeGui=False
 				self.core.listStack.showChangesInListDialog=True
 				

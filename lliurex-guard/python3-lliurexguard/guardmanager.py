@@ -46,6 +46,8 @@ class GuardManager(object):
 	LOAD_LLIUREXGUARD_ERROR=-37
 
 	ALL_CORRECT_CODE=0
+	LIST_CREATED_SUCCESSFUL=3
+	LIST_EDITED_SUCCESSFUL=4
 	CHANGE_GUARDMODE_SUCCESSFUL=8
 	READ_LIST_INFO_SUCCESSFUL=12
 	LOAD_FILE_SUCCESSFUL=15
@@ -137,8 +139,8 @@ class GuardManager(object):
 		else:
 			self.userValidated=False
 
-		msg_log='Session user: %s Lliurex-Guard user: %s'%(os.environ["USER"],self.credentials[0])
-		self.write_log(msg_log)
+		msgLog='Session user: %s Lliurex-Guard user: %s'%(os.environ["USER"],self.credentials[0])
+		self.writeLog(msgLog)
 
 
 	#def create_n4dClient
@@ -166,7 +168,7 @@ class GuardManager(object):
 		msg="Read LliureX Guard Mode: "
 		self._debug(msg,readGuardmode)
 		msgLog=msg+str(readGuardmode)
-		self.write_log(msgLog)
+		self.writeLog(msgLog)
 		if readGuardmode['status']:
 			self.guardMode=readGuardmode['data']
 			return {'status':True,'code':GuardManager.READ_GUARDMODE_SUCCESSFUL,'data':readGuardmode['data']}
@@ -181,7 +183,7 @@ class GuardManager(object):
 		msg="LliureX Guard Mode changed to %s"%mode
 		self._debug(msg,changeGuardmode)
 		msgLog=msg+str(changeGuardmode)
-		self.write_log(msgLog)
+		self.writeLog(msgLog)
 		
 		if changeGuardmode['status']:
 			msg="LliureX Guard Mode changed. Dnsmasq restarted "
@@ -220,7 +222,7 @@ class GuardManager(object):
 		msg="LliureX Guard mode lists readed "
 		self._debug(msg,readGuardmodeHeaders)
 		msgLog=msg+str(readGuardmodeHeaders)
-		self.write_log(msgLog)
+		self.writeLog(msgLog)
 		if readGuardmodeHeaders['status']:
 			self.listsConfig=readGuardmodeHeaders['data']
 			for item in self.listsConfig:
@@ -242,6 +244,7 @@ class GuardManager(object):
 	def _getListsConfig(self):
 
 		orderList=self._getOrderList()
+		self.listsConfigData=[]
 		
 		for item in orderList:
 			tmp={}
@@ -251,10 +254,10 @@ class GuardManager(object):
 			tmp["entries"]=self.listsConfig[item]["lines"]
 			tmp["description"]=self.listsConfig[item]["description"]
 			tmp["activated"]=self.listsConfig[item]["active"]
-			tmp["remove"]=False
+			tmp["remove"]=self.listsConfig[item]["remove"]
 			tmp["metaInfo"]=tmp["name"]+tmp["description"]
 
-			self.listsConfigData.append(tmp) 
+			self.listsConfigData.append(tmp)
 
 	#def _getListsConfig
 
@@ -328,13 +331,13 @@ class GuardManager(object):
 				self._getUrlConfig(content)
 
 			result=tmpFile
-			msg_log=msg + " successfully"
+			msgLog=msg + " successfully"
 		else:
 			code=GuardManager.READ_LIST_INFO_ERROR
 			result=errorInfo
-			msg_log=msg+ "with errors. Error details: "+str(errorInfo)
+			msgLog=msg+ "with errors. Error details: "+str(errorInfo)
 		
-		self.write_log(msg_log)
+		self.writeLog(msgLog)
 		return {'status':status,'code':code,'data':result}
 
 	#def readGuardmodeList	
@@ -355,7 +358,7 @@ class GuardManager(object):
 					if "NAME" not in line:
 						if "DESCRIPTION" not in line:
 							if line !="":
-								line=self._format_line(line)
+								line=self._formatLine(line)
 								if line!="":
 									content.append(line)	
 									countLines+=1
@@ -403,7 +406,7 @@ class GuardManager(object):
 			for item in self.listsConfig:
 				self.listsConfig[item]["remove"]=True
 		else:
-			self.listsConfig[str(listToEdit)]["remove"]=True
+			self.listsConfig[str(listToRemove)]["remove"]=True
 
 		self._updateListsConfigData("remove",True,listToRemove)
 	
@@ -439,59 +442,106 @@ class GuardManager(object):
 			tmp["url"]=item.strip()
 			self.urlConfigData.append(tmp)
 
-	#def _getUrlConfig		
+	#def _getUrlConfig
 
-	def save_conf(self,args):
+	def saveConf(self,listInfo,edit,fileToSave=None):
+
+		result={}
+		ret=self._createFileToSave(listInfo["id"],fileToSave)
+
+		if ret["status"]:
+			if edit:
+				order=str(self.listToLoad)
+				msgCode=GuardManager.LIST_EDITED_SUCCESSFUL
+				if self.listsConfig[order]["id"]!=listInfo["id"]:
+					self.listsConfig[order]["replaced_to"]=self.listsConfig[order]["id"]
+			else:
+				order=str(len(self.listsConfig)+1)
+				msgCode=GuardManager.LIST_CREATED_SUCCESSFUL
+				self.listsConfig[order]={}
+				self.listsConfig[order]["active"]=True
+				self.listsConfig[order]["remove"]=False
+				self.listsConfig[order]["replaced_to"]=""
+
+			self.listsConfig[order]["id"]=listInfo["id"]
+			self.listsConfig[order]["name"]=listInfo["name"]
+			self.listsConfig[order]["description"]=listInfo["description"]
+			self.listsConfig[order]["lines"]=ret["lines"]
+			self.listsConfig[order]["tmpfile"]=ret["tmpfile"]
+			self.listsConfig[order]["edited"]=True
+
+			self._getListsConfig()
+
+		else:
+			msgCode=ret["code"]
+		
+		result["status"]=ret["status"]
+		result["code"]=msgCode
+		result["data"]=ret["data"]
+
+		return result
+
+	#def saveConf		
+
+	def _createFileToSave(self,listId,fileToSave=None):
 
 		error=False
 		result={}
-		info=args[0]
-		content=args[1]
-		count_lines=0
+		countLines=0
+		urlToRemove=[]
 
 		try:
-			if args[2]==None:
-				tmp_list=self._createTmpFile(info["id"])
-				self.garbageFiles.append(tmp_list)
+			if fileToSave==None:
+				tmpList=self._createTmpFile(listId)
+				self.garbageFiles.append(tmpList)
 			else:
-				tmp_list=args[2]
+				tmpList=fileToSave
 
-			if content=="":
-				tmp_content=[]
-				f=open(tmp_list,'r')
+			if fileToSave!=None:
+				tmpContent=[]
+				f=open(tmpList,'r')
 				lines=f.readlines()
 				f.close()
-				f=open(tmp_list,'w')
+				f=open(tmpList,'w')
 				for line in lines:
 					if line!="":
-						line=self._format_line(line)
+						line=self._formatLine(line)
 						if line!="":
 							f.write(line)
-							count_lines+=1
+							countLines+=1
 		
 				f.close()		
 				
 			else:
-				format_content=[]	
-				content=content.split("\n")	
-				for line in content:
-					if line !="":
-						line=self._format_line(line)
+				formatContent=[]	
+				for item in self.urlConfigData:
+					if item["url"]!="":
+						line=self._formatLine(item["url"])
 						if line!="":
-							format_content.append(line+"\n")
-							count_lines+=1	
-				f=open(tmp_list,"w")
-				f.write("".join(format_content))
+							item["url"]=line
+							formatContent.append(line+"\n") 
+							countLines+=1	
+						else:
+							urlToRemove.append(item)
+				
+				for item in urlToRemove:
+					if item in self.urlConfigData:
+						self.urlConfigData.remove(item)
+
+				f=open(tmpList,"w")
+				f.write("".join(formatContent))
 				f.close()
+
 			content=None
-			format_content=None
-			if count_lines>0:
+			formatContent=None
+			urltoRemove=[]
+			if countLines>0:
 				result["status"]=True
 			else:
 				result["status"]=False
 				result["code"]=GuardManager.EMPTY_LIST_ERROR
-			result["tmpfile"]=tmp_list
-			result["lines"]=count_lines
+			result["tmpfile"]=tmpList
+			result["lines"]=countLines
 			result["data"]=""
 			
 		except Exception as e:
@@ -499,16 +549,14 @@ class GuardManager(object):
 			result['code']=GuardManager.SAVING_FILE_ERROR
 			result['data']=str(e)
 		
-		msg="List %s. Saved changes "%info["id"]
+		msg="List %s. Saved changes "%listId
 		self._debug(msg,result)
-		msg_log=msg+" "+str(result)	
-		self.write_log(msg_log)
+		msgLog=msg+" "+str(result)	
+		self.writeLog(msgLog)
 
 		return result
-			
-
-			
-	#def save_conf		
+		
+	#def _createFileToSave		
 
 	def checkData(self,data,edit,loadedFile):
 
@@ -573,88 +621,85 @@ class GuardManager(object):
 	#def _getOrderList		
 
 
-	def apply_changes(self,list_data,orig_data):
+	def applyChanges(self):
 
-		list_to_remove=[]
-		list_to_active=[]
-		list_to_deactive=[]
-		self.tmpfile_list=[]
+		listToRemove=[]
+		listToActive=[]
+		listToDeactive=[]
+		self.tmpFileList=[]
 		error=False
 		code=""
 		data=""
 
-		if len(orig_data)==0:
-			changes=list_data.keys()
+		if len(self.listsConfigOrig)==0:
+			changes=self.listsConfig.keys()
 		else:	
-			changes=diff(orig_data,list_data).keys()
+			changes=diff(self.listsConfigOrig,self.listsConfig).keys()
 
 		if len(changes)>0:
-			for item in list_data:
+			for item in self.listsConfig:
 				if item in changes:	
-					if list_data[item]["remove"]:
-						list_to_remove.append(list_data[item]["id"])
+					if self.listsConfig[item]["remove"]:
+						listToRemove.append(self.listsConfig[item]["id"])
 						continue
 
 							
-					if list_data[item]["active"]:
-						if list_data[item]["tmpfile"]!="":
-							#self.tmpfile_list.append(list_data[item]["tmpfile"])
+					if self.listsConfig[item]["active"]:
+						if self.listsConfig[item]["tmpfile"]!="":
 							if self.is_client:
-								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
+								send=self.sendTmpFileToServer(self.listsConfig[item]["tmpfile"])
 									
-						list_to_active.append(list_data[item])
+						listToActive.append(self.listsConfig[item])
 									
 									
-					if not list_data[item]["active"]:
-						if list_data[item]["tmpfile"]!="":
-							#self.tmpfile_list.append(list_data[item]["tmpfile"])
+					if not self.listsConfig[item]["active"]:
+						if self.listsConfig[item]["tmpfile"]!="":
 							if self.is_client:
-								send=self.send_tmpfile_toserver(list_data[item]["tmpfile"])
+								send=self.sendTmpFileToServer(self.listsConfig[item]["tmpfile"])
 								
-						list_to_deactive.append(list_data[item])
+						listToDeactive.append(self.listsConfig[item])
 
-					if list_data[item]["replaced_to"]!="":
-						orig_name=list_data[item]["replaced_to"]
-						list_to_remove.append(orig_name)
+					if self.listsConfig[item]["replaced_to"]!="":
+						origName=self.listsConfig[item]["replaced_to"]
+						listToRemove.append(origName)
 			
-			if len(list_to_remove)>0:
-				result_remove=self.client.LliurexGuardManager.remove_guardmode_list(list_to_remove)	
+			if len(listToRemove)>0:
+				resultRemove=self.client.LliurexGuardManager.remove_guardmode_list(listToRemove)	
 				msg="Applied Changes.Removed list "
-				self._debug(msg,result_remove)
-				msg_log=msg+str(result_remove)+". List removed: "+str(list_to_remove)
-				self.write_log(msg_log)
-				if not result_remove['status']:
+				self._debug(msg,resultRemove)
+				msgLog=msg+str(resultRemove)+". List removed: "+str(listToRemove)
+				self.writeLog(msgLog)
+				if not resultRemove['status']:
 					error=True
 					code=GuardManager.REMOVING_LIST_ERROR
-					data=result_remove['data']
+					data=resultRemove['data']
 
 			if not error:
-				if len(list_to_active)>0:
-						result_active=self.client.LliurexGuardManager.activate_guardmode_list(list_to_active)	
+				if len(listToActive)>0:
+						resultActive=self.client.LliurexGuardManager.activate_guardmode_list(listToActive)	
 						msg="Applied Changes.Actived list "
-						self._debug(msg,result_active)
-						msg_log=msg+str(result_active)+". List actived: "+str(list_to_active)
-						self.write_log(msg_log)
+						self._debug(msg,resultActive)
+						msgLog=msg+str(resultActive)+". List actived: "+str(listToActive)
+						self.writeLog(msgLog)
 
-						if not result_active['status']:
+						if not resultActive['status']:
 							error=True
 							code=GuardManager.ACTIVATING_LIST_ERROR
-							data=result_active['data']
+							data=resultActive['data']
 
 				if not error:
-					if len(list_to_deactive)>0:
-						result_deactive=self.client.LliurexGuardManager.deactivate_guardmode_list(list_to_deactive)	
+					if len(listToDeactive)>0:
+						resultDeactive=self.client.LliurexGuardManager.deactivate_guardmode_list(listToDeactive)	
 						msg="Applied Changes.Deactived lists "
-						self._debug(msg,result_deactive)
-						msg_log=msg+str(result_deactive)+". List deactived: "+str(list_to_deactive)
-						self.write_log(msg_log)
-						if not result_deactive['status']:
+						self._debug(msg,resultDeactive)
+						msgLog=msg+str(resultDeactive)+". List deactived: "+str(listToDeactive)
+						self.writeLog(msgLog)
+						if not resultDeactive['status']:
 							error=True
 							code=GuardManager.DEACTIVATING_LIST_ERROR
-							data=result_deactive['data']
+							data=resultDeactive['data']
 
 			if not error:
-				#self.remove_tmp_file(tmpfile_list)
 				msg="Lliurex Guard applied changes. Dnsmasq restart"
 				restartDnsmasq=self.restartDnsmasq(msg)
 				if restartDnsmasq['status']:
@@ -667,7 +712,7 @@ class GuardManager(object):
 		else:
 			return {'status':True,'code':GuardManager.ALL_CORRECT_CODE}						
 
-	#def apply_changes
+	#def applyChanges
 
 	def restartDnsmasq(self,msg):
 
@@ -686,30 +731,29 @@ class GuardManager(object):
 				if self.count<self.timeout:
 					self.count+=1
 				else:
-					msg_log="Lliurex Guard checking connection with server. Time Out. Error:%s"%str(e)
-					self.write_log(msg_log)
+					msgLog="Lliurex Guard checking connection with server. Time Out. Error:%s"%str(e)
+					self.writeLog(msgLog)
 					self.connection=True
 
-			
 		#self.set_server(self.server_ip)	
 		self.client=n4d.client.Client(ticket=self.tk)
 		self._debug(msg,restartDnsmasq)
-		msg_log=msg+str(restartDnsmasq)
-		self.write_log(msg_log)
+		msgLog=msg+str(restartDnsmasq)
+		self.writeLog(msgLog)
 		
 		return restartDnsmasq				
 
 	#def restartDnsmasq()	
 
-	def send_tmpfile_toserver(self,tmp_file):
+	def sendTmpFileToServer(self,tmp_file):
 
 		send_tmpfile=self.localClient.ScpManager.send_file(self.credentials[0],self.credentials[1],"server",tmp_file,"/tmp")
-		msg_log="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
-		self.write_log(msg_log)
+		msgLog="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
+		self.writeLog(msgLog)
 		
 		return send_tmpfile
 
-	#def send_tmpfile_toserver		
+	#def sendTmpFileToServer		
 
 	def _createTmpFile(self,listId):
 	
@@ -724,7 +768,7 @@ class GuardManager(object):
 
 		'''
 		if "client" in self.flavours:
-			for item in self.tmpfile_list:
+			for item in self.tmpFileList:
 				if os.path.exists(item):
 					os.remove(item)
 		'''
@@ -739,14 +783,14 @@ class GuardManager(object):
 		
 	#def _remove_tmp_file	
 
-	def write_log(self,msg):
+	def writeLog(self,msg):
 	
 		syslog.openlog("LLIUREX-GUARD")
 		syslog.syslog(msg)	
 
-	#def write_log	
+	#def writeLog	
 
-	def _format_line(self,line):
+	def _formatLine(self,line):
 
 		firstchar=line[0]
 		
@@ -763,7 +807,7 @@ class GuardManager(object):
 		
 		return line
 
-	#def _format_line
+	#def _formatLine
 
 	def get_clipboard_content(self):
 

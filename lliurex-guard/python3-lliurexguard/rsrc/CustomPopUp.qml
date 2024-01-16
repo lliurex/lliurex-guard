@@ -58,11 +58,8 @@ Popup {
             case 14:
                 var msg=i18nd("lliurex-guard","Loading file. Wait a moment...")
                 break;
-            case 15:
-                var msg=i18nd("lliurex-guard","Applying changes. Wait a moment...")
-                break;
             case 17:
-                var msg=i18nd("lliurex-guard","Changing Lliurex Guard mode. Wait a moment...")
+                var msg=i18nd("lliurex-guard","Applying changes. Wait a moment...")
                 break;
             case 18:
                 var msg=i18nd("lliurex-guard","Selecting lists to change the activation status. Wait a moment...")

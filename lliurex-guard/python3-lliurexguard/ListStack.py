@@ -60,7 +60,6 @@ class CheckListChanges(QThread):
 	def __init__(self,*args):
 
 		QThread.__init__(self)
-		print(args)
 		self.dataToCheck=args[0]
 		self.edit=args[1]
 		self.fileToCheck=args[2]
@@ -76,6 +75,26 @@ class CheckListChanges(QThread):
 
 #class CheckListChanges
 
+class SaveChanges(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.dataToSave=args[0]
+		self.edit=args[1]
+		self.fileToCheck=args[2]
+		self.ret={}
+
+	#def __init__
+
+	def run(self,*args):
+
+		self.ret=Bridge.guardManager.saveConf(self.dataToSave,self.edit,self.fileToCheck)
+
+	#def run
+
+#class SaveChanges
+
 
 class Bridge(QObject):
 
@@ -89,9 +108,9 @@ class Bridge(QObject):
 		self._listName=Bridge.guardManager.listName
 		self._listDescription=Bridge.guardManager.listDescription
 		self._showListFormMessage=[False,"","Ok"]
-		self._changesInList=False
+		self._arePendingChangesInList=False
 		self.changesInHeaders=False
-		self.changesInFile=False
+		self.changesInContent=False
 		self._listCurrentOption=0
 		self._showUrlsList=False
 		self._enableForm=True
@@ -147,19 +166,19 @@ class Bridge(QObject):
 
 	#def _getUrlModel
 
-	def _getChangesInList(self):
+	def _getArePendingChangesInList(self):
 
-		return self._changesInList
+		return self._arePendingChangesInList
 
-	#def _getChangesInList
+	#def _getArePendingChangesInList
 
-	def _setChangesInList(self,changesInList):
+	def _setArePendingChangesInList(self,arePendingChangesInList):
 
-		if self._changesInList!=changesInList:
-			self._changesInList=changesInList
-			self.on_changesInList.emit()
+		if self._arePendingChangesInList!=arePendingChangesInList:
+			self._arePendingChangesInList=arePendingChangesInList
+			self.on_arePendingChangesInList.emit()
 
-	#def _setChangesInList
+	#def _setArePendingChangesInList
 
 	def _getShowListFormMessage(self):
 
@@ -232,8 +251,9 @@ class Bridge(QObject):
 		self.listName=Bridge.guardManager.listName
 		self.listDescription=Bridge.guardManager.listDescription
 		self.showListFormMessage=[False,"","Ok"]
-		self.changesInList=False
+		self.arePendingChangesInList=False
 		self.changesInHeaders=False
+		self.changesInContent=False
 		self.fileToLoad=None
 		self.lastChangeFromFile=""
 		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
@@ -244,14 +264,13 @@ class Bridge(QObject):
 	@Slot()
 	def goHome(self):
 
-		if not self.changesInList:
-			self.core.mainStack.currentStack=1
-			self.core.mainStack.mainCurrentOption=0
+		if not self.arePendingChangesInList:
 			self.listCurrentOption=0
-			self.core.mainStack.moveToStack=""
+			self.core.mainStack.moveToStack=1
+			self.core.mainStack.manageGoToStack()
 		else:
 			self.showChangesInListDialog=True
-			self.core.mainStack.moveToStack=1
+			self.core.mainStack.moveToStack=""
 
 	#def goHome
 
@@ -261,6 +280,7 @@ class Bridge(QObject):
 		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
 		self.core.guardOptionsStack.showMainMessage=[False,"","Ok"]
 		self.editList=LoadList(False,listToLoad)
+		self.edit=True
 		self.editList.start()
 		self.editList.finished.connect(self._loadListRet)
 
@@ -306,12 +326,13 @@ class Bridge(QObject):
 		lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
 
 		if lastChangeFromFile!=self.lastChangeFromFile:
-			self.changesInFile=True
-			self.changesInList=True
+			self.changesInContent=True
+			self.arePendingChangesInList=True
 			self.lastChangeFromFile=lastChangeFromFile
 		else:
 			if not self.changesInHeaders:
-				self.changesInFile=False
+				self.changesInContent=False
+				self.arePendingChangesInList=False
 
 	#def _openFileRet
 
@@ -325,10 +346,11 @@ class Bridge(QObject):
 
 		if self.currentListConfig!=Bridge.guardManager.currentListConfig:
 			self.changesInHeaders=True
-			self.changesInList=True
+			self.arePendingChangesInList=True
 		else:
-			if not self.changesInFile:
-				self.changesInList=False
+			if not self.changesInContent:
+				self.changesInHeaders=False
+				self.arePendingChangesInList=False
 
 	#def updateListName
 
@@ -341,10 +363,11 @@ class Bridge(QObject):
 
 		if self.currentListConfig!=Bridge.guardManager.currentListConfig:
 			self.changesInHeaders=True
-			self.changesInList=True
+			self.arePendingChangesInList=True
 		else:
-			if not self.changesInFile:
-				self.changesInList=False
+			if not self.changesInContent:
+				self.changesInHeaders=False
+				self.arePendingChangesInList=False
 
 	#def updateListDescription
 
@@ -362,28 +385,33 @@ class Bridge(QObject):
 				self.contentOfList.append(tmp)
 
 		if self.contentOfList!= Bridge.guardManager.urlConfigData:
-			self.changesInList=True
+			self.changesInContent=True
+			self.arePendingChangesInList=True
 		else:
-			self.changesInList=False 
-
+			if not self.changesInHeaders:
+				self.arePendingChangesInList=False
+				self.changesInContent=False 
+ 
 	#def AddNewUrl
 
 	@Slot(int)
-	def removeUrl(self,urltoRemove):
+	def removeUrl(self,urlToRemove):
 
 		self.showListFormMessage=[False,"","Ok"]
-		tmpUrl=self._urlModel._entries[urltoRemove]["url"]
-		self._urlModel.removeRow(urltoRemove)
+		tmpUrl=self._urlModel._entries[urlToRemove]["url"]
+		self._urlModel.removeRow(urlToRemove)
 
 		for i in range(len(self.contentOfList)-1,-1,-1):
 			if tmpUrl==self.contentOfList[i]["url"]:
 				self.contentOfList.pop(i)
 
 		if self.contentOfList!=Bridge.guardManager.urlConfigData:
-			Bridge.guardManager.urlConfigData=self.contentOfList
-			self.changesInList=True
+			self.changesInContent=True
+			self.arePendingChangesInList=True
 		else:
-			self.changesInList=False 
+			if not self.changesInHeaders:
+				self.arePendingChangesInList=False
+				self.changesInContent=False 
 
 	#def removeUrl
 
@@ -393,15 +421,12 @@ class Bridge(QObject):
 		self.showChangesInListDialog=False
 
 		if response=="Apply":
-			self.saveChanges()
+			self.saveListChanges()
 		elif response=="Discard":
-			print("Discard")
-			self.changesInList=False
+			self.arePendingChangesInList=False
 			self.core.mainStack.closeGui=True
 			self.core.mainStack.moveToStack=1
 			self.core.mainStack.manageGoToStack()
-		elif response=="Cancel":
-			print("Cancel")
 
 	#def manageChangesInListDialog
 
@@ -412,7 +437,7 @@ class Bridge(QObject):
 		self.showListFormMessage=[False,"","Ok"]
 		self.core.mainStack.closePopUp=[False,WAITING_SAVE_CHANGES]
 		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"]]
-		self.checkListChangesT=CheckListChanges(dataToCheck,True,self.fileToLoad)
+		self.checkListChangesT=CheckListChanges(dataToCheck,self.edit,self.fileToLoad)
 		self.checkListChangesT.start()
 		self.checkListChangesT.finished.connect(self._checkListChangesRet)
 
@@ -420,14 +445,35 @@ class Bridge(QObject):
 
 	def _checkListChangesRet(self):
 
-		self.core.mainStack.closePopUp=[True,""]
 		if self.checkListChangesT.ret["result"]:
-			self.changesInList=False
+			Bridge.guardManager.urlConfigData=self.contentOfList
+			self.saveChangesT=SaveChanges(self.currentListConfig,self.edit,self.fileToLoad)
+			self.saveChangesT.start()
+			self.saveChangesT.finished.connect(self._saveChangesRet)
 		else:
+			self.core.mainStack.closePopUp=[True,""]
 			self.showListFormMessage=[True,self.checkListChangesT.ret["code"],"Error"]
 
-	#def _checkListChangesRet				
+	#def _checkListChangesRet
 
+	def _saveChangesRet(self):
+
+		if self.saveChangesT.ret["status"]:
+			self.core.guardOptionsStack._updateListsModel()
+			self.core.guardOptionsStack.showMainMessage=[True,self.saveChangesT.ret["code"],"Ok",""]
+			self.core.guardOptionsStack.arePendingChanges=True
+		else:
+			self.core.guardOptionsStack.showMainMessage=[True,self.saveChangesT.ret["code"],"Error",self.saveChangesT.ret["data"]]
+
+		self.core.mainStack.closePopUp=[True,""]
+		self.arePendingChangesInList=False
+		self.core.mainStack.closeGui=True
+		self.core.mainStack.moveToStack=1
+		self.core.mainStack.manageGoToStack()
+		self.listCurrentOption=0
+
+	#def _saveChangesRet
+		
 	on_listName=Signal()
 	listName=Property(str,_getListName,_setListName,notify=on_listName)
 
@@ -440,8 +486,8 @@ class Bridge(QObject):
 	on_listCurrentOption=Signal()
 	listCurrentOption=Property(int,_getListCurrentOption,_setListCurrentOption, notify=on_listCurrentOption)
 
-	on_changesInList=Signal()
-	changesInList=Property(bool,_getChangesInList,_setChangesInList,notify=on_changesInList)
+	on_arePendingChangesInList=Signal()
+	arePendingChangesInList=Property(bool,_getArePendingChangesInList,_setArePendingChangesInList,notify=on_arePendingChangesInList)
 
 	on_enableForm=Signal()
 	enableForm=Property(bool,_getEnableForm,_setEnableForm,notify=on_enableForm)

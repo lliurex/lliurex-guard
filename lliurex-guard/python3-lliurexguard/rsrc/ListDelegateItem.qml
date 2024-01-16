@@ -134,7 +134,7 @@ Components.ListItem{
                     MenuItem{
                         icon.name:listRemove?"restoration.svg":"delete.svg"
                         text:listRemove?i18nd("lliurex-guard","Restore the list"):i18nd("lliurex-guard","Delete the list")
-                        onClicked:listRemove?guardOptionsStackBridge.restoreList(listOrder):guardOptionsStackBridge.removeList([false,listOrder])
+                        onClicked:listRemove?guardOptionsStackBridge.restoreList(listOrder):guardOptionsStackBridge.removeLists([false,listOrder])
                     }
                 }
             }

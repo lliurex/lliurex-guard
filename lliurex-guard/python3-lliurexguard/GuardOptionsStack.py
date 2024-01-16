@@ -14,6 +14,7 @@ WAITING_CHANGE_GUARDMODE_CODE=7
 WAITING_APPLY_LISTS_CHANGES_CODE=18
 WAITING_REMOVE_LISTS_CODE=19
 WAITING_RESTORE_LIST_CODE=20
+WAITING_APPLY_CHANGES_CODE=17
 
 class ChangeListStatus(QThread):
 
@@ -96,6 +97,26 @@ class ChangeMode(QThread):
 	#def run
 
 #class ChangeMode
+
+class ApplyChanges(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.retChange={}
+		self.retHeaders={}
+
+	#def __init__
+
+	def run(self,*args):
+
+		self.retChange=Bridge.guardManager.applyChanges()
+		if self.retChange["status"]:
+			self.retHeaders=Bridge.guardManager.readGuardmodeHeaders()
+	
+	#def run
+
+#class ApplyChanges
 
 class Bridge(QObject):
 
@@ -464,14 +485,42 @@ class Bridge(QObject):
 		self.showPendingChangesDialog=False
 
 		if response=="Acdept":
-			print("apply")
+			self.applyChanges()
 		elif response=="Discard":
 			self.arePendingChanges=False
 			self.core.mainStack.closeGui=True
-		elif response=="Cancel":
-			self.arePendingChanges=False
 
 	#def managePendingChangesDialog
+
+	@Slot()
+	def applyChanges(self):
+
+		self.core.mainStack.closeGui=False
+		self.core.mainStack.closePopUp=[False,WAITING_APPLY_CHANGES_CODE]
+		self.applyChangesT=ApplyChanges()
+		self.applyChangesT.start()
+		self.applyChangesT.finished.connect(self._applyChangesRet)
+
+	#def applyChanges
+
+	def _applyChangesRet(self):
+
+		if self.applyChangesT.retChange["status"]:
+			if self.applyChangesT.retHeaders["status"]:
+				self.loadConfig()
+				self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Ok",""]
+			else:
+				self.showMainMessage=[True,self.applyChangesT.retHeaders["code"],"Error",self.applyChangesT.retHeaders["data"]]
+
+			self.arePendingChanges=False
+			self.core.mainStack.closeGui=True
+
+		else:
+			self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Error",self.applyChangesT.retChange["data"]]
+
+		self.core.mainStack.closePopUp=[True,""]		
+
+	#def _applyChangesRet
 	 
 	on_showMainMessage=Signal()
 	showMainMessage=Property('QVariantList',_getShowMainMessage,_setShowMainMessage, notify=on_showMainMessage)

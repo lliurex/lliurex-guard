@@ -120,10 +120,10 @@ Rectangle{
             visible:true
             focus:true
             display:AbstractButton.TextBesideIcon
-            icon.name:"dialog-ok.svg"
+            icon.name:"document-save.svg"
             text:i18nd("lliurex-guard","Apply")
             Layout.preferredHeight:40
-            enabled:listStackBridge.changesInList
+            enabled:listStackBridge.arePendingChangesInList
             Keys.onReturnPressed: applyBtn.clicked()
             Keys.onEnterPressed: applyBtn.clicked()
             
@@ -141,7 +141,7 @@ Rectangle{
             icon.name:"dialog-cancel.svg"
             text:i18nd("lliurex-guard","Cancel")
             Layout.preferredHeight: 40
-            enabled:listStackBridge.changesInList
+            enabled:listStackBridge.arePendingChangesInList
             Keys.onReturnPressed: cancelBtn.clicked()
             Keys.onEnterPressed: cancelBtn.clicked()
 
