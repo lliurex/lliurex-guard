@@ -15,13 +15,12 @@ WAITING_OPEN_FILE_CODE=6
 WAITING_SAVE_CHANGES=26
 
 
-class LoadList(QThread):
+class AddList(QThread):
 
 	def __init__(self,*args):
 
 		QThread.__init__(self)
-		self.newList=args[0]
-		self.listInfo=args[1]
+		self.fileToLoad=args[0]
 		self.ret={}
 
 	#def __init__
@@ -30,8 +29,30 @@ class LoadList(QThread):
 
 		time.sleep(0.5)
 		ret=Bridge.guardManager.initValues()
-		if not self.newList:
-			self.ret=Bridge.guardManager.loadListConfig(self.listInfo)
+		if self.fileToLoad!="":
+			self.ret=Bridge.guardManager.loadFile(self.fileToLoad)
+		else:
+			self.ret={'status':True,'data':False}
+	
+	#def run
+
+#class AddList
+
+class LoadList(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.listInfo=args[0]
+		self.ret={}
+
+	#def __init__
+
+	def run(self,*args):
+
+		time.sleep(0.5)
+		ret=Bridge.guardManager.initValues()
+		self.ret=Bridge.guardManager.loadListConfig(self.listInfo)
 
 	#def run
 
@@ -274,13 +295,50 @@ class Bridge(QObject):
 
 	#def goHome
 
+	@Slot(str)
+	def addNewList(self,fileToLoad=""):
+
+		self.core.mainStack.closeGui=False
+		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
+		self.core.guardOptionsStack.showMainMessage=[False,"","Ok"]
+		self.edit=False
+		self.newListT=AddList(fileToLoad)
+		self.newListT.start()
+		self.newListT.finished.connect(self._newListRet)
+
+	#def addNewList
+
+	def _newListRet(self):
+
+		if self.newListT.ret['status']:
+			self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
+			self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
+			self._initializeVars()
+			if not self.newListT.ret["data"][0]:
+				self.showUrlsList=True
+				self.updateUrlModel()
+			else:
+				self.fileToLoad=self.newListT.ret["data"][1]
+				self.lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
+				self.showUrlsList=False
+			self.core.mainStack.currentStack=2
+			self.listCurrentOption=1
+		else:
+			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error"]
+
+		self.core.mainStack.closeGui=False
+		self.core.mainStack.closePopUp=[True,""]
+
+	#def _newListRet
+
 	@Slot(int)
 	def loadList(self,listToLoad):
 		
+		self.core.mainStack.closeGui=False
 		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
 		self.core.guardOptionsStack.showMainMessage=[False,"","Ok"]
-		self.editList=LoadList(False,listToLoad)
 		self.edit=True
+		self.editList=LoadList(listToLoad)
 		self.editList.start()
 		self.editList.finished.connect(self._loadListRet)
 
@@ -288,9 +346,9 @@ class Bridge(QObject):
 
 	def _loadListRet(self):
 
-		self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
-		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 		if self.editList.ret["status"]:
+			self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
+			self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 			self._initializeVars()
 			if self.editList.ret["data"]=="":
 				self.updateUrlModel()
@@ -299,9 +357,13 @@ class Bridge(QObject):
 				self.fileToLoad=self.editList.ret["data"]
 				self.lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
 				self.showUrlsList=False
-			self.core.mainStack.closePopUp=[True,""]
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
+		else:
+			self.core.guardOptionsStack.showMainMessage=[True,self.editListT.ret["code"],"Error"]
+
+		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.closeGui=True
 
 	#def _loadListRet
 

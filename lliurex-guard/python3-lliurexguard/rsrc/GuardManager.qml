@@ -75,13 +75,13 @@ Rectangle{
                 MenuItem{
                     icon.name:"document-edit.svg"
                     text:i18nd("lliurex-guard","Add custom list")
-                    onClicked:guardOptionsStackBridge.addCustomList()
+                    onClicked:listStackBridge.addNewList()
                 }
 
                 MenuItem{
                     icon.name:"document-import.svg"
                     text:i18nd("lliurex-guard","Add custom list from file")
-                    onClicked:guardOptionsStackBridge.addCustomListFromFile()
+                    onClicked:loadFileDialog.open()
                 }
             } 
         }
@@ -233,6 +233,20 @@ Rectangle{
         
     }
 
+    FileDialog{
+        id:loadFileDialog
+        folder:shortcuts.home
+        nameFilters:["Test files (*txt)"]
+        onAccepted:{
+            var selectedPath=""
+            selectedPath=loadFileDialog.fileUrl.toString()
+            selectedPath=selectedPath.replace(/^(file:\/{2})/,"")
+            listStackBridge.addNewList(selectedPath)
+        }
+      
+    } 
+
+
     ChangesDialog{
         id:changeModeDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
@@ -342,6 +356,13 @@ Rectangle{
             case -10:
                 var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard will be disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
+            case -13:
+                var msg=i18nd("lliurex-guard","Error loading the information from the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -16:
+                var msg=i18nd("lliurex-guard","Error loading file:")
+                " "+guardOptionsStackBridge.showMainMessage[3]
+                break;
             case -19:
                 var msg=i18nd("lliurex-guard","Error removing lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
@@ -356,6 +377,12 @@ Rectangle{
                 break;
             case -25:
                 var msg=i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
+            case -27:
+                var msg=i18nd("lliurex-guardd","The file loaded is empty or the url than containt do not have the correct format")
+                break;
+            case -30:
+                var msg=i18nd("lliurex-guard","It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
                 break;
             case -35:
                 var msg=i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")

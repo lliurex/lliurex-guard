@@ -388,6 +388,26 @@ class GuardManager(object):
 
 	#def readLocalFile
 
+	def loadFile(self,fileToLoad):
+
+		data=""
+		limitLines=False
+		ret=self.readLocalFile(fileToLoad,True)
+
+		if ret["status"]:
+			if ret["data"][0]!=None:
+				self._getUrlConfig(ret["data"][0])
+				print(self.urlConfigData)
+			else:
+				limitLines=True
+			data=[limitLines,ret["data"][2]]
+		else:
+			data=ret["data"]
+
+		return {'status':ret['status'],'code':ret['code'],'data':data}
+			
+	#def loadFile
+
 	def changeListsStatus(self,allLists,active,listToEdit):
 
 		if allLists:
@@ -437,6 +457,7 @@ class GuardManager(object):
 
 	def _getUrlConfig(self,content):
 
+		self.urlConfigData=[]
 		for item in content:
 			tmp={}
 			tmp["url"]=item.strip()
