@@ -358,7 +358,7 @@ class GuardManager(object):
 					if "NAME" not in line:
 						if "DESCRIPTION" not in line:
 							if line !="":
-								line=self._formatLine(line)
+								line=self.formatLine(line)
 								if line!="":
 									content.append(line)	
 									countLines+=1
@@ -526,7 +526,7 @@ class GuardManager(object):
 				f=open(tmpList,'w')
 				for line in lines:
 					if line!="":
-						line=self._formatLine(line)
+						line=self.formatLine(line)
 						if line!="":
 							f.write(line)
 							countLines+=1
@@ -537,7 +537,7 @@ class GuardManager(object):
 				formatContent=[]	
 				for item in self.urlConfigData:
 					if item["url"]!="":
-						line=self._formatLine(item["url"])
+						line=self.formatLine(item["url"])
 						if line!="":
 							item["url"]=line
 							formatContent.append(line+"\n") 
@@ -811,24 +811,25 @@ class GuardManager(object):
 
 	#def writeLog	
 
-	def _formatLine(self,line):
+	def formatLine(self,line):
 
-		firstchar=line[0]
-		
-		if firstchar in [".","_","-","+","*","$"," ","&","!","¡","#","%","?","¿"]:
-			line=line[1:]
-		
-		if "https" in line:
-			line=line.replace("https://","")
-		else:
-			line=line.replace("http://","")
+		if line!="":
+			firstchar=line[0]
+			
+			if firstchar in [".","_","-","+","*","$"," ","&","!","¡","#","%","?","¿"]:
+				line=line[1:]
+			
+			if "https" in line:
+				line=line.replace("https://","")
+			else:
+				line=line.replace("http://","")
 
-		if len(line.strip().split("/"))>1:
-			line=""
+			if len(line.strip().split("/"))>1:
+				line=""
 		
 		return line
 
-	#def _formatLine
+	#def formatLine
 
 	def get_clipboard_content(self):
 

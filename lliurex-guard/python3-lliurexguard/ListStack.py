@@ -440,6 +440,7 @@ class Bridge(QObject):
 		tmpNewUrl=urlToAdd.split(" ")
 		
 		for item in tmpNewUrl:
+			item=Bridge.guardManager.formatLine(item)
 			if item!="":
 				self._urlModel.appendRow(item)
 				tmp={}

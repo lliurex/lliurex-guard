@@ -69,9 +69,12 @@ Rectangle {
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
                 ToolTip.text:i18nd("lliurex-guard","Click to add the urls to list")
-                Keys.onReturnPressed: applyUserBtn.clicked()
-                Keys.onEnterPressed: applyUserBtn.clicked()
-                onClicked:listStackBridge.addNewUrl(urlEntry.text)
+                Keys.onReturnPressed: applyUrlBtn.clicked()
+                Keys.onEnterPressed: applyUrlBtn.clicked()
+                onClicked:{
+                    listStackBridge.addNewUrl(urlEntry.text)
+                    urlEntry.text=""
+                }
             }
 
             Button{
@@ -89,6 +92,7 @@ Rectangle {
                     entryRow.visible=false
                     urlEntry.text=""
                     searchRow.visible=true
+                    addUrlBtn.enabled=true
                 }
             }
 
@@ -157,6 +161,7 @@ Rectangle {
                 onClicked:{
                     entryRow.visible=true
                     searchRow.visible=false
+                    addUrlBtn.enabled=false
                 }
 
             }
