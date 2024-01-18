@@ -158,6 +158,9 @@ class GuardManager(object):
 		self.listName=""
 		self.listDescription=""
 		self.currentListConfig={}
+		self.currentListConfig["id"]=""
+		self.currentListConfig["name"]=""
+		self.currentListConfig["description"]=""
 		self.urlConfigData=[]
 		
 	#def initValues		

@@ -75,7 +75,7 @@ Rectangle{
                 MenuItem{
                     icon.name:"document-edit.svg"
                     text:i18nd("lliurex-guard","Add custom list")
-                    onClicked:listStackBridge.addNewList()
+                    onClicked:listStackBridge.addNewList("")
                 }
 
                 MenuItem{

@@ -32,7 +32,7 @@ class AddList(QThread):
 		if self.fileToLoad!="":
 			self.ret=Bridge.guardManager.loadFile(self.fileToLoad)
 		else:
-			self.ret={'status':True,'data':False}
+			self.ret={'status':True,'data':[False]}
 	
 	#def run
 
@@ -300,7 +300,7 @@ class Bridge(QObject):
 
 		self.core.mainStack.closeGui=False
 		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
-		self.core.guardOptionsStack.showMainMessage=[False,"","Ok"]
+		self.core.guardOptionsStack.showMainMessage=[False,"","Ok",""]
 		self.edit=False
 		self.newListT=AddList(fileToLoad)
 		self.newListT.start()
@@ -324,7 +324,7 @@ class Bridge(QObject):
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
 		else:
-			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error"]
+			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error",self.newListT.ret["data"]]
 
 		self.core.mainStack.closeGui=False
 		self.core.mainStack.closePopUp=[True,""]
@@ -336,7 +336,7 @@ class Bridge(QObject):
 		
 		self.core.mainStack.closeGui=False
 		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
-		self.core.guardOptionsStack.showMainMessage=[False,"","Ok"]
+		self.core.guardOptionsStack.showMainMessage=[False,"","Ok",""]
 		self.edit=True
 		self.editList=LoadList(listToLoad)
 		self.editList.start()
@@ -360,7 +360,7 @@ class Bridge(QObject):
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
 		else:
-			self.core.guardOptionsStack.showMainMessage=[True,self.editListT.ret["code"],"Error"]
+			self.core.guardOptionsStack.showMainMessage=[True,self.editListT.ret["code"],"Error",self.editListT.ret["data"]]
 
 		self.core.mainStack.closePopUp=[True,""]
 		self.core.mainStack.closeGui=True
