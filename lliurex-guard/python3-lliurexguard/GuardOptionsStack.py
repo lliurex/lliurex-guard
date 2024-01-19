@@ -514,6 +514,7 @@ class Bridge(QObject):
 				self.showMainMessage=[True,self.applyChangesT.retHeaders["code"],"Error",self.applyChangesT.retHeaders["data"]]
 
 			self.arePendingChanges=False
+			self.core.listStack.arePendingChangesInList=False
 			self.core.mainStack.closeGui=True
 
 		else:
