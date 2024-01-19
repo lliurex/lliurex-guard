@@ -546,7 +546,7 @@ class Bridge(QObject):
 
 	def _cancelListChanges(self):
 
-		self.changesInList=False
+		self.arePendingChangesInList=False
 		self.core.mainStack.closeGui=True
 		self.core.mainStack.moveToStack=1
 		self.core.mainStack.manageGoToStack()
