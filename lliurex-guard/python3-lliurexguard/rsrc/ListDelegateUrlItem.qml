@@ -5,18 +5,22 @@ import QtQml.Models 2.8
 
 Components.ListItem{
 
-    id: listItem
+    id: listUrlItem
     property string url
 
     enabled:true
 
     onContainsMouseChanged: {
-        if (!manageUrlBtn.activeFocus){
-            if (containsMouse) {
-                urlList.currentIndex = index
-            }else {
-                urlList.currentIndex = -1
-            }
+         if (containsMouse) {
+            let i=0
+            do{
+                urlList.currentIndex=index-i
+                i+=1
+
+            }while (!listUrlItem.ListView.isCurrentItem)
+
+        } else {
+            urlList.currentIndex = -1
         }
 
     }
@@ -29,14 +33,14 @@ Components.ListItem{
         Item{
             id: menuItem
             height:visible?30:0
-            width:listItem.width-manageUrlBtn.width
+            width:listUrlItem.width-manageUrlBtn.width
             
             Text{
                 id:urlText
                 text:url
                 font.pointSize: 10
                 width:{
-                    if (listItem.ListView.isCurrentItem){
+                    if (listUrlItem.ListView.isCurrentItem){
                         parent.width-(manageUrlBtn.width+20)
                     }else{
                         parent.width-20
@@ -55,7 +59,7 @@ Components.ListItem{
                 anchors.leftMargin:15
                 anchors.left:urlText.right
                 anchors.verticalCenter:parent.verticalCenter
-                visible:listItem.ListView.isCurrentItem
+                visible:listUrlItem.ListView.isCurrentItem
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered

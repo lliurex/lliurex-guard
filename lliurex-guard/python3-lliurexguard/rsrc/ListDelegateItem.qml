@@ -5,7 +5,7 @@ import QtQml.Models 2.8
 
 Components.ListItem{
 
-    id: listItem
+    id: listFilterItem
     property int listOrder
     property string listId
     property string listName
@@ -19,13 +19,19 @@ Components.ListItem{
 
     onContainsMouseChanged: {
         if (!optionsMenu.activeFocus){
+
             if (containsMouse) {
-                guardLists.currentIndex = index
-            }else {
+                let i=0
+                do{
+                    guardLists.currentIndex=index-i
+                    i+=1
+
+                }while (!listFilterItem.ListView.isCurrentItem)
+
+            } else {
                 guardLists.currentIndex = -1
             }
         }
-
     }
 
     Rectangle {
@@ -42,7 +48,7 @@ Components.ListItem{
         Item{
             id: menuItem
             height:visible?60:0
-            width:listItem.width-manageListBtn.width
+            width:listFilterItem.width-manageListBtn.width
             
             Column{
                 id:description
@@ -50,7 +56,7 @@ Components.ListItem{
                 anchors.leftMargin:15
                 spacing:10
                 width:{
-                    if (listItem.ListView.isCurrentItem){
+                    if (listFilterItem.ListView.isCurrentItem){
                         parent.width-(entriesText.width+listState.width+manageListBtn.width+80)
                     }else{
                         parent.width-(entriesText.width+listState.width+60)
@@ -104,7 +110,7 @@ Components.ListItem{
                 anchors.leftMargin:15
                 anchors.left:listState.right
                 anchors.verticalCenter:parent.verticalCenter
-                visible:listItem.ListView.isCurrentItem
+                visible:listFilterItem.ListView.isCurrentItem
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
