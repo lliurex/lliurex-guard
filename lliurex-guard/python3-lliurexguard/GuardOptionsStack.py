@@ -431,7 +431,7 @@ class Bridge(QObject):
 	def changeGuardMode(self,mode):
 
 		self.modeToChange=mode
-		self._showMainMessage=[False,"","Ok"]
+		self._showMainMessage=[False,"","Ok",""]
 		self.showChangeModeDialog=[True,self.modeToChange]
 	
 	#def changeGuardMode
@@ -495,6 +495,7 @@ class Bridge(QObject):
 	@Slot()
 	def applyChanges(self):
 
+		self.showMainMessage=[False,"","Ok",""]
 		self.core.mainStack.closeGui=False
 		self.core.mainStack.closePopUp=[False,WAITING_APPLY_CHANGES_CODE]
 		self.applyChangesT=ApplyChanges()

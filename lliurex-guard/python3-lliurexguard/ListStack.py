@@ -536,6 +536,22 @@ class Bridge(QObject):
 		self.listCurrentOption=0
 
 	#def _saveChangesRet
+
+	@Slot()
+	def cancelListChanges(self):
+
+		self._cancelListChanges()
+
+	#def cancelListChanges
+
+	def _cancelListChanges(self):
+
+		self.changesInList=False
+		self.core.mainStack.closeGui=True
+		self.core.mainStack.moveToStack=1
+		self.core.mainStack.manageGoToStack()
+
+	#def _cancelBellChanges
 		
 	on_listName=Signal()
 	listName=Property(str,_getListName,_setListName,notify=on_listName)
