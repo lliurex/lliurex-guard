@@ -460,9 +460,9 @@ class Bridge(QObject):
 				else:
 					self.showMainMessage=[True,self.changeModeT.retHeaders['code'],"Error",self.changeModeT.retHeaders['data']]		
 			else:
-				self.showMainMessage=[True,self.changeModeT.retMode['code'],"Error",self.changeModeT.ret['data']]
+				self.showMainMessage=[True,self.changeModeT.retMode['code'],"Error",self.changeModeT.retMode['data']]
 		else:
-			self.showMainMessage=[True,self.changeModeT.retChange['code'],"Error",self.changeModeT.ret['data']]
+			self.showMainMessage=[True,self.changeModeT.retChange['code'],"Error",self.changeModeT.retChange['data']]
 
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
@@ -484,7 +484,7 @@ class Bridge(QObject):
 
 		self.showPendingChangesDialog=False
 
-		if response=="Acdept":
+		if response=="Apply":
 			self.applyChanges()
 		elif response=="Discard":
 			self.arePendingChanges=False
@@ -514,7 +514,6 @@ class Bridge(QObject):
 				self.showMainMessage=[True,self.applyChangesT.retHeaders["code"],"Error",self.applyChangesT.retHeaders["data"]]
 
 			self.arePendingChanges=False
-			self.core.listStack.arePendingChangesInList=False
 			self.core.mainStack.closeGui=True
 
 		else:

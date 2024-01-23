@@ -306,7 +306,7 @@ Rectangle{
         Connections{
            target:pendingChangesDialog
            function onApplyDialogClicked(){
-                guardOptionsStackBridge.managePendingChangesDialog("Accept")
+                guardOptionsStackBridge.managePendingChangesDialog("Apply")
            }
            function onDiscardDialogClicked(){
                 guardOptionsStackBridge.managePendingChangesDialog('Discard')         

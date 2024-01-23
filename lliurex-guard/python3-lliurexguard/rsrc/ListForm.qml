@@ -169,7 +169,7 @@ Rectangle{
         Connections{
             target:settingsChangesDialog
             function onApplyDialogClicked(){
-                listStackBridge.manageChangesInListDialog("Accept")
+                listStackBridge.manageChangesInListDialog("Apply")
             }
             function onDiscardDialogClicked(){
                 listStackBridge.manageChangesInListDialog("Discard")           

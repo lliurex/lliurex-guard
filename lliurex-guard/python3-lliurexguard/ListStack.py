@@ -288,6 +288,7 @@ class Bridge(QObject):
 		if not self.arePendingChangesInList:
 			self.listCurrentOption=0
 			self.core.mainStack.moveToStack=1
+			self.core.mainStack.closeGui=True
 			self.core.mainStack.manageGoToStack()
 		else:
 			self.showChangesInListDialog=True
@@ -326,7 +327,6 @@ class Bridge(QObject):
 		else:
 			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error",self.newListT.ret["data"]]
 
-		self.core.mainStack.closeGui=False
 		self.core.mainStack.closePopUp=[True,""]
 
 	#def _newListRet
@@ -363,7 +363,6 @@ class Bridge(QObject):
 			self.core.guardOptionsStack.showMainMessage=[True,self.editListT.ret["code"],"Error",self.editListT.ret["data"]]
 
 		self.core.mainStack.closePopUp=[True,""]
-		self.core.mainStack.closeGui=True
 
 	#def _loadListRet
 
@@ -496,7 +495,6 @@ class Bridge(QObject):
 	@Slot() 
 	def saveListChanges(self):
 
-		self.core.mainStack.closeGui=False
 		self.showListFormMessage=[False,"","Ok"]
 		self.core.mainStack.closePopUp=[False,WAITING_SAVE_CHANGES]
 		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"]]

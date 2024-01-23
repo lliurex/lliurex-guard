@@ -22,6 +22,7 @@ GridLayout{
             Connections{
                 function onMenuOptionClicked(){
                     listStackBridge.goHome();
+                    closeTimer.stop()
                 }
             }
         }  
