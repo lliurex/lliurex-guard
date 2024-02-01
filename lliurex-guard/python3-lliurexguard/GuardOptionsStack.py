@@ -113,7 +113,9 @@ class ApplyChanges(QThread):
 		self.retChange=Bridge.guardManager.applyChanges()
 		if self.retChange["status"]:
 			self.retHeaders=Bridge.guardManager.readGuardmodeHeaders()
-	
+		else:
+			if self.retChange["code"]==-10:
+				ret=Bridge.guardManager.readGuardmode()
 	#def run
 
 #class ApplyChanges
@@ -295,14 +297,15 @@ class Bridge(QObject):
 
 	#def _setEnableRemoveListsOption
 
-	def _updateListsModel(self):
+	def _updateListsModel(self,forceClear=False):
 
 		ret=self._listsModel.clear()
-		listsEntries=Bridge.guardManager.listsConfigData
-		for item in listsEntries:
-			if item["id"]!="":
-				self._listsModel.appendRow(item["order"],item["id"],item["name"],item["entries"],item["description"],item["activated"],item["remove"],item["metaInfo"])
-	
+		if not forceClear:
+			listsEntries=Bridge.guardManager.listsConfigData
+			for item in listsEntries:
+				if item["id"]!="":
+					self._listsModel.appendRow(item["order"],item["id"],item["name"],item["entries"],item["description"],item["activated"],item["remove"],item["metaInfo"])
+		
 	#def _updateListsModel
 
 	def _updateListsModelInfo(self,param):
@@ -517,6 +520,13 @@ class Bridge(QObject):
 			self.core.mainStack.closeGui=True
 
 		else:
+			if self.applyChangesT.retChange["code"]==-10:
+				self.core.mainStack.closeGui=True
+				self.arePendingChanges=False
+				self.guardMode=Bridge.guardManager.guardMode
+				self._updateListsModel(True)
+				self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
+
 			self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Error",self.applyChangesT.retChange["data"]]
 
 		self.core.mainStack.closePopUp=[True,""]		

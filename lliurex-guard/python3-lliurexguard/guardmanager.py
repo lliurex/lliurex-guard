@@ -834,45 +834,6 @@ class GuardManager(object):
 
 	#def formatLine
 
-	def get_clipboard_content(self):
-
-		text_to_copy=[]
-		code=""
-		
-		try:
-			p = subprocess.Popen(['xclip','-selection', 'clipboard', '-o'], stdout=subprocess.PIPE)
-			data=p.communicate()[0]
-		except Exception as e:
-			print (str(e))
-			data=""
-	
-		if type(data) is bytes:
-			result=data.decode()
-		else:
-			result=data
-		
-		if result!="":	
-			text=result.split("\n")
-			   		
-			if len(text)<=self.limitLines:
-				for item in text:
-					text_to_copy.append(item+"\n")
-				
-			else:
-				count=0
-				code=GuardManager.LINES_TO_COPY_OFF_LIMITS_ERROR
-			
-				for item in text:
-					if count<2500:
-						text_to_copy.append(item+"\n")
-						count+=1
-					else:
-						break
-
-		return {'status':True,'code':code,'data':text_to_copy} 	
-
-	#def get_clipboard_content				
-
 	def update_list_dns(self,list_data):
 
 		status=True

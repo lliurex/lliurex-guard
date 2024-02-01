@@ -354,7 +354,7 @@ Rectangle{
                 var msg=i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
             case -10:
-                var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard will be disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
+                var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard and the lists have been disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
                 break;
             case -13:
                 var msg=i18nd("lliurex-guard","Error loading the information from the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
