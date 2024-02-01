@@ -82,15 +82,12 @@ Rectangle{
             Button{
                 id:openFileBtn
                 visible:!listStackBridge.showUrlsList
-                focus:true
                 display:AbstractButton.TextBesideIcon
                 icon.name:"dialog-edit.svg"
                 text:i18nd("lliurex-guard","Clic to see/edit the list")
                 Layout.preferredHeight:40
                 Layout.alignment:Qt.AlignLeft
                 enabled:true
-                Keys.onReturnPressed: applyBtn.clicked()
-                Keys.onEnterPressed: applyBtn.clicked()
                 onClicked:listStackBridge.openListFile()
 
             }
@@ -118,14 +115,11 @@ Rectangle{
         Button {
             id:applyBtn
             visible:true
-            focus:true
             display:AbstractButton.TextBesideIcon
             icon.name:"document-save.svg"
             text:i18nd("lliurex-guard","Apply")
             Layout.preferredHeight:40
             enabled:listStackBridge.arePendingChangesInList
-            Keys.onReturnPressed: applyBtn.clicked()
-            Keys.onEnterPressed: applyBtn.clicked()
             
             onClicked:{
                 closeTimer.stop()
@@ -136,14 +130,11 @@ Rectangle{
         Button {
             id:cancelBtn
             visible:true
-            focus:true
             display:AbstractButton.TextBesideIcon
             icon.name:"dialog-cancel.svg"
             text:i18nd("lliurex-guard","Cancel")
             Layout.preferredHeight: 40
             enabled:listStackBridge.arePendingChangesInList
-            Keys.onReturnPressed: cancelBtn.clicked()
-            Keys.onEnterPressed: cancelBtn.clicked()
 
             onClicked:{
                listStackBridge.cancelListChanges()

@@ -64,7 +64,6 @@ Rectangle {
                 display:AbstractButton.IconOnly
                 icon.name:"dialog-ok.svg"
                 enabled:urlEntry.text.trim().length>0?true:false
-                focus:true
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
@@ -149,15 +148,12 @@ Rectangle {
             Button{
                 id:addUrlBtn
                 visible:true
-                focus:true
                 display:AbstractButton.TextBesideIcon
                 icon.name:"list-add.svg"
                 text:i18nd("lliurex-guard","Añadir url")
                 Layout.preferredHeight:40
                 Layout.leftMargin:10
                 enabled:true
-                Keys.onReturnPressed: applyBtn.clicked()
-                Keys.onEnterPressed: applyBtn.clicked()
                 onClicked:{
                     entryRow.visible=true
                     searchRow.visible=false

@@ -51,13 +51,10 @@ Rectangle{
         Button {
             id:newBtn
             visible:true
-            focus:true
             display:AbstractButton.TextBesideIcon
             icon.name:"list-add.svg"
             text:i18nd("lliurex-guard","New List")
             Layout.preferredHeight:40
-            Keys.onReturnPressed: applyBtn.clicked()
-            Keys.onEnterPressed: applyBtn.clicked()
             onClicked:editMenu.open()
             enabled:{
                 if (guardOptionsStackBridge.guardMode!="DisableMode"){
@@ -89,7 +86,6 @@ Rectangle{
         Button {
             id:actionsBtn
             visible:true
-            focus:true
             display:AbstractButton.TextBesideIcon
             icon.name:"configure.svg"
             text:i18nd("lliurex-guard","Global Options")
@@ -135,7 +131,6 @@ Rectangle{
         Button {
             id:modeBtn
             visible:true
-            focus:true
             display:AbstractButton.TextBesideIcon
             icon.name:{
                 switch(guardOptionsStackBridge.guardMode){
@@ -166,8 +161,6 @@ Rectangle{
  
             Layout.preferredHeight:40
             Layout.rightMargin:rectLayout.width-(actionsBtn.width+modeBtn.width+newBtn.width+applyBtn.width+40)
-            Keys.onReturnPressed: applyBtn.clicked()
-            Keys.onEnterPressed: applyBtn.clicked()
             onClicked:modeMenu.open()
 
             Menu{
@@ -220,14 +213,11 @@ Rectangle{
         Button {
             id:applyBtn
             visible:true
-            focus:true
             enabled:guardOptionsStackBridge.arePendingChanges
             display:AbstractButton.TextBesideIcon
             icon.name:"dialog-ok.svg"
             text:i18nd("lliurex-guard","Apply")
             Layout.preferredHeight:40
-            Keys.onReturnPressed: applyBtn.clicked()
-            Keys.onEnterPressed: applyBtn.clicked()
             onClicked:guardOptionsStackBridge.applyChanges()
         }
         
