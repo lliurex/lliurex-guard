@@ -834,40 +834,40 @@ class GuardManager(object):
 
 	#def formatLine
 
-	def update_list_dns(self,list_data):
+	def updateListDns(self,listData):
 
 		status=True
-		error_info=[]
+		errorInfo=[]
 		code=""
-		for item in list_data:
-			read_guardmode_list=self.client.LliurexGuardManager.read_guardmode_list(list_data[item]["id"],list_data[item]['active'])
-			if read_guardmode_list['status']:
-				content=read_guardmode_list['data'][0]
-				count_lines=read_guardmode_list['data'][1]
-				tmp_file=self._createTmpFile(list_data[item]["id"])
-				f=open(tmp_file,'w')
-				tmp_content="".join(content)
-				f.write(tmp_content)
+		for item in self.listsConfig:
+			readGuardmodeList=self.client.LliurexGuardManager.read_guardmode_list(self.listsConfig[item]["id"],self.listsConfig[item]['active'])
+			if readGuardmodeList['status']:
+				content=readGuardmodeList['data'][0]
+				countLines=readGuardmodeList['data'][1]
+				tmpFile=self._createTmpFile(self.listsConfig[item]["id"])
+				f=open(tmpFile,'w')
+				tmpContent="".join(content)
+				f.write(tmpContent)
 				f.close()
-				tmp_content=None
-				self.garbageFiles.append(tmp_file)
-				list_data[item]["tmpfile"]=tmp_file
+				tmpContent=None
+				self.garbageFiles.append(tmpFile)
+				self.listConfig[item]["tmpfile"]=tmpFile
 
 			else:
 				status=False
 				code=GuardManager.READ_FILE_ERROR
-				error_info=read_guardmode_list['data']
+				errorInfo=readGuardmodeList['data']
 				break
 
 		if status:
 			code=GuardManager.READ_FILE_SUCCESSFUL
-			result=list_data
+			result=""
 		else:
-			result=error_info
+			result=errorInfo
 
 		return {'status':status,'code':code,'data':result}
 		
-	#def update_list_dns
+	#def updateListDns
 
 	def checkGlobalOptionStatus(self):
 
@@ -932,5 +932,7 @@ class GuardManager(object):
 			pass
 
 		return lastChange
+
+	#def getLastChangeInFile
 
 #class GuardManager

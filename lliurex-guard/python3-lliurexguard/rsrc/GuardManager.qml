@@ -335,6 +335,32 @@ Rectangle{
         }
     } 
 
+    ChangesDialog{
+        id:updateDnsDialog
+        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Update whitelists dns")
+        dialogMsg:i18nd("lliurex-guard","Do you want to update white list dns?")
+        dialogVisible:guardOptionsStackBridge.showUpdateDnsDialog
+        dialogWidth:650
+        btnAcceptVisible:false
+        btnAcceptText:""
+        btnDiscardText:i18nd("lliurex-guard","Accept")
+        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardVisible:true
+        btnCancelText:i18nd("lliurex-guard","Cancel")
+        btnCancelIcon:"dialog-cancel.svg"
+        Connections{
+           target:updateDnsDialog
+           function onDiscardDialogClicked(){
+                guardOptionsStackBridge.manageUpdateDnsDialog('Accept')         
+           }
+           function onRejectDialogClicked(){
+                guardOptionsStackBridge.manageUpdateDnsDialog('Cancel')       
+           }
+
+        }
+    }
+
     function getTextMessage(){
         switch (guardOptionsStackBridge.showMainMessage[1]){
             case -5:
@@ -374,6 +400,9 @@ Rectangle{
             case -30:
                 var msg=i18nd("lliurex-guard","It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
                 break;
+            case -34:
+                var msg=i18nd("lliurex-guard","It is not possible to update white list dns")+" "+guardOptionsStackBridge.showMainMessage[3]
+                break;
             case -35:
                 var msg=i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")
                 break;
@@ -388,6 +417,9 @@ Rectangle{
                 break;
             case 18:
                 var msg=i18nd("lliurex-guard","Changes applied successfully")
+                break;
+            case 35:
+                var msg=i18nd("lliurex-guard","The white list dns update was successful")
                 break;
           default:
               var msg=""

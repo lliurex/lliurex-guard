@@ -72,7 +72,10 @@ Popup {
                 break;
             case 26:
                 var msg=i18nd("lliurex-guard","Saving changes. Wait a moment...")
-                break
+                break;
+            case 27:
+                var msg=i18nd("lliurex-guard","Updating white list dns. Wait a moment...")
+                break;
             default:
                 var msg=""
                 break;

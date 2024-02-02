@@ -15,6 +15,7 @@ WAITING_APPLY_LISTS_CHANGES_CODE=18
 WAITING_REMOVE_LISTS_CODE=19
 WAITING_RESTORE_LIST_CODE=20
 WAITING_APPLY_CHANGES_CODE=17
+WAITING_UPDATE_DNS=27
 
 class ChangeListStatus(QThread):
 
@@ -71,6 +72,24 @@ class RestoreList(QThread):
 	#def run
 
 #class RestoreLists
+
+class UpdateDns(QThread):
+
+	def __init__(self,*args):
+
+		QThread.__init__(self)
+		self.ret={}
+
+	#def __init__
+
+	def run(self,*args):
+
+		time.sleep(0.5)
+		self.ret=Bridge.guardManager.updateListDns()
+
+	#def run
+
+#class UpdateDns
 
 class ChangeMode(QThread):
 
@@ -138,6 +157,7 @@ class Bridge(QObject):
 		self._showPendingChangesDialog=False
 		self._showRemoveListsDialog=[False,False]
 		self._enableRemoveListsOption=True
+		self._showUpdateDnsDialog=False
 	
 	#def _init__
 	
@@ -297,6 +317,20 @@ class Bridge(QObject):
 
 	#def _setEnableRemoveListsOption
 
+	def _getShowUpdateDnsDialog(self):
+
+		return self._showUpdateDnsDialog
+
+	#def _getShowUpdateDnsDialog
+
+	def _setShowUpdateDnsDialog(self,showUpdateDnsDialog):
+
+		if self._showUpdateDnsDialog!=showUpdateDnsDialog:
+			self._showUpdateDnsDialog=showUpdateDnsDialog
+			self.on_showUpdateDnsDialog.emit()
+
+	#def _setShowUpdateDnsDialog
+
 	def _updateListsModel(self,forceClear=False):
 
 		ret=self._listsModel.clear()
@@ -426,9 +460,37 @@ class Bridge(QObject):
 	@Slot()
 	def updateWhiteListDNS(self):
 
-		print("Update DNS")
+		self.showMainMessage=[False,"","Ok",""]
+		self.showUpdateDnsDialog=True
 
 	#def updateWhiteListDNS
+
+	@Slot(str)
+	def manageUpdateDnsDialog(self,response):
+
+		self.showUpdateDnsDialog=False
+
+		if response=="Accept":
+			self.core.mainStack.closeGui=False
+			self.core.mainStack.closePopUp=[False,WAITING_UPDATE_DNS]
+			self.updateDnsT=UpdateDns()
+			self.updateDnsT.start()
+			self.updateDnsT.finished.connect(self._updateDnsRet)
+
+	#def manageUpdateDnsDialog
+
+	def _updateDnsRet(self):
+
+		if self.updateDnsT.ret['status']:
+			self.showMainMessage=[True,self.updateDnsT['code'],"Ok",""]
+		else:
+			self.showMainMessage=[True,self.updateDnsT["code"],"Error",self.updateDnsT["data"]]
+
+		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.closeGui=True
+
+	#def _updateDnsRet
+
 
 	@Slot(str)
 	def changeGuardMode(self,mode):
@@ -562,6 +624,9 @@ class Bridge(QObject):
 
 	on_enableRemoveListsOption=Signal()
 	enableRemoveListsOption=Property(bool,_getEnableRemoveListsOption,_setEnableRemoveListsOption,notify=on_enableRemoveListsOption)
+
+	on_showUpdateDnsDialog=Signal()
+	showUpdateDnsDialog=Property(bool,_getShowUpdateDnsDialog,_setShowUpdateDnsDialog,notify=on_showUpdateDnsDialog)
 
 	listsModel=Property(QObject,_getListsModel,constant=True)
 
