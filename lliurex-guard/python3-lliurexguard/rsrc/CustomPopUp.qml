@@ -28,7 +28,7 @@ Popup {
                 width:30
                 height:30
                 AnimatedImage{
-                    source: "/usr/lib/python3/dist-packages/bellscheduler/rsrc/loading.gif"
+                    source: "/usr/lib/python3/dist-packages/lliurexguard/rsrc/loading.gif"
                     transform: Scale {xScale:0.45;yScale:0.45}
                 }
             }

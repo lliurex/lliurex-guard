@@ -120,7 +120,7 @@ Rectangle{
                     onClicked:guardOptionsStackBridge.removeLists([true])
                 }
                 MenuItem{
-                    icon.name:""
+                    icon.name:"view-refresh.svg"
                     text:i18nd("lliurex-guard","Update white list dns")
                     onClicked:guardOptionsStackBridge.updateWhiteListDNS()
                     visible:guardOptionsStackBridge.showUpdateDnsOption
@@ -341,7 +341,7 @@ Rectangle{
         dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Update whitelists dns")
         dialogMsg:i18nd("lliurex-guard","Do you want to update white list dns?")
         dialogVisible:guardOptionsStackBridge.showUpdateDnsDialog
-        dialogWidth:650
+        dialogWidth:500
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard","Accept")

@@ -482,9 +482,9 @@ class Bridge(QObject):
 	def _updateDnsRet(self):
 
 		if self.updateDnsT.ret['status']:
-			self.showMainMessage=[True,self.updateDnsT['code'],"Ok",""]
+			self.showMainMessage=[True,self.updateDnsT.ret['code'],"Ok",""]
 		else:
-			self.showMainMessage=[True,self.updateDnsT["code"],"Error",self.updateDnsT["data"]]
+			self.showMainMessage=[True,self.updateDnsT.ret["code"],"Error",self.updateDnsT.ret["data"]]
 
 		self.core.mainStack.closePopUp=[True,""]
 		self.core.mainStack.closeGui=True

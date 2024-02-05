@@ -834,7 +834,7 @@ class GuardManager(object):
 
 	#def formatLine
 
-	def updateListDns(self,listData):
+	def updateListDns(self):
 
 		status=True
 		errorInfo=[]
@@ -851,7 +851,7 @@ class GuardManager(object):
 				f.close()
 				tmpContent=None
 				self.garbageFiles.append(tmpFile)
-				self.listConfig[item]["tmpfile"]=tmpFile
+				self.listsConfig[item]["tmpfile"]=tmpFile
 
 			else:
 				status=False
