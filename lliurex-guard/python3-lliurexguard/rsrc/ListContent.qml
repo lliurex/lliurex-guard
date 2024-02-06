@@ -54,7 +54,7 @@ Rectangle {
 
             TextField{
                 id:urlEntry
-                placeholderText:i18nd("lliurex-guarad","Url separated by space")
+                placeholderText:i18nd("lliurex-guard","Url separated by space")
                 font.pointSize:10
                 Layout.fillWidth:true
                 focus:true
@@ -151,7 +151,7 @@ Rectangle {
                 visible:true
                 display:AbstractButton.TextBesideIcon
                 icon.name:"list-add.svg"
-                text:i18nd("lliurex-guard","Añadir url")
+                text:i18nd("lliurex-guard","Add url")
                 Layout.preferredHeight:40
                 Layout.leftMargin:10
                 enabled:true

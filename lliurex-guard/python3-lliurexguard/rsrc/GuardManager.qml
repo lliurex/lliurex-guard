@@ -313,7 +313,7 @@ Rectangle{
         id:removeListsDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
         dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Remove Lists")
-        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog[1]?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove")
+        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog[1]?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove?")
         dialogVisible:guardOptionsStackBridge.showRemoveListsDialog[0]
         dialogWidth:500
         btnAcceptVisible:false
