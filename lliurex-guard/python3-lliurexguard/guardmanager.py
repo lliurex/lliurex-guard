@@ -891,6 +891,7 @@ class GuardManager(object):
 
 		allActivated=False
 		allDeactivated=False
+		enableStatusFilter=True
 		countActivated=0
 		countDeactivated=0
 		result=[]
@@ -903,11 +904,13 @@ class GuardManager(object):
 
 			if countActivated==0:
 				allDeactivated=True
+				enableStatusFilter=False
 
 			if countDeactivated==0:
 				allActivated=True
+				enableStatusFilter=False
 
-		result=[allActivated,allDeactivated]
+		result=[allActivated,allDeactivated,enableStatusFilter]
 
 		return result
 

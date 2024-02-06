@@ -152,13 +152,14 @@ class Bridge(QObject):
 		self._guardMode="DisableMode"
 		self._showChangeModeDialog=[False,""]
 		self._showUpdateDnsOption=False
-		self._enableListsStatusOptions=[True,True]
+		self._enableListsStatusOptions=[True,True,True]
 		self._arePendingChanges=False
 		self._showPendingChangesDialog=False
 		self._showRemoveListsDialog=[False,False]
 		self._enableRemoveListsOption=True
 		self._showUpdateDnsDialog=False
-	
+		self._filterStatusValue="all"
+
 	#def _init__
 	
 	def loadConfig(self):
@@ -331,6 +332,20 @@ class Bridge(QObject):
 
 	#def _setShowUpdateDnsDialog
 
+	def _getFilterStatusValue(self):
+
+		return self._filterStatusValue
+
+	#def _getFilterStatusValue
+
+	def _setFilterStatusValue(self,filterStatusValue):
+
+		if self._filterStatusValue!=filterStatusValue:
+			self._filterStatusValue=filterStatusValue
+			self.on_filterStatusValue.emit()
+
+	#def _setFilterStatusValue
+
 	def _updateListsModel(self,forceClear=False):
 
 		ret=self._listsModel.clear()
@@ -351,6 +366,13 @@ class Bridge(QObject):
 				self._listsModel.setData(index,param,updatedInfo[i][param])
 
 	#def _updateListsModelInfo
+
+	@Slot(str)
+	def manageStatusFilter(self,value):
+
+		self.filterStatusValue=value
+
+	#def manageStatusFilter
 
 	@Slot('QVariantList')
 	def changeListStatus(self,data):
@@ -375,7 +397,7 @@ class Bridge(QObject):
 
 		self._updateListsModelInfo('activated')
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
-		
+		self.filterStatusValue="all"
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
 			self.arePendingChanges=True
 		else:
@@ -419,7 +441,8 @@ class Bridge(QObject):
 		self._updateListsModelInfo('remove')
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-
+		self.filterStatusValue="all"
+		
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
 			self.arePendingChanges=True
 		else:
@@ -446,7 +469,8 @@ class Bridge(QObject):
 
 		self._updateListsModelInfo('remove')
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-
+		self.filterStatusValue="all"
+		
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
 			self.arePendingChanges=True
 		else:
@@ -531,6 +555,7 @@ class Bridge(QObject):
 
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+		self.filterStatusValue="all"
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
 		self.core.mainStack.closePopUp=[True,""]
 		self.core.mainStack.closeGui=True
@@ -627,6 +652,9 @@ class Bridge(QObject):
 
 	on_showUpdateDnsDialog=Signal()
 	showUpdateDnsDialog=Property(bool,_getShowUpdateDnsDialog,_setShowUpdateDnsDialog,notify=on_showUpdateDnsDialog)
+
+	on_filterStatusValue=Signal()
+	filterStatusValue=Property(str,_getFilterStatusValue,_setFilterStatusValue,notify=on_filterStatusValue)
 
 	listsModel=Property(QObject,_getListsModel,constant=True)
 

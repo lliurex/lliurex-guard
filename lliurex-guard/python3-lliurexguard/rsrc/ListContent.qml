@@ -73,6 +73,7 @@ Rectangle {
                 onClicked:{
                     listStackBridge.addNewUrl(urlEntry.text)
                     urlEntry.text=""
+                    urlEntry.forceActiveFocus()
                 }
             }
 
@@ -156,6 +157,7 @@ Rectangle {
                 enabled:true
                 onClicked:{
                     entryRow.visible=true
+                    urlEntry.forceActiveFocus()
                     searchRow.visible=false
                     addUrlBtn.enabled=false
                 }

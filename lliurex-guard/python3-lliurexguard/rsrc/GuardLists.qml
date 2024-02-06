@@ -19,20 +19,80 @@ Rectangle {
         anchors.left:parent.left
         anchors.fill:parent
 
-        PC3.TextField{
-            id:listSearchEntry
-            font.pointSize:10
-            horizontalAlignment:TextInput.AlignLeft
+        RowLayout{
             Layout.alignment:Qt.AlignRight
-            focus:true
-            width:100
-            visible:true
-            enabled:true
-            placeholderText:i18nd("lliurex-guard","Search...")
-            onTextChanged:{
-                filterModel.update()
+            spacing:10
+            Button{
+                id:statusFilterBtn
+                display:AbstractButton.IconOnly
+                icon.name:"view-filter.svg"
+                enabled:guardOptionsStackBridge.enableListsStatusOptions[2]
+                ToolTip.delay: 1000
+                ToolTip.timeout: 3000
+                ToolTip.visible: hovered
+                ToolTip.text:i18nd("lliurex-guard","Click to filter list by status")
+                onClicked:optionsMenu.open();
+               
+                Menu{
+                    id:optionsMenu
+                    y: statusFilterBtn.height
+                    x:-(optionsMenu.width-statusFilterBtn.width/2)
+
+                    MenuItem{
+                        icon.name:"security-high.svg"
+                        text:i18nd("lliurex-guard","Show activated lists ")
+                        enabled:{
+                            if (guardOptionsStackBridge.filterStatusValue!="active"){
+                                true
+                            }else{
+                                false
+                            }
+                        }
+                        onClicked:guardOptionsStackBridge.manageStatusFilter("active")
+                    }
+
+                    MenuItem{
+                        icon.name:"lliurex-guard-disable-mode.svg"
+                        text:i18nd("lliurex-guard","Show disabled lists")
+                        enabled:{
+                            if (guardOptionsStackBridge.filterStatusValue!="disable"){
+                                true
+                            }else{
+                                false
+                            }
+                        }
+                        onClicked:guardOptionsStackBridge.manageStatusFilter("disable")
+                    }
+                    MenuItem{
+                        icon.name:"kt-remove-filters.svg"
+                        text:i18nd("lliurex-guard","Remove filter")
+                        enabled:{
+                            if (guardOptionsStackBridge.filterStatusValue!="all"){
+                                true
+                            }else{
+                                false
+                            }
+                        }
+                        onClicked:guardOptionsStackBridge.manageStatusFilter("all")
+                    }
+                }
+                
             }
-            
+            PC3.TextField{
+                id:listSearchEntry
+                font.pointSize:10
+                horizontalAlignment:TextInput.AlignLeft
+                Layout.alignment:Qt.AlignRight
+                focus:true
+                width:100
+                visible:true
+                enabled:true
+                placeholderText:i18nd("lliurex-guard","Search...")
+                onTextChanged:{
+                    filterModel.update()
+                }
+                
+            }
         }
 
         Rectangle {
@@ -67,6 +127,7 @@ Rectangle {
                         model:listsModel
                         role:"metaInfo"
                         search:listSearchEntry.text.trim()
+                        statusFilter:guardOptionsStackBridge.filterStatusValue
 
                         delegate: ListDelegateItem{
                             width:listsTable.width
