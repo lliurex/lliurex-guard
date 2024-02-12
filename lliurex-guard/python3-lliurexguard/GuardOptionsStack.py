@@ -169,7 +169,7 @@ class Bridge(QObject):
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
-
+		print(self.enableListsStatusOptions)
 	#def loadConfig
 
 	def _getListsModel(self):
@@ -441,6 +441,7 @@ class Bridge(QObject):
 		self._updateListsModelInfo('remove')
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.filterStatusValue="all"
 		
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
@@ -469,6 +470,7 @@ class Bridge(QObject):
 
 		self._updateListsModelInfo('remove')
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.filterStatusValue="all"
 		
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
@@ -613,6 +615,7 @@ class Bridge(QObject):
 				self.guardMode=Bridge.guardManager.guardMode
 				self._updateListsModel(True)
 				self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
+				self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 
 			self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Error",self.applyChangesT.retChange["data"]]
 
