@@ -11,16 +11,18 @@ Components.ListItem{
     enabled:true
 
     onContainsMouseChanged: {
-         if (containsMouse) {
-            let i=0
-            do{
-                urlList.currentIndex=index-i
-                i+=1
+         if (!optionsUrlMenu.activeFocus){
+             if (containsMouse) {
+                let i=0
+                do{
+                    urlList.currentIndex=index-i
+                    i+=1
 
-            }while (!listUrlItem.ListView.isCurrentItem)
+                }while (!listUrlItem.ListView.isCurrentItem)
 
-        } else {
-            urlList.currentIndex = -1
+            } else {
+                urlList.currentIndex = -1
+            }
         }
 
     }
@@ -55,7 +57,7 @@ Components.ListItem{
             Button{
                 id:manageUrlBtn
                 display:AbstractButton.IconOnly
-                icon.name:"delete.svg"
+                icon.name:"configure.svg"
                 anchors.leftMargin:15
                 anchors.left:urlText.right
                 anchors.verticalCenter:parent.verticalCenter
@@ -63,8 +65,43 @@ Components.ListItem{
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
-                ToolTip.text:i18nd("lliurex-guard","Click to delete this url")
-                onClicked:listStackBridge.removeUrl(index)
+                ToolTip.text:i18nd("lliurex-guard","Click to edit this url")
+                onClicked:{
+                    optionsUrlMenu.open();
+                    listStackBridge.cancelUrlEdition()
+                    entryRow.visible=false
+                    urlEntry.text=""
+                    searchRow.visible=true
+                    addUrlBtn.enabled=true
+                }
+                onVisibleChanged:{
+                    optionsUrlMenu.close()
+                }
+
+                Menu{
+                    id:optionsUrlMenu
+                    y: manageUrlBtn.height
+                    x:-(optionsUrlMenu.width-manageUrlBtn.width/2)
+
+                   MenuItem{
+                        icon.name:"document-edit.svg"
+                        text:i18nd("lliurex-guard","Edit url")
+                        onClicked:{
+                            listStackBridge.manageEditUrlBtn([index,urlText.text])
+                            entryRow.visible=true
+                            urlEntry.forceActiveFocus()
+                            urlEntry.text=urlText.text
+                            searchRow.visible=false
+                            addUrlBtn.enabled=false
+                        }
+                    }
+                    MenuItem{
+                        icon.name:"delete.svg"
+                        text:i18nd("lliurex-guard","Delete the url")
+                        onClicked:listStackBridge.removeUrl(index)
+          
+                    }
+                }
           
             }
         }

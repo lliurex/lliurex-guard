@@ -169,7 +169,7 @@ class Bridge(QObject):
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
-		print(self.enableListsStatusOptions)
+
 	#def loadConfig
 
 	def _getListsModel(self):

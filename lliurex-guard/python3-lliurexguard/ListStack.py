@@ -136,6 +136,7 @@ class Bridge(QObject):
 		self._showUrlsList=False
 		self._enableForm=True
 		self._showChangesInListDialog=False
+		self._enableUrlEdition=False
 
 	#def _init__
 
@@ -256,6 +257,20 @@ class Bridge(QObject):
 			self.on_showChangesInListDialog.emit()
 
 	#def _setShowChangesInListDialog
+
+	def _getEnableUrlEdition(self):
+
+		return self._enableUrlEdition
+
+	#def _getEnableUrlEdition
+
+	def _setEnableUrlEdition(self,enableUrlEdition):
+
+		if self._enableUrlEdition!=enableUrlEdition:
+			self._enableUrlEdition=enableUrlEdition
+			self.on_enableUrlEdition.emit()
+
+	#def _setEnableUrlEdition
 
 	def updateUrlModel(self):
 
@@ -458,6 +473,48 @@ class Bridge(QObject):
 				self.changesInContent=False 
  
 	#def AddNewUrl
+	@Slot('QVariantList')
+	def manageEditUrlBtn(self,oldValue):
+
+		self.showListFormMessage=[False,"","Ok"]
+		self.enableUrlEdition=True
+		self.urlToEditIndex=oldValue[0]
+		self.urlToEditValue=oldValue[1]
+
+	#def manageEditUrlBtn
+
+	@Slot(str)
+	def editUrl(self,newValue):
+
+		tmpNewUrl=newValue.split(" ")[0]
+		tmpNewUrl=Bridge.guardManager.formatLine(tmpNewUrl)
+		if tmpNewUrl!="":
+			index=self._urlModel.index(self.urlToEditIndex)
+			self._urlModel.setData(index,"url",tmpNewUrl)
+			for item in self.contentOfList:
+				if item["url"]==self.urlToEditValue:
+					item["url"]=tmpNewUrl
+					break;
+
+			if self.contentOfList!=Bridge.guardManager.urlConfigData:
+				self.changesInContent=True
+				self.arePendingChangesInList=True
+			else:
+				if not self.changesInHeaders:
+					self.arePendingChangesInList=False
+					self.changesInContent=False 
+
+		self.enableUrlEdition=False
+		self.urlToEditIndex=""
+		self.urlToEditValue=""
+
+	#def editUrl
+
+	@Slot()
+	def cancelUrlEdition(self):
+
+		self.enableUrlEdition=False
+	#def cancelUrlEdition
 
 	@Slot(int)
 	def removeUrl(self,urlToRemove):
@@ -578,6 +635,9 @@ class Bridge(QObject):
 	on_showUrlsList=Signal()
 	showUrlsList=Property(bool,_getShowUrlsList,_setShowUrlsList,notify=on_showUrlsList)
 	
+	on_enableUrlEdition=Signal()
+	enableUrlEdition=Property(bool,_getEnableUrlEdition,_setEnableUrlEdition,notify=on_enableUrlEdition)
+
 	urlModel=Property(QObject,_getUrlModel,constant=True)
 
 #class Bridge

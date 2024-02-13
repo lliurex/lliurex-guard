@@ -71,9 +71,17 @@ Rectangle {
                 Keys.onReturnPressed: applyUrlBtn.clicked()
                 Keys.onEnterPressed: applyUrlBtn.clicked()
                 onClicked:{
-                    listStackBridge.addNewUrl(urlEntry.text)
-                    urlEntry.text=""
-                    urlEntry.forceActiveFocus()
+                    if (listStackBridge.enableUrlEdition){
+                        listStackBridge.editUrl(urlEntry.text)
+                        entryRow.visible=false
+                        urlEntry.text=""
+                        searchRow.visible=true
+                        addUrlBtn.enabled=true
+                    }else{
+                        listStackBridge.addNewUrl(urlEntry.text)
+                        urlEntry.text=""
+                        urlEntry.forceActiveFocus()
+                    }
                 }
             }
 
@@ -93,6 +101,7 @@ Rectangle {
                     urlEntry.text=""
                     searchRow.visible=true
                     addUrlBtn.enabled=true
+                    listStackBridge.cancelUrlEdition()
                 }
             }
 

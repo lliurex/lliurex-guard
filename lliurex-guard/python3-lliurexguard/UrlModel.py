@@ -53,11 +53,28 @@ class UrlModel(QtCore.QAbstractListModel):
 	#def appendRow
 
 	def removeRow(self,index):
+		
 		self.beginRemoveRows(QtCore.QModelIndex(),index,index)
 		self._entries.pop(index)
 		self.endRemoveRows()
 	
 	#def removeRow
+
+	def setData(self, index, param, value, role=QtCore.Qt.EditRole):
+		
+		if role == QtCore.Qt.EditRole:
+			row = index.row()
+			if param in ["url"]:
+				if self._entries[row][param]!=value:
+					self._entries[row][param]=value
+					self.dataChanged.emit(index,index)
+					return True
+				else:
+					return False
+			else:
+				return False
+	
+	#def setData
 
 	def clear(self):
 		
