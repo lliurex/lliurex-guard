@@ -117,7 +117,7 @@ Rectangle{
             visible:true
             display:AbstractButton.TextBesideIcon
             icon.name:"document-save.svg"
-            text:i18nd("lliurex-guard","Apply")
+            text:i18nd("lliurex-guard","Save")
             Layout.preferredHeight:40
             enabled:listStackBridge.arePendingChangesInList
             

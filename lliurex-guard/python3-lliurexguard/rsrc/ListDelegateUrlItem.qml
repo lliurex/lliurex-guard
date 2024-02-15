@@ -69,10 +69,7 @@ Components.ListItem{
                 onClicked:{
                     optionsUrlMenu.open();
                     listStackBridge.cancelUrlEdition()
-                    entryRow.visible=false
-                    urlEntry.text=""
-                    searchRow.visible=true
-                    addUrlBtn.enabled=true
+                    manageEntryRow(false)
                 }
                 onVisibleChanged:{
                     optionsUrlMenu.close()
@@ -88,11 +85,9 @@ Components.ListItem{
                         text:i18nd("lliurex-guard","Edit url")
                         onClicked:{
                             listStackBridge.manageEditUrlBtn([index,urlText.text])
-                            entryRow.visible=true
+                            manageEntryRow(true)
                             urlEntry.forceActiveFocus()
                             urlEntry.text=urlText.text
-                            searchRow.visible=false
-                            addUrlBtn.enabled=false
                         }
                     }
                     MenuItem{

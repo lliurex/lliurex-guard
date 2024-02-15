@@ -73,10 +73,7 @@ Rectangle {
                 onClicked:{
                     if (listStackBridge.enableUrlEdition){
                         listStackBridge.editUrl(urlEntry.text)
-                        entryRow.visible=false
-                        urlEntry.text=""
-                        searchRow.visible=true
-                        addUrlBtn.enabled=true
+                        manageEntryRow(false)
                     }else{
                         listStackBridge.addNewUrl(urlEntry.text)
                         urlEntry.text=""
@@ -97,10 +94,7 @@ Rectangle {
                 Keys.onReturnPressed: cancelUserBtn.clicked()
                 Keys.onEnterPressed: cancelUserBtn.clicked()
                 onClicked:{
-                    entryRow.visible=false
-                    urlEntry.text=""
-                    searchRow.visible=true
-                    addUrlBtn.enabled=true
+                    manageEntryRow(false)
                     listStackBridge.cancelUrlEdition()
                 }
             }
@@ -165,14 +159,22 @@ Rectangle {
                 Layout.leftMargin:10
                 enabled:true
                 onClicked:{
-                    entryRow.visible=true
+                    manageEntryRow(true)
                     urlEntry.forceActiveFocus()
-                    searchRow.visible=false
-                    addUrlBtn.enabled=false
+                    
                 }
 
             }
         }
+    }
+
+    function manageEntryRow(enable){
+
+         entryRow.visible=enable
+         urlEntry.text=""
+         searchRow.visible=!enable
+         addUrlBtn.enabled=!enable
+
     }
 }
 
