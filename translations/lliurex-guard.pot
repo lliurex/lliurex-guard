@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:44+0100\n"
+"POT-Creation-Date: 2024-02-15 11:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,7 +140,6 @@ msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:219
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:290
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:120
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:154
 msgid "Apply"
 msgstr ""
@@ -308,6 +307,31 @@ msgstr ""
 msgid "The white list dns update was successful"
 msgstr ""
 
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:30
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:77
+msgid "Relationship of urls and domains:"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:57
+msgid "Url separated by space"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:70
+msgid "Click to add the urls to list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:93
+msgid "Click to close"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:147
+msgid "No url is configured"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:157
+msgid "Add url"
+msgstr ""
+
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:88
 msgid "entries"
 msgstr ""
@@ -329,16 +353,24 @@ msgstr ""
 msgid "Edit list"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:142
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
 msgid "Restore the list"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:142
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
 msgid "Delete the list"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:66
-msgid "Click to delete this url"
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:68
+msgid "Click to edit this url"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:85
+msgid "Edit url"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:95
+msgid "Delete the url"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:45
@@ -349,13 +381,12 @@ msgstr ""
 msgid "Description: "
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:77
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:30
-msgid "Relationship of urls and domains:"
-msgstr ""
-
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:87
 msgid "Clic to see/edit the list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:120
+msgid "Save"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:149
@@ -409,31 +440,9 @@ msgid ""
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/MainOptions.qml:25
-#: lliurex-guard/python3-lliurexguard/rsrc/MainOptions.qml:25
 msgid "Configuration"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/MainOptions.qml:37
-#: lliurex-guard/python3-lliurexguard/rsrc/MainOptions.qml:37
 msgid "Help"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:57
-msgid "Url separated by space"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:70
-msgid "Click to add the urls to list"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:88
-msgid "Click to close"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:144
-msgid "No url is configured"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:154
-msgid "Add url"
 msgstr ""
