@@ -397,7 +397,6 @@ class GuardManager(object):
 		if ret["status"]:
 			if ret["data"][0]!=None:
 				self._getUrlConfig(ret["data"][0])
-				print(self.urlConfigData)
 			else:
 				limitLines=True
 			data=[limitLines,ret["data"][2]]
@@ -412,7 +411,8 @@ class GuardManager(object):
 
 		if allLists:
 			for item in self.listsConfig:
-				self.listsConfig[item]["active"]=active
+				if not self.listsConfig[item]["remove"]:
+					self.listsConfig[item]["active"]=active
 		else:
 			self.listsConfig[str(listToEdit)]["active"]=active
 
@@ -451,7 +451,11 @@ class GuardManager(object):
 		else:
 			for item in self.listsConfigData:
 				if item[param]!=value:
-					item[param]=value
+					if param!="remove":
+						if not item["remove"]:
+							item[param]=value
+					else:
+						item[param]=value
 
 	#def _updateListsConfigData		
 

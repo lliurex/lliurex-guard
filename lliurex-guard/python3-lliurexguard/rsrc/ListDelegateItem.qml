@@ -135,6 +135,7 @@ Components.ListItem{
                     MenuItem{
                         icon.name:"document-edit.svg"
                         text:i18nd("lliurex-guard","Edit list")
+                        enabled:listRemove?false:true
                         onClicked:listStackBridge.loadList(listOrder)
                     }
                     MenuItem{

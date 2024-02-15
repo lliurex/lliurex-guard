@@ -342,9 +342,6 @@ class Bridge(QObject):
 		else:
 			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error",self.newListT.ret["data"]]
 
-		self.core.guardOptionsStack.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
-		self.core.guardOptionsStack.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-		self.core.guardOptionsStack.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.core.mainStack.closePopUp=[True,""]
 
 	#def _newListRet
@@ -592,6 +589,11 @@ class Bridge(QObject):
 		self.core.mainStack.moveToStack=1
 		self.core.mainStack.manageGoToStack()
 		self.listCurrentOption=0
+		self.core.guardOptionsStack.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.core.guardOptionsStack.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
+		self.core.guardOptionsStack.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.core.guardOptionsStack.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+
 
 	#def _saveChangesRet
 

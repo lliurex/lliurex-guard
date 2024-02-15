@@ -158,7 +158,7 @@ Rectangle{
                         break
                 }
             }
- 
+            enabled:!guardOptionsStackBridge.arePendingChanges
             Layout.preferredHeight:40
             Layout.rightMargin:rectLayout.width-(actionsBtn.width+modeBtn.width+newBtn.width+applyBtn.width+40)
             onClicked:modeMenu.open()
