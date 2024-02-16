@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-15 11:38+0100\n"
+"POT-Creation-Date: 2024-02-16 12:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -362,7 +362,7 @@ msgid "Delete the list"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:68
-msgid "Click to edit this url"
+msgid "Click to manage this url"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:85
@@ -422,7 +422,7 @@ msgid "Home"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListOptions.qml:42
-msgid "list"
+msgid "List"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:40

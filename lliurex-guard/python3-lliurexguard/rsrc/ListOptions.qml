@@ -39,7 +39,7 @@ GridLayout{
 
                 MenuOptionBtn {
                     id:infoItem
-                    optionText:i18nd("lliurex-guard","list")
+                    optionText:i18nd("lliurex-guard","List")
                     optionIcon:"/usr/share/icons/breeze/actions/22/view-list-details.svg"
                  }
 

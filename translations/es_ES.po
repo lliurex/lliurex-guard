@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-15 11:38+0100\n"
-"PO-Revision-Date: 2024-02-15 11:39+0100\n"
+"POT-Creation-Date: 2024-02-16 12:46+0100\n"
+"PO-Revision-Date: 2024-02-16 12:50+0100\n"
 "Last-Translator: lliurex <lliurex@gva.es>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -385,8 +385,8 @@ msgid "Delete the list"
 msgstr "Eliminar la lista"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:68
-msgid "Click to edit this url"
-msgstr "Haga clic para editar la url"
+msgid "Click to manage this url"
+msgstr "Haga clic para gestionar la url"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:85
 msgid "Edit url"
@@ -449,7 +449,7 @@ msgid "Home"
 msgstr "Inicio"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListOptions.qml:42
-msgid "list"
+msgid "List"
 msgstr "Lista"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:40

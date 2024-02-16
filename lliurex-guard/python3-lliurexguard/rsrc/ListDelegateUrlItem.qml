@@ -65,7 +65,7 @@ Components.ListItem{
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
-                ToolTip.text:i18nd("lliurex-guard","Click to edit this url")
+                ToolTip.text:i18nd("lliurex-guard","Click to manage this url")
                 onClicked:{
                     optionsUrlMenu.open();
                     listStackBridge.cancelUrlEdition()
