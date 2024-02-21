@@ -292,6 +292,8 @@ class Bridge(QObject):
 		self.changesInContent=False
 		self.fileToLoad=None
 		self.lastChangeFromFile=""
+		self.listCurrentOption=0
+		self.showChangesInListDialog=False
 		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 		self._urlModel.clear()
 
