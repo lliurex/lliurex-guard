@@ -135,6 +135,7 @@ Rectangle {
 
                             delegate: ListDelegateUrlItem{
                                 width:listsTable.width
+                                urlId:model.urlId
                                 url:model.url
                                 
                             }

@@ -6,6 +6,7 @@ import QtQml.Models 2.8
 Components.ListItem{
 
     id: listUrlItem
+    property int urlId
     property string url
 
     enabled:true

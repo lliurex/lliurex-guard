@@ -137,6 +137,7 @@ class Bridge(QObject):
 		self._enableForm=True
 		self._showChangesInListDialog=False
 		self._enableUrlEdition=False
+		self.lastUrlId=0
 
 	#def _init__
 
@@ -276,9 +277,10 @@ class Bridge(QObject):
 
 		ret=self._urlModel.clear()
 		urlEntries=self.contentOfList
+		self.lastUrlId=len(self.contentOfList)+1
 		for item in urlEntries:
 			if item["url"]!="":
-				self._urlModel.appendRow(item["url"])
+				self._urlModel.appendRow(item["urlId"],item["url"])
 	
 	#def updateUrlModel
 
@@ -294,6 +296,7 @@ class Bridge(QObject):
 		self.lastChangeFromFile=""
 		self.listCurrentOption=0
 		self.showChangesInListDialog=False
+		self.lastUrlId=0
 		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 		self._urlModel.clear()
 
@@ -458,10 +461,14 @@ class Bridge(QObject):
 		for item in tmpNewUrl:
 			item=Bridge.guardManager.formatLine(item)
 			if item!="":
-				self._urlModel.appendRow(item)
-				tmp={}
-				tmp["url"]=item
-				self.contentOfList.append(tmp)
+				if not Bridge.guardManager.checkUrlDuplicates(item,self.contentOfList):
+					urlId=self.lastUrlId+1
+					self._urlModel.appendRow(urlId,item)
+					tmp={}
+					tmp["urlId"]=urlId
+					tmp["url"]=item
+					self.contentOfList.append(tmp)
+					self.lastUrlId=len(self.contentOfList)+1
 
 		if self.contentOfList!= Bridge.guardManager.urlConfigData:
 			self.changesInContent=True
@@ -488,12 +495,13 @@ class Bridge(QObject):
 		tmpNewUrl=newValue.split(" ")[0]
 		tmpNewUrl=Bridge.guardManager.formatLine(tmpNewUrl)
 		if tmpNewUrl!="":
-			index=self._urlModel.index(self.urlToEditIndex)
-			self._urlModel.setData(index,"url",tmpNewUrl)
-			for item in self.contentOfList:
-				if item["url"]==self.urlToEditValue:
-					item["url"]=tmpNewUrl
-					break;
+			if not Bridge.guardManager.checkUrlDuplicates(tmpNewUrl,self.contentOfList):
+				index=self._urlModel.index(self.urlToEditIndex)
+				self._urlModel.setData(index,"url",tmpNewUrl)
+				for item in self.contentOfList:
+					if item["url"]==self.urlToEditValue:
+						item["url"]=tmpNewUrl
+						break;
 
 			if self.contentOfList!=Bridge.guardManager.urlConfigData:
 				self.changesInContent=True
@@ -513,17 +521,18 @@ class Bridge(QObject):
 	def cancelUrlEdition(self):
 
 		self.enableUrlEdition=False
+	
 	#def cancelUrlEdition
 
 	@Slot(int)
 	def removeUrl(self,urlToRemove):
 
 		self.showListFormMessage=[False,"","Ok"]
-		tmpUrl=self._urlModel._entries[urlToRemove]["url"]
+		tmpId=self._urlModel._entries[urlToRemove]["urlId"]
 		self._urlModel.removeRow(urlToRemove)
 
 		for i in range(len(self.contentOfList)-1,-1,-1):
-			if tmpUrl==self.contentOfList[i]["url"]:
+			if tmpId==self.contentOfList[i]["urlId"]:
 				self.contentOfList.pop(i)
 
 		if self.contentOfList!=Bridge.guardManager.urlConfigData:

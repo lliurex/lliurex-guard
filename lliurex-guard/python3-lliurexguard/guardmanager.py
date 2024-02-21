@@ -462,8 +462,11 @@ class GuardManager(object):
 	def _getUrlConfig(self,content):
 
 		self.urlConfigData=[]
+		cont=0
 		for item in content:
+			cont+=1
 			tmp={}
+			tmp["urlId"]=cont
 			tmp["url"]=item.strip()
 			self.urlConfigData.append(tmp)
 
@@ -941,4 +944,15 @@ class GuardManager(object):
 
 	#def getLastChangeInFile
 
+	def checkUrlDuplicates(self,urlToCheck,listOfUrl):
+
+		for item in listOfUrl:
+			if item["url"]==urlToCheck:
+				return True
+
+		return False
+
+	#def checkUrlDuplicates
+
+	
 #class GuardManager
