@@ -186,6 +186,12 @@ Rectangle{
             case -31:
                 var msg=i18nd("lliurex-guard","It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")
                 break;
+            case -32:
+                var msg=i18nd("lliurex-guard","Duplicate url have not been added to the list")
+                break;
+            case -33:
+                var msg=i18nd("lliurex-guard","The url entered already exists in the list")
+                break;
             case 6:
                 var msg=i18nd("lliurex-guard","Waiting while viewing / editing the list. To continue close the file")
                 break

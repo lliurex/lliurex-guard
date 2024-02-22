@@ -13,6 +13,8 @@ from . import UrlModel
 WAITING_LOADING_LIST_CODE=11
 WAITING_OPEN_FILE_CODE=6
 WAITING_SAVE_CHANGES=26
+DUPLICATES_ENTRIES_CODE=-32
+DUPLICATE_URL_CODE=-33
 
 
 class AddList(QThread):
@@ -277,7 +279,7 @@ class Bridge(QObject):
 
 		ret=self._urlModel.clear()
 		urlEntries=self.contentOfList
-		self.lastUrlId=len(self.contentOfList)+1
+		self.lastUrlId=Bridge.guardManager.getLastUrlId()+1
 		for item in urlEntries:
 			if item["url"]!="":
 				self._urlModel.appendRow(item["urlId"],item["url"])
@@ -457,18 +459,22 @@ class Bridge(QObject):
 
 		self.showListFormMessage=[False,"","Ok"]
 		tmpNewUrl=urlToAdd.split(" ")
-		
+		countDuplicate=0
+		self.lastUrlId=self.lastUrlId+1
+
 		for item in tmpNewUrl:
 			item=Bridge.guardManager.formatLine(item)
 			if item!="":
+				self.lastUrlId+=1
 				if not Bridge.guardManager.checkUrlDuplicates(item,self.contentOfList):
-					urlId=self.lastUrlId+1
+					urlId=self.lastUrlId
 					self._urlModel.appendRow(urlId,item)
 					tmp={}
 					tmp["urlId"]=urlId
 					tmp["url"]=item
 					self.contentOfList.append(tmp)
-					self.lastUrlId=len(self.contentOfList)+1
+				else:
+					countDuplicate+=1
 
 		if self.contentOfList!= Bridge.guardManager.urlConfigData:
 			self.changesInContent=True
@@ -476,7 +482,10 @@ class Bridge(QObject):
 		else:
 			if not self.changesInHeaders:
 				self.arePendingChangesInList=False
-				self.changesInContent=False 
+				self.changesInContent=False
+
+		if countDuplicate>0:
+			self.showListFormMessage=[True,DUPLICATES_ENTRIES_CODE,"Warning"] 
  
 	#def AddNewUrl
 	@Slot('QVariantList')
@@ -492,6 +501,8 @@ class Bridge(QObject):
 	@Slot(str)
 	def editUrl(self,newValue):
 
+		self.showListFormMessage=[False,"","Ok"]
+
 		tmpNewUrl=newValue.split(" ")[0]
 		tmpNewUrl=Bridge.guardManager.formatLine(tmpNewUrl)
 		if tmpNewUrl!="":
@@ -502,7 +513,9 @@ class Bridge(QObject):
 					if item["url"]==self.urlToEditValue:
 						item["url"]=tmpNewUrl
 						break;
-
+			else:
+				self.showListFormMessage=[True,DUPLICATE_URL_CODE,"Warning"] 
+		
 			if self.contentOfList!=Bridge.guardManager.urlConfigData:
 				self.changesInContent=True
 				self.arePendingChangesInList=True

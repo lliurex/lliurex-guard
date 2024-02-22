@@ -35,7 +35,7 @@ Components.ListItem{
         border.color: "transparent"
         Item{
             id: menuItem
-            height:visible?30:0
+            height:visible?35:0
             width:listUrlItem.width-manageUrlBtn.width
             
             Text{
