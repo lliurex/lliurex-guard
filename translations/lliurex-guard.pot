@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-23 13:41+0100\n"
+"POT-Creation-Date: 2024-02-23 14:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -422,6 +422,19 @@ msgid "The url entered already exists in the list"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
+msgid ""
+"Duplicate url and url with incorrect format have not been added to the list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:199
+msgid "Url with incorrect format have not been added to the list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:202
+msgid "The url entered is not in the correct format"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:205
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr ""
 

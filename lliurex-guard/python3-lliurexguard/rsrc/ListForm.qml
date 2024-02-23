@@ -192,6 +192,15 @@ Rectangle{
             case -33:
                 var msg=i18nd("lliurex-guard","The url entered already exists in the list")
                 break;
+            case -34:
+                var msg=i18nd("lliurex-guard","Duplicate url and url with incorrect format have not been added to the list")
+                break;
+            case -35:
+                var msg=i18nd("lliurex-guard","Url with incorrect format have not been added to the list")
+                break;
+            case -36:
+                var msg=i18nd("lliurex-guard","The url entered is not in the correct format")
+                break;
             case 6:
                 var msg=i18nd("lliurex-guard","Waiting while viewing / editing the list. To continue close the file")
                 break

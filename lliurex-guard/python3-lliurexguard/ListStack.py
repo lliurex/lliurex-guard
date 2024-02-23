@@ -15,6 +15,9 @@ WAITING_OPEN_FILE_CODE=6
 WAITING_SAVE_CHANGES=26
 DUPLICATES_ENTRIES_CODE=-32
 DUPLICATE_URL_CODE=-33
+DUPLICATES_INCORRECT_CODE=-34
+INCORRECT_ENTRIES_CODE=-35
+INCORRECT_URL_CODE=-36
 
 
 class AddList(QThread):
@@ -460,6 +463,7 @@ class Bridge(QObject):
 		self.showListFormMessage=[False,"","Ok"]
 		tmpNewUrl=urlToAdd.split(" ")
 		countDuplicate=0
+		countError=0
 		self.lastUrlId=self.lastUrlId+1
 
 		for item in tmpNewUrl:
@@ -475,6 +479,8 @@ class Bridge(QObject):
 					self.contentOfList.append(tmp)
 				else:
 					countDuplicate+=1
+			else:
+				countError+=1
 
 		if self.contentOfList!= Bridge.guardManager.urlConfigData:
 			self.changesInContent=True
@@ -484,8 +490,12 @@ class Bridge(QObject):
 				self.arePendingChangesInList=False
 				self.changesInContent=False
 
-		if countDuplicate>0:
+		if countError >0 and countDuplicate>0:
+			self.showListFormMessage=[True,DUPLICATES_INCORRECT_CODE,"Warning"]
+		elif countDuplicate>0:
 			self.showListFormMessage=[True,DUPLICATES_ENTRIES_CODE,"Warning"] 
+		elif countError>0:
+			self.showListFormMessage=[True,INCORRECT_ENTRIES_CODE,"Warning"]	
  
 	#def AddNewUrl
 	@Slot('QVariantList')
@@ -523,6 +533,9 @@ class Bridge(QObject):
 				if not self.changesInHeaders:
 					self.arePendingChangesInList=False
 					self.changesInContent=False 
+
+		else:
+			self.showListFormMessage=[True,INCORRECT_URL_CODE,"Warning"]
 
 		self.enableUrlEdition=False
 		self.urlToEditIndex=""

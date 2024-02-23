@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-23 13:41+0100\n"
-"PO-Revision-Date: 2024-02-23 13:44+0100\n"
+"POT-Creation-Date: 2024-02-23 14:24+0100\n"
+"PO-Revision-Date: 2024-02-23 14:29+0100\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -451,6 +451,19 @@ msgid "The url entered already exists in the list"
 msgstr "L'url introduïda ja existix en la llista"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
+msgid ""
+"Duplicate url and url with incorrect format have not been added to the list"
+msgstr "Les url duplicades i amb format incorrecte no s'han afegit a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:199
+msgid "Url with incorrect format have not been added to the list"
+msgstr "Les url amb format incorrecte no s'han afegit a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:202
+msgid "The url entered is not in the correct format"
+msgstr "L'url introduïda té un format incorrecte"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:205
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr "S'està esperant mentre es visualitza/s'edita la llista"
 
