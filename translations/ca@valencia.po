@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-16 12:46+0100\n"
-"PO-Revision-Date: 2024-02-16 12:51+0100\n"
+"POT-Creation-Date: 2024-02-23 13:41+0100\n"
+"PO-Revision-Date: 2024-02-23 13:44+0100\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -349,11 +349,11 @@ msgstr "Feu clic per a afegir url a la llista"
 msgid "Click to close"
 msgstr "Feu clic per a tancar"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:147
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:148
 msgid "No url is configured"
 msgstr "No hi ha cap url configurada"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:157
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:158
 msgid "Add url"
 msgstr "Afig url"
 
@@ -386,15 +386,15 @@ msgstr "Restaura la llista"
 msgid "Delete the list"
 msgstr "Elimina la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:68
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:69
 msgid "Click to manage this url"
 msgstr "Feu clic per a gestionar l'url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:85
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:86
 msgid "Edit url"
 msgstr "Edita l'url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:95
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:96
 msgid "Delete the url"
 msgstr "Elimina l'url"
 
@@ -443,6 +443,14 @@ msgstr ""
 "La grandària del fitxer excedeix el límit recomanat de 28 Mb"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:190
+msgid "Duplicate url have not been added to the list"
+msgstr "Les url duplicades no s'han afegit a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:193
+msgid "The url entered already exists in the list"
+msgstr "L'url introduïda ja existix en la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr "S'està esperant mentre es visualitza/s'edita la llista"
 

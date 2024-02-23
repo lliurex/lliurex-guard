@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-16 12:46+0100\n"
+"POT-Creation-Date: 2024-02-23 13:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -324,11 +324,11 @@ msgstr ""
 msgid "Click to close"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:147
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:148
 msgid "No url is configured"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:157
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:158
 msgid "Add url"
 msgstr ""
 
@@ -361,15 +361,15 @@ msgstr ""
 msgid "Delete the list"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:68
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:69
 msgid "Click to manage this url"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:85
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:86
 msgid "Edit url"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:95
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:96
 msgid "Delete the url"
 msgstr ""
 
@@ -414,6 +414,14 @@ msgid ""
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:190
+msgid "Duplicate url have not been added to the list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:193
+msgid "The url entered already exists in the list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr ""
 

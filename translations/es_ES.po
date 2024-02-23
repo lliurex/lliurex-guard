@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-16 12:46+0100\n"
-"PO-Revision-Date: 2024-02-16 12:50+0100\n"
+"POT-Creation-Date: 2024-02-23 13:41+0100\n"
+"PO-Revision-Date: 2024-02-23 13:42+0100\n"
 "Last-Translator: lliurex <lliurex@gva.es>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -347,11 +347,11 @@ msgstr "Haga clic para añadir urls a la lista"
 msgid "Click to close"
 msgstr "Haga clic para cerrar"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:147
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:148
 msgid "No url is configured"
 msgstr "No hay urls configuradas"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:157
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:158
 msgid "Add url"
 msgstr "Añadir urls"
 
@@ -384,15 +384,15 @@ msgstr "Restaurar la lista"
 msgid "Delete the list"
 msgstr "Eliminar la lista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:68
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:69
 msgid "Click to manage this url"
 msgstr "Haga clic para gestionar la url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:85
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:86
 msgid "Edit url"
 msgstr "Editar url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:95
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:96
 msgid "Delete the url"
 msgstr "Eliminar la url"
 
@@ -441,6 +441,14 @@ msgstr ""
 "El tamaño del fichero excede el límite recomendado de 28 Mb"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:190
+msgid "Duplicate url have not been added to the list"
+msgstr "Las url duplicadas no han sido añadidas a la lista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:193
+msgid "The url entered already exists in the list"
+msgstr "La url introducida ya existe en la lista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr "Esperando mientras se consulta/edita la lista"
 
