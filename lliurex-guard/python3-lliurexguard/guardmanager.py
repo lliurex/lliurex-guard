@@ -821,6 +821,8 @@ class GuardManager(object):
 
 	def formatLine(self,line):
 
+		sanitizeItems=["--",".-","-.","0.",".0",'0-',"-0",]
+
 		if line!="":
 			firstchar=line[0]
 			
@@ -834,7 +836,21 @@ class GuardManager(object):
 
 			if len(line.strip().split("/"))>1:
 				line=""
-		
+
+			if line !="":
+				rejectLine=False
+				for item in sanitizeItems:
+					if item in line:
+						print("match")
+						rejectLine=True
+						break
+
+				if not rejectLine:
+					if len(line.split("-"))>2:
+						line=""
+				else:
+					line=""
+
 		return line
 
 	#def formatLine
