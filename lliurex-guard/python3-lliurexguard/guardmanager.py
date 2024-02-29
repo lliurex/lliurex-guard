@@ -803,14 +803,8 @@ class GuardManager(object):
 
 	#def _createTmpFile	
 
-	def remove_tmp_file(self):
+	def removeTmpFile(self):
 
-		'''
-		if "client" in self.flavours:
-			for item in self.tmpFileList:
-				if os.path.exists(item):
-					os.remove(item)
-		'''
 		for item in self.garbageFiles:
 			if os.path.exists(item):
 				os.remove(item)
@@ -820,7 +814,7 @@ class GuardManager(object):
 		self.client.LliurexGuardManager.remove_tmp_file()			
 
 		
-	#def _remove_tmp_file	
+	#def removeTmpFile	
 
 	def writeLog(self,msg):
 	

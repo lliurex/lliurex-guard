@@ -580,6 +580,11 @@ class Bridge(QObject):
 			self.applyChanges()
 		elif response=="Discard":
 			self.arePendingChanges=False
+			try:
+				Bridge.guardManager.removeTmpFile()
+			except:
+				pass
+				
 			self.core.mainStack.closeGui=True
 
 	#def managePendingChangesDialog
@@ -606,6 +611,10 @@ class Bridge(QObject):
 				self.showMainMessage=[True,self.applyChangesT.retHeaders["code"],"Error",self.applyChangesT.retHeaders["data"]]
 
 			self.arePendingChanges=False
+			try:
+				Bridge.guardManager.removeTmpFile()
+			except:
+				pass
 			self.core.mainStack.closeGui=True
 
 		else:
