@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-29 13:14+0100\n"
-"PO-Revision-Date: 2024-02-29 13:14+0100\n"
+"POT-Creation-Date: 2024-02-29 14:03+0100\n"
+"PO-Revision-Date: 2024-02-29 14:04+0100\n"
 "Last-Translator: lliurex <lliurex@gva.es>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -223,10 +223,12 @@ msgid "Do you want select the list to be remove?"
 msgstr "¿Desea seleccionar la lista para ser borrada?"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:321
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:205
 msgid "Yes"
 msgstr "Si"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:324
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:208
 msgid "No"
 msgstr "No"
 
@@ -351,9 +353,23 @@ msgstr "Haga clic para cerrar"
 msgid "No url is configured"
 msgstr "No hay urls configuradas"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:158
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:162
 msgid "Add url"
 msgstr "Añadir urls"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:178
+msgid "Remove list"
+msgstr "Borrar lista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:199
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:11
+msgid "Edit list"
+msgstr "Editar lista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:200
+msgid "Do you want delete all urls from the list?"
+msgstr "¿Desea eliminar todas las url de la lista?"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:88
 msgid "entries"
@@ -370,11 +386,6 @@ msgstr "Desactivar la lista"
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:130
 msgid "Enable list"
 msgstr "Activar la lista"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:11
-msgid "Edit list"
-msgstr "Editar lista"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
 msgid "Restore the list"

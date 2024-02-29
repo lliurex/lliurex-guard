@@ -150,24 +150,77 @@ Rectangle {
                     } 
                  }
             }
-            Button{
-                id:addUrlBtn
-                visible:true
-                display:AbstractButton.TextBesideIcon
-                icon.name:"list-add.svg"
-                text:i18nd("lliurex-guard","Add url")
-                Layout.preferredHeight:40
+            ColumnLayout{
+                id:buttomLayout
                 Layout.leftMargin:10
-                enabled:true
-                onClicked:{
-                    manageEntryRow(true)
-                    urlEntry.forceActiveFocus()
-                    
-                }
 
+                Button{
+                    id:addUrlBtn
+                    visible:true
+                    display:AbstractButton.TextBesideIcon
+                    icon.name:"list-add.svg"
+                    text:i18nd("lliurex-guard","Add url")
+                    Layout.preferredHeight:40
+                    
+                    enabled:true
+                    onClicked:{
+                        manageEntryRow(true)
+                        urlEntry.forceActiveFocus()
+                        
+                    }
+
+                }
+                Button{
+                    id:deleteListBtn
+                    visible:true
+                    display:AbstractButton.TextBesideIcon
+                    icon.name:"delete.svg"
+                    text:i18nd("lliurex-guard","Remove list")
+                    Layout.preferredHeight:40
+                    enabled:{
+                        if ((listCount>0)&&(!entryRow.visible)){
+                            true
+                        }else{
+                            false
+                        }
+                    }
+                    onClicked:{
+                        emptyListDialog.dialogVisible=true
+                    }
+
+                }
             }
         }
     }
+
+   ChangesDialog{
+        id:emptyListDialog
+        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Edit list")
+        dialogMsg:i18nd("lliurex-guard","Do you want delete all urls from the list?")
+        dialogVisible:false
+        dialogWidth:480
+        btnAcceptVisible:false
+        btnAcceptText:""
+        btnDiscardText:i18nd("lliurex-guard","Yes")
+        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardVisible:true
+        btnCancelText:i18nd("lliurex-guard","No")
+        btnCancelIcon:"dialog-cancel.svg"
+        Connections{
+           target:emptyListDialog
+           function onDiscardDialogClicked(){
+                emptyListDialog.dialogVisible=false
+                listStackBridge.manageEmptyListDialog('Apply')         
+           }
+           function onRejectDialogClicked(){
+                emptyListDialog.dialogVisible=false
+                listStackBridge.manageEmptyListDialog('Cancel')       
+           }
+
+        }
+    } 
+
 
     function manageEntryRow(enable){
 

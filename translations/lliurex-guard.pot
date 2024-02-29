@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-29 13:14+0100\n"
+"POT-Creation-Date: 2024-02-29 14:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,10 +209,12 @@ msgid "Do you want select the list to be remove?"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:321
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:205
 msgid "Yes"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:324
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:208
 msgid "No"
 msgstr ""
 
@@ -328,8 +330,22 @@ msgstr ""
 msgid "No url is configured"
 msgstr ""
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:158
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:162
 msgid "Add url"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:178
+msgid "Remove list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:199
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:11
+msgid "Edit list"
+msgstr ""
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:200
+msgid "Do you want delete all urls from the list?"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:88
@@ -346,11 +362,6 @@ msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:130
 msgid "Enable list"
-msgstr ""
-
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:11
-msgid "Edit list"
 msgstr ""
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143

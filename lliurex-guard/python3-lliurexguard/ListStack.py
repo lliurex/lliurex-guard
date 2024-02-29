@@ -573,6 +573,25 @@ class Bridge(QObject):
 	#def removeUrl
 
 	@Slot(str)
+	def manageEmptyListDialog(self,response):
+		
+		self.showListFormMessage=[False,"","Ok"]
+		
+		if response=="Apply":
+			self._urlModel.clear()
+			self.contentOfList=[]
+
+			if self.contentOfList!=Bridge.guardManager.urlConfigData:
+				self.changesInContent=True
+				self.arePendingChangesInList=True
+			else:
+				if not self.changesInHeaders:
+					self.arePendingChangesInList=False
+					self.changesInContent=False 	
+
+	#def manageEmptyListDialog
+
+	@Slot(str)
 	def manageChangesInListDialog(self,response):
 
 		self.showChangesInListDialog=False
