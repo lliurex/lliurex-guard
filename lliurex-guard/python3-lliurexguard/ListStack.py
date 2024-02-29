@@ -15,9 +15,9 @@ WAITING_OPEN_FILE_CODE=6
 WAITING_SAVE_CHANGES=26
 DUPLICATES_ENTRIES_CODE=-32
 DUPLICATE_URL_CODE=-33
-DUPLICATES_INCORRECT_CODE=-34
-INCORRECT_ENTRIES_CODE=-35
-INCORRECT_URL_CODE=-36
+DUPLICATES_INCORRECT_CODE=-36
+INCORRECT_ENTRIES_CODE=-37
+INCORRECT_URL_CODE=-38
 
 
 class AddList(QThread):
@@ -350,6 +350,7 @@ class Bridge(QObject):
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
 		else:
+			self.core.mainStack.closeGui=True
 			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error",self.newListT.ret["data"]]
 
 		self.core.mainStack.closePopUp=[True,""]
@@ -591,7 +592,7 @@ class Bridge(QObject):
 
 		self.showListFormMessage=[False,"","Ok"]
 		self.core.mainStack.closePopUp=[False,WAITING_SAVE_CHANGES]
-		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"]]
+		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"],len(self.contentOfList)]
 		self.checkListChangesT=CheckListChanges(dataToCheck,self.edit,self.fileToLoad)
 		self.checkListChangesT.start()
 		self.checkListChangesT.finished.connect(self._checkListChangesRet)

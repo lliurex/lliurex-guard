@@ -183,6 +183,9 @@ Rectangle{
             case -2:
                 var msg=i18nd("lliurex-guard","The name of the list is duplicate")
                 break;
+            case -27:
+                var msg=i18nd("lliurex-guard","The loaded file is empty")
+                break;
             case -31:
                 var msg=i18nd("lliurex-guard","It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")
                 break;
@@ -192,13 +195,16 @@ Rectangle{
             case -33:
                 var msg=i18nd("lliurex-guard","The url entered already exists in the list")
                 break;
-            case -34:
-                var msg=i18nd("lliurex-guard","Duplicate url and url with incorrect format have not been added to the list")
-                break;
             case -35:
-                var msg=i18nd("lliurex-guard","Url with incorrect format have not been added to the list")
+                var msg=i18nd("lliurex-guard","The url list is empty")
                 break;
             case -36:
+                var msg=i18nd("lliurex-guard","Duplicate url and url with incorrect format have not been added to the list")
+                break;
+            case -37:
+                var msg=i18nd("lliurex-guard","Url with incorrect format have not been added to the list")
+                break;
+            case -38:
                 var msg=i18nd("lliurex-guard","The url entered is not in the correct format")
                 break;
             case 6:

@@ -357,7 +357,7 @@ class GuardManager(object):
 				for line in lines:
 					if "NAME" not in line:
 						if "DESCRIPTION" not in line:
-							if line !="":
+							if line.strip()!="":
 								line=self.formatLine(line)
 								if line!="":
 									content.append(line)	
@@ -605,7 +605,17 @@ class GuardManager(object):
 
 			if loadedFile !=None:
 				if os.path.getsize(loadedFile)>self.limitFileSize:
-					return {'result':False,'code':GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}			
+					return {'result':False,'code':GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}
+				else:
+					with open(loadedFile,'r') as fd:
+						content=fd.read().strip()
+						if not content:
+							return {'result':False,'code':GuardManager.EMPTY_FILE_ERROR,'data':''}
+						else:
+							content=""			
+			else:
+				if data[2]==0:
+					return {'result':False,'code':GuardManager.EMPTY_LIST_ERROR,'data':''}			
 
 		return {"result":True,"code":GuardManager.ALL_CORRECT_CODE}			
 			 			

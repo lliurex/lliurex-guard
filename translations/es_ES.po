@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-23 14:24+0100\n"
-"PO-Revision-Date: 2024-02-23 14:26+0100\n"
+"POT-Creation-Date: 2024-02-29 13:14+0100\n"
+"PO-Revision-Date: 2024-02-29 13:14+0100\n"
 "Last-Translator: lliurex <lliurex@gva.es>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:53
 msgid "Changing Lliurex Guard mode. Wait a moment..."
@@ -433,6 +433,10 @@ msgid "The name of the list is duplicate"
 msgstr "El nombre de la lista esta duplicado"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:187
+msgid "The loaded file is empty"
+msgstr "El fichero cargado esta vacio"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:190
 msgid ""
 "It is not possible to edit the list.\n"
 "The file size exceeds the recommended limit of 28 Mb"
@@ -440,29 +444,33 @@ msgstr ""
 "No es posible editar la lista.\n"
 "El tamaño del fichero excede el límite recomendado de 28 Mb"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:190
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:193
 msgid "Duplicate url have not been added to the list"
 msgstr "Las url duplicadas no han sido añadidas a la lista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:193
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
 msgid "The url entered already exists in the list"
 msgstr "La url introducida ya existe en la lista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:196
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:199
+msgid "The url list is empty"
+msgstr "La lista de url está vacia"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:202
 msgid ""
 "Duplicate url and url with incorrect format have not been added to the list"
 msgstr ""
 "Las url duplicadas y con formato incorrecto no han sido añadidas a la lista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:199
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:205
 msgid "Url with incorrect format have not been added to the list"
 msgstr "Las url con formato incorrecto no han sido añadidas a la lista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:202
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:208
 msgid "The url entered is not in the correct format"
 msgstr "La url introducida tiene un formato incorrecto"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:205
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:211
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr "Esperando mientras se consulta/edita la lista"
 
