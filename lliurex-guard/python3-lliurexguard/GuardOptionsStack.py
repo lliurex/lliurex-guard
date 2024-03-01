@@ -60,14 +60,15 @@ class RestoreList(QThread):
 	def __init__(self,*args):
 
 		QThread.__init__(self)
-		self.listToRestore=args[0]
+		self.allLists=args[0]
+		self.listToRestore=args[1]
 
 	#def __init__
 
 	def run(self,*args):
 
 		time.sleep(0.5)
-		ret=Bridge.guardManager.restoreList(self.listToRestore)
+		ret=Bridge.guardManager.restoreList(self.allLists,self.listToRestore)
 
 	#def run
 
@@ -157,6 +158,8 @@ class Bridge(QObject):
 		self._showPendingChangesDialog=False
 		self._showRemoveListsDialog=[False,False]
 		self._enableRemoveListsOption=True
+		self._enableRestoreListsOption=True
+		self._showRestoreListsDialog=False
 		self._showUpdateDnsDialog=False
 		self._filterStatusValue="all"
 
@@ -168,6 +171,8 @@ class Bridge(QObject):
 		self._updateListsModel()
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.enableRestoreListsOption=Bridge.guardManager.checkRestoreListsOption()
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
 
 	#def loadConfig
@@ -318,6 +323,34 @@ class Bridge(QObject):
 
 	#def _setEnableRemoveListsOption
 
+	def _getEnableRestoreListsOption(self):
+
+		return self._enableRestoreListsOption
+
+	#def _getEnableRestoreListsOption
+
+	def _setEnableRestoreListsOption(self,enableRestoreListsOption):
+
+		if self._enableRestoreListsOption!=enableRestoreListsOption:
+			self._enableRestoreListsOption=enableRestoreListsOption
+			self.on_enableRestoreListsOption.emit()
+
+	#def _setEnableRestoreListsOption
+
+	def _getShowRestoreListsDialog(self):
+
+		return self._showRestoreListsDialog
+
+	#def _getShowRestoreListsDialgo
+
+	def _setShowRestoreListsDialog(self,showRestoreListsDialog):
+
+		if self._showRestoreListsDialog!=showRestoreListsDialog:
+			self._showRestoreListsDialog=showRestoreListsDialog
+			self.on_showRestoreListsDialog.emit()
+
+	#def _setShowRestoreListsDialog
+
 	def _getShowUpdateDnsDialog(self):
 
 		return self._showUpdateDnsDialog
@@ -441,6 +474,7 @@ class Bridge(QObject):
 		self._updateListsModelInfo('remove')
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.enableRestoreListsOption=Bridge.guardManager.checkRestoreListsOption()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.filterStatusValue="all"
 		
@@ -454,22 +488,38 @@ class Bridge(QObject):
 
 	#def _removeListRet
 
-	@Slot(str)
-
-	def restoreList(self,listToRestore):
+	@Slot('QVariantList')
+	def restoreLists(self,data):
 
 		self.showMainMessage=[False,"","Ok",""]
-		self.core.mainStack.closePopUp=[False,WAITING_RESTORE_LIST_CODE]
-		self.restoreListT=RestoreList(listToRestore)
-		self.restoreListT.start()
-		self.restoreListT.finished.connect(self._restoreListRet)
+		self.restoreAllLists=data[0]
 
-	#def restoreList
+		if self.restoreAllLists:
+			self.listToRestore=None
+			self.showRestoreListsDialog=True
+		else:
+			self.listToRestore=data[1]
+			self.manageRestoreListsDialog('Apply')
+
+		
+	@Slot(str)
+	def manageRestoreListsDialog(self,response):
+
+		self.showRestoreListsDialog=[False,False]
+		if response=="Apply":
+			self.core.mainStack.closeGui=False
+			self.core.mainStack.closePopUp=[False,WAITING_RESTORE_LIST_CODE]
+			self.restoreListT=RestoreList(self.restoreAllLists,self.listToRestore)
+			self.restoreListT.start()
+			self.restoreListT.finished.connect(self._restoreListRet)
+	
+	#def manageRestoreListsDialog
 
 	def _restoreListRet(self):
 
 		self._updateListsModelInfo('remove')
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
+		self.enableRestoreListsOption=Bridge.guardManager.checkRestoreListsOption()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.filterStatusValue="all"
 		
@@ -661,6 +711,12 @@ class Bridge(QObject):
 
 	on_enableRemoveListsOption=Signal()
 	enableRemoveListsOption=Property(bool,_getEnableRemoveListsOption,_setEnableRemoveListsOption,notify=on_enableRemoveListsOption)
+
+	on_enableRestoreListsOption=Signal()
+	enableRestoreListsOption=Property(bool,_getEnableRestoreListsOption,_setEnableRestoreListsOption,notify=on_enableRestoreListsOption)
+
+	on_showRestoreListsDialog=Signal()
+	showRestoreListsDialog=Property(bool,_getShowRestoreListsDialog,_setShowRestoreListsDialog,notify=on_showRestoreListsDialog)
 
 	on_showUpdateDnsDialog=Signal()
 	showUpdateDnsDialog=Property(bool,_getShowUpdateDnsDialog,_setShowUpdateDnsDialog,notify=on_showUpdateDnsDialog)

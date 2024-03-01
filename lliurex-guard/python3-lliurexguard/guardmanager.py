@@ -432,9 +432,13 @@ class GuardManager(object):
 	
 	#def removeLists
 
-	def restoreList(self,listToRestore):
+	def restoreList(self,allLists,listToRestore):
 
-		self.listsConfig[str(listToRestore)]["remove"]=False
+		if allLists:
+			for item in self.listsConfig:
+				self.listsConfig[item]["remove"]=False
+		else:
+			self.listsConfig[str(listToRestore)]["remove"]=False
 
 		self._updateListsConfigData("remove",False,listToRestore)
 
@@ -916,9 +920,11 @@ class GuardManager(object):
 
 		allActivated=False
 		allDeactivated=False
+		allRemoved=False
 		enableStatusFilter=True
 		countActivated=0
 		countDeactivated=0
+		countRemoved=0
 		result=[]
 		if len(self.listsConfig)>0:
 			for item in self.listsConfig:
@@ -926,6 +932,8 @@ class GuardManager(object):
 					countActivated+=1
 				else:
 					countDeactivated+=1
+				if self.listsConfig[item]["remove"]:
+					countRemoved+=1
 
 			if countActivated==0:
 				allDeactivated=True
@@ -934,6 +942,11 @@ class GuardManager(object):
 			if countDeactivated==0:
 				allActivated=True
 				enableStatusFilter=False
+
+			if countRemoved==len(self.listsConfig):
+				allActivated=True
+				allDeactivated=True
+
 		else:
 			enableStatusFilter=False
 			
@@ -948,9 +961,20 @@ class GuardManager(object):
 		for item in self.listsConfig:
 			if not self.listsConfig[item]["remove"]:
 				return True
+		
 		return False
 
 	#def checkRemoveListsOption
+
+	def checkRestoreListsOption(self):
+
+		for item in self.listsConfig:
+			if self.listsConfig[item]["remove"]:
+				return True
+
+		return False
+
+	#def checkRestoreListOption
 
 	def getLastChangeInFile(self,fileToCheck):
 

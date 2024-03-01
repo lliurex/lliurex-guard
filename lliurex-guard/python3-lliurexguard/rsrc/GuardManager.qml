@@ -112,12 +112,17 @@ Rectangle{
                     onClicked:guardOptionsStackBridge.changeListStatus([true,false])
 
                 }
-
-               MenuItem{
+                MenuItem{
                     icon.name:"delete.svg"
                     text:i18nd("lliurex-guard","Delete all lists")
                     enabled:guardOptionsStackBridge.enableRemoveListsOption
                     onClicked:guardOptionsStackBridge.removeLists([true])
+                }
+                MenuItem{
+                    icon.name:"restoration.svg"
+                    text:i18nd("lliurex-guard","Restore all lists")
+                    enabled:guardOptionsStackBridge.enableRestoreListsOption
+                    onClicked:guardOptionsStackBridge.restoreLists([true])
                 }
                 MenuItem{
                     icon.name:"view-refresh.svg"
@@ -330,6 +335,31 @@ Rectangle{
            }
            function onRejectDialogClicked(){
                 guardOptionsStackBridge.manageRemoveListsDialog('Cancel')       
+           }
+
+        }
+    } 
+    ChangesDialog{
+        id:restoreListsDialog
+        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Restore Lists")
+        dialogMsg:i18nd("lliurex-guard","Do you want select alls list not to be remove?")
+        dialogVisible:guardOptionsStackBridge.showRestoreListsDialog
+        dialogWidth:500
+        btnAcceptVisible:false
+        btnAcceptText:""
+        btnDiscardText:i18nd("lliurex-guard","Yes")
+        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardVisible:true
+        btnCancelText:i18nd("lliurex-guard","No")
+        btnCancelIcon:"dialog-cancel.svg"
+        Connections{
+           target:restoreListsDialog
+           function onDiscardDialogClicked(){
+                guardOptionsStackBridge.manageRestoreListsDialog('Apply')         
+           }
+           function onRejectDialogClicked(){
+                guardOptionsStackBridge.manageRestoreListsDialog('Cancel')       
            }
 
         }
