@@ -39,6 +39,9 @@ Rectangle{
             enabled:listStackBridge.enableForm
             Layout.topMargin: messageLabel.visible?0:40
             Layout.alignment:Qt.AlignHCenter
+            onEnabledChanged:{
+                nameEntry.forceActiveFocus()
+            }
 
             Text{
                 id:name
@@ -49,7 +52,6 @@ Rectangle{
                 id:nameEntry
                 text:listStackBridge.listName
                 horizontalAlignment:TextInput.AlignLeft
-                focus:true
                 implicitWidth:400
                 onTextChanged:{
                     listStackBridge.updateListName(nameEntry.text)
@@ -65,7 +67,6 @@ Rectangle{
                 id:descriptionEntry
                 text:listStackBridge.listDescription
                 horizontalAlignment:TextInput.AlignLeft
-                focus:true
                 implicitWidth:400
                 onTextChanged:{
                     listStackBridge.updateListDescription(descriptionEntry.text)

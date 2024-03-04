@@ -68,7 +68,7 @@ Popup {
                 var msg=i18nd("lliurex-guard","Selecting lists to be deleted. Wait a moment...")
                 break;
             case 20:
-                var msg=i18nd("lliurex-guard","Selecting lists not to be deleted. Wait a moment...")
+                var msg=i18nd("lliurex-guard","Selecting lists to be restored. Wait a moment...")
                 break;
             case 26:
                 var msg=i18nd("lliurex-guard","Saving changes. Wait a moment...")

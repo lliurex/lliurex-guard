@@ -139,7 +139,7 @@ class Bridge(QObject):
 		self.changesInContent=False
 		self._listCurrentOption=0
 		self._showUrlsList=False
-		self._enableForm=True
+		self._enableForm=False
 		self._showChangesInListDialog=False
 		self._enableUrlEdition=False
 		self.lastUrlId=0
@@ -298,6 +298,7 @@ class Bridge(QObject):
 		self.changesInHeaders=False
 		self.changesInContent=False
 		self.fileToLoad=None
+		self.enableForm=False
 		self.lastChangeFromFile=""
 		self.listCurrentOption=0
 		self.showChangesInListDialog=False
@@ -349,6 +350,7 @@ class Bridge(QObject):
 				self.showUrlsList=False
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
+			self.enableForm=True
 		else:
 			self.core.mainStack.closeGui=True
 			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error",self.newListT.ret["data"]]
@@ -385,6 +387,7 @@ class Bridge(QObject):
 				self.showUrlsList=False
 			self.core.mainStack.currentStack=2
 			self.listCurrentOption=1
+			self.enableForm=True
 		else:
 			self.core.guardOptionsStack.showMainMessage=[True,self.editListT.ret["code"],"Error",self.editListT.ret["data"]]
 

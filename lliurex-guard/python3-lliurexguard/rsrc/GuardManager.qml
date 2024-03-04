@@ -95,7 +95,7 @@ Rectangle{
             
             Menu{
                 id:actionsMenu
-                y: -actionsBtn.height*2.5
+                y: -actionsBtn.height*3.2
                 x: actionsBtn.width/2
 
                 MenuItem{
@@ -343,7 +343,7 @@ Rectangle{
         id:restoreListsDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
         dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Restore Lists")
-        dialogMsg:i18nd("lliurex-guard","Do you want select alls list not to be remove?")
+        dialogMsg:i18nd("lliurex-guard","Do you want select alls list to be restore?")
         dialogVisible:guardOptionsStackBridge.showRestoreListsDialog
         dialogWidth:500
         btnAcceptVisible:false

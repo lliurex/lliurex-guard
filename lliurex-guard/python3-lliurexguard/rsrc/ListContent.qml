@@ -57,7 +57,6 @@ Rectangle {
                 placeholderText:i18nd("lliurex-guard","Url separated by space")
                 font.pointSize:10
                 Layout.fillWidth:true
-                focus:true
             }
             Button{
                 id:applyUrlBtn
