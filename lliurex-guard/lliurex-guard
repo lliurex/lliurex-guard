@@ -55,7 +55,7 @@ class Tunnel(QObject):
 
 	def getPackageVersion(self):
 
-		packageVersionFile="/var/lib/lliure-guard"
+		packageVersionFile="/var/lib/lliurex-guard"
 		pkgVersion=""
 
 		if os.path.exists(packageVersionFile):
