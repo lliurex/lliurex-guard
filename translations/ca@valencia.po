@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-04 08:43+0100\n"
-"PO-Revision-Date: 2024-03-04 08:46+0100\n"
+"POT-Creation-Date: 2024-04-10 08:54+0200\n"
+"PO-Revision-Date: 2024-04-10 08:54+0200\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -151,7 +151,7 @@ msgstr "Desactiva LliureX Guard"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:224
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:295
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:153
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:155
 msgid "Apply"
 msgstr "Aplica"
 
@@ -190,13 +190,13 @@ msgstr ""
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:269
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:377
 msgid "Accept"
-msgstr "Acsepta"
+msgstr "Accepta"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:272
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:299
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:380
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:134
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:157
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:136
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:159
 msgid "Cancel"
 msgstr "Cancel·la"
 
@@ -213,7 +213,7 @@ msgstr ""
 "Voleu aplicar els canvis o descartar-los?"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:296
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:154
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:156
 msgid "Discard"
 msgstr "Descarta"
 
@@ -349,7 +349,7 @@ msgstr ""
 "L'actualització dels dns de les llistes blanques s'ha realitzat correctament"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:30
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:76
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:78
 msgid "Relationship of urls and domains:"
 msgstr "Relació d'url i de dominis:"
 
@@ -423,27 +423,27 @@ msgstr "Edita l'url"
 msgid "Delete the url"
 msgstr "Elimina l'url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:45
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:48
 msgid "Name:"
 msgstr "Nom:"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:61
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:63
 msgid "Description: "
 msgstr "Descripció: "
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:86
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:88
 msgid "Clic to see/edit the list"
 msgstr "Feu clic per a vore/editar la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:119
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:121
 msgid "Save"
 msgstr "Guarda"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:148
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:150
 msgid "List edition"
 msgstr "Edició de la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:150
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:152
 msgid ""
 "The are pending changes to save.\n"
 "Do you want save the changes or discard them?"
@@ -451,19 +451,19 @@ msgstr ""
 "Hi ha canvis pendents d'aplicar.\n"
 "Voleu guardar els canvis o descartar-los?"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:180
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:182
 msgid "You must indicate a name for the list"
 msgstr "Heu d'indicar un nom per a la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:183
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:185
 msgid "The name of the list is duplicate"
 msgstr "El nom de la llista està duplicat"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:186
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:188
 msgid "The loaded file is empty"
 msgstr "El fitxer carregat està buit"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:189
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:191
 msgid ""
 "It is not possible to edit the list.\n"
 "The file size exceeds the recommended limit of 28 Mb"
@@ -471,32 +471,32 @@ msgstr ""
 "No és possible editar la llista.\n"
 "La grandària del fitxer excedeix el límit recomanat de 28 Mb"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:192
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:194
 msgid "Duplicate url have not been added to the list"
 msgstr "Les url duplicades no s'han afegit a la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:195
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:197
 msgid "The url entered already exists in the list"
 msgstr "L'url introduïda ja existix en la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:198
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:200
 msgid "The url list is empty"
 msgstr "La llista d'url està buida"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:201
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:203
 msgid ""
 "Duplicate url and url with incorrect format have not been added to the list"
 msgstr "Les url duplicades i amb format incorrecte no s'han afegit a la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:204
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:206
 msgid "Url with incorrect format have not been added to the list"
 msgstr "Les url amb format incorrecte no s'han afegit a la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:207
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:209
 msgid "The url entered is not in the correct format"
 msgstr "L'url introduïda té un format incorrecte"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:210
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:212
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr "S'està esperant mentre es visualitza/s'edita la llista"
 
