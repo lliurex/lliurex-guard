@@ -13,15 +13,9 @@ Components.ListItem{
 
     onContainsMouseChanged: {
          if (!optionsUrlMenu.activeFocus){
-             if (containsMouse) {
-                let i=0
-                do{
-                    urlList.currentIndex=index-i
-                    i+=1
-
-                }while (!listUrlItem.ListView.isCurrentItem)
-
-            } else {
+            if (containsMouse) {
+                urlList.currentIndex=filterModel.visibleElements.indexOf(index)
+            }else {
                 urlList.currentIndex = -1
             }
         }

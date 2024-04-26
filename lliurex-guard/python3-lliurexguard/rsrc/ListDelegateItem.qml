@@ -21,14 +21,8 @@ Components.ListItem{
         if (!optionsMenu.activeFocus){
 
             if (containsMouse) {
-                let i=0
-                do{
-                    guardLists.currentIndex=index-i
-                    i+=1
-
-                }while (!listFilterItem.ListView.isCurrentItem)
-
-            } else {
+                guardLists.currentIndex=filterModel.visibleElements.indexOf(index)
+            }else {
                 guardLists.currentIndex = -1
             }
         }

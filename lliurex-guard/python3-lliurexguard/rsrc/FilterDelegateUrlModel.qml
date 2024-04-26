@@ -7,6 +7,7 @@ DelegateModel {
 	property string search
 	onRoleChanged:Qt.callLater(update)
 	onSearchChanged:Qt.callLater(update)
+	property var visibleElements:[]
 	
 	groups: [
 		DelegateModelGroup{
@@ -24,6 +25,7 @@ DelegateModel {
 	filterOnGroup:"visible"
 
 	function update(){
+		visibleElements=[]
 		if (allItems.count>0){
 			allItems.setGroups(0,allItems.count,[ "all"]);
 			for (let index = 0; index < allItems.count; index++) {
@@ -31,6 +33,7 @@ DelegateModel {
 	            let visible = item[role].toLowerCase().includes(search.toLowerCase());
 	            if (!visible) continue;
 	            allItems.setGroups(index, 1, [ "all", "visible" ]);
+	            visibleElements.push(index);
 	        }
 	   }
 
