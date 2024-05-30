@@ -649,11 +649,7 @@ class Bridge(QObject):
 		self.core.mainStack.moveToStack=1
 		self.core.mainStack.manageGoToStack()
 		self.listCurrentOption=0
-		self.core.guardOptionsStack.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-		self.core.guardOptionsStack.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
-		self.core.guardOptionsStack.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-		self.core.guardOptionsStack.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
-
+		self.core.guardOptionsStack.manageGlobalOptions()
 
 	#def _saveChangesRet
 

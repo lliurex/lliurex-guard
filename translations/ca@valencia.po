@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-10 08:54+0200\n"
-"PO-Revision-Date: 2024-04-10 08:54+0200\n"
+"PO-Revision-Date: 2024-05-30 11:18+0200\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -91,7 +91,7 @@ msgstr "Configuració actual"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:56
 msgid "New List"
-msgstr "Llista nova"
+msgstr "Nova llista"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:74
 msgid "Add custom list"

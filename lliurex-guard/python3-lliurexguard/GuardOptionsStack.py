@@ -169,13 +169,19 @@ class Bridge(QObject):
 
 		self.guardMode=Bridge.guardManager.guardMode
 		self._updateListsModel()
+		self.manageGlobalOptions()
+
+	#def loadConfig
+
+	def manageGlobalOptions(self):
+
 		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
 		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
 		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
 		self.enableRestoreListsOption=Bridge.guardManager.checkRestoreListsOption()
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
 
-	#def loadConfig
+	#def manageGlobalOptions
 
 	def _getListsModel(self):
 
@@ -472,10 +478,8 @@ class Bridge(QObject):
 	def _removeListsRet(self):
 
 		self._updateListsModelInfo('remove')
-		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
-		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-		self.enableRestoreListsOption=Bridge.guardManager.checkRestoreListsOption()
-		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+
+		self.manageGlobalOptions()
 		self.filterStatusValue="all"
 		
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
@@ -518,9 +522,7 @@ class Bridge(QObject):
 	def _restoreListRet(self):
 
 		self._updateListsModelInfo('remove')
-		self.enableRemoveListsOption=Bridge.guardManager.checkRemoveListsOption()
-		self.enableRestoreListsOption=Bridge.guardManager.checkRestoreListsOption()
-		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+		self.manageGlobalOptions()
 		self.filterStatusValue="all"
 		
 		if Bridge.guardManager.listsConfig!=Bridge.guardManager.listsConfigOrig:
@@ -605,8 +607,7 @@ class Bridge(QObject):
 		else:
 			self.showMainMessage=[True,self.changeModeT.retChange['code'],"Error",self.changeModeT.retChange['data']]
 
-		self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
-		self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
+		self.manageGlobalOptions()
 		self.filterStatusValue="all"
 		self.showUpdateDnsOption=Bridge.guardManager.checkUpdateDnsOptionStatus()
 		self.core.mainStack.closePopUp=[True,""]
@@ -673,9 +674,7 @@ class Bridge(QObject):
 				self.arePendingChanges=False
 				self.guardMode=Bridge.guardManager.guardMode
 				self._updateListsModel(True)
-				self.enableGlobalOptions=Bridge.guardManager.checkGlobalOptionStatus()
-				self.enableListsStatusOptions=Bridge.guardManager.checkChangeStatusListsOption()
-
+				self.manageGlobalOptions()
 			self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Error",self.applyChangesT.retChange["data"]]
 
 		self.core.mainStack.closePopUp=[True,""]		
