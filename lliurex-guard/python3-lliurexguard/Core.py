@@ -4,7 +4,7 @@ import sys
 import os
 
 
-from . import guardmanager
+from . import GuardManager
 from . import ListStack
 from . import GuardOptionsStack
 from . import MainStack
@@ -36,7 +36,7 @@ class Core:
 	def init(self):
 
 	
-		self.guardManager=guardmanager.GuardManager()
+		self.guardManager=GuardManager.GuardManager()
 		self.listStack=ListStack.Bridge()
 		self.guardOptionsStack=GuardOptionsStack.Bridge()
 		self.mainStack=MainStack.Bridge()
