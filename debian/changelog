@@ -1,3 +1,9 @@
+lliurex-guard (5.19) jammy; urgency=medium
+
+  * Migrated to PySide2-QML
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 17 Jun 2024 13:01:00 +0200
+
 lliurex-guard (5.18.6) jammy; urgency=medium
 
   * Sanitize url to avoid problems with dnsmasq
