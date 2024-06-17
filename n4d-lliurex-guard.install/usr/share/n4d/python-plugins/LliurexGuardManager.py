@@ -32,6 +32,7 @@ class LliurexGuardManager:
 		self.whitelist_filter="address=/#/"+self.blacklist_redirection
 		self.disable_whitelist_filter="#"+self.whitelist_filter
 		self.list_tmpfile=[]
+		self.list_to_active=[]
 		'''
 		server='localhost'
 		context=ssl._create_unverified_context()
@@ -301,6 +302,7 @@ class LliurexGuardManager:
 			return n4d.responses.build_successful_call_response(result)
 		else:
 			if not nonretry:
+				self.deactivate_guardmode_list(self.list_to_active)
 				self.change_guardmode("DisableMode",True)
 			#Old n4d_return {'status':False,'msg':"Error restarting Dnsmaq",'data':data}
 			result={'status':False,'msg':"Error restarting Dnsmaq",'data':data}
@@ -485,7 +487,8 @@ class LliurexGuardManager:
 	
 	def activate_guardmode_list(self,lists):
 
-		result=self._move_guardmode_list(lists,self.active_path,self.disable_path)
+		self.list_to_active=lists
+		result=self._move_guardmode_list(self.list_to_active,self.active_path,self.disable_path)
 
 		if result['status']:
 			#Old n4d: return {'status':True,'msg':"Lists activated successfully"}
