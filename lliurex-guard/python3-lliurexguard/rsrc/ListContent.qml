@@ -38,7 +38,7 @@ Rectangle {
                 Layout.alignment:Qt.AlignRight
                 focus:true
                 width:100
-                enabled:guardLists.count==0?false:true
+                enabled:urlList.count==0?false:true
                 placeholderText:i18nd("lliurex-guard","Search...")
                 onTextChanged:{
                     filterModel.update()
