@@ -8,7 +8,7 @@ Standards-Version: 4.1.2
 
 Package: lliurex-guard
 Architecture: all
-Depends: n4d,n4d-lliurex-base,python3-n4d-client,python3-jsondiff,xclip,lliurex-guard-zerofiles,n4d-qt-agent
+Depends: n4d,n4d-lliurex-base,python3-n4d-client,python3-jsondiff,lliurex-guard-zerofiles,n4d-qt-agent,python3-pyside2.qtqml, python3-pyside2.qtwidgets, python3-pyside2.qtquick,python3-pyside2.qtgui,python3-pyside2.qtquickwidgets
 Description: Contains lliurex-guard
  This package contains the : lliurex-guard gui
 
