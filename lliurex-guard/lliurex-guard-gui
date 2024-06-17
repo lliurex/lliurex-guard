@@ -1,5 +1,37 @@
 #!/usr/bin/env python3
+from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import QUrl
+from PySide2.QtGui import QIcon
+from PySide2.QtQml import QQmlApplicationEngine
+
 import sys
 from lliurexguard.Core import Core
 
 c=Core.get_core()
+
+app=QApplication()
+engine = QQmlApplicationEngine()
+engine.clearComponentCache()
+context=engine.rootContext()
+mainStackBridge=c.mainStack
+guardOptionsStackBridge=c.guardOptionsStack
+listStackBridge=c.listStack
+context.setContextProperty("mainStackBridge", mainStackBridge)
+context.setContextProperty("guardOptionsStackBridge", guardOptionsStackBridge)
+context.setContextProperty("listStackBridge", listStackBridge)
+
+url = QUrl("/usr/lib/python3/dist-packages/lliurexguard/rsrc/lliurex-guard.qml")
+
+engine.load(url)
+if not engine.rootObjects():
+	sys.exit(-1)
+
+engine.quit.connect(QApplication.quit)
+app.setWindowIcon(QIcon("/usr/share/icons/hicolor/scalable/apps/lliurex-guard.svg"));
+ret=app.exec_()
+del engine
+del app
+sys.exit(ret)
+
+
+

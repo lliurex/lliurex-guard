@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-02 10:57+0200\n"
-"PO-Revision-Date: 2023-06-02 10:59+0200\n"
+"POT-Creation-Date: 2024-04-10 08:54+0200\n"
+"PO-Revision-Date: 2024-05-30 11:18+0200\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -18,241 +18,148 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:221
-msgid "You must indicate a name for the list"
-msgstr "Heu d'indicar un nom per a la llista"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:223
-msgid "The name of the list is duplicate"
-msgstr "El nom de la llista està duplicat"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:225
-msgid "List created successfully"
-msgstr "S'ha creat la llista correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:227
-msgid "List edited successfully"
-msgstr "S'ha editat la llista correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:229
-msgid "Error saving the changes of the list:"
-msgstr "S'ha produït un error en guardar els canvis de la llista:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:231
-msgid "Waiting while viewing / editing the list"
-msgstr "S'està esperant mentre es visualitza/s'edita la llista"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:233
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:53
 msgid "Changing Lliurex Guard mode. Wait a moment..."
 msgstr "S'està guardant el mode Lliurex Guard..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:235
-msgid "The change of Lliurex Guard mode has been successful"
-msgstr "S'ha canviat el mode Lliurex Guard correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:237
-msgid "Error changing Lliurex Guard mode:"
-msgstr "S'ha produït un error en canviar el mode Lliurex Guard:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:239
-msgid "Error restarting dnsmasq. Lliurex Guard will be disabled:"
-msgstr ""
-"S'ha produït un error en reiniciar dnsmasq. Lliurex Guard s'inhabilitarà:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:241
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:56
 msgid "Loading the information from the list. Wait a moment..."
 msgstr "S'està carregant la informació de la llista. Espereu..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:243
-msgid "Information of the list loaded successfully"
-msgstr "La informació de la llista s'ha carregat correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:245
-msgid "Error loading the information from the list:"
-msgstr "S'ha produït un error en carregar la informació de la llista:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:247
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:59
 msgid "Loading file. Wait a moment..."
 msgstr "S'està carregant un fitxer. Espereu..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:249
-msgid "File loaded sucessfully"
-msgstr "S'ha carregat el fitxer correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:251
-msgid "Error loading file:"
-msgstr "S'ha produït un error en carregar el fitxer:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:253
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:62
 msgid "Applying changes. Wait a moment..."
 msgstr "S'estan aplicant els canvis. Espereu..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:255
-msgid "Changes applied successfully"
-msgstr "Els canvis s'han aplicat correctament"
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:65
+msgid "Selecting lists to change the activation status. Wait a moment..."
+msgstr ""
+"S'està seleccionant les llistes per a canviar el seu estat d'activació. "
+"Espereu un moment..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:257
-msgid "Error removing lists:"
-msgstr "S'ha produït un error en eliminar les llistes:"
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:68
+msgid "Selecting lists to be deleted. Wait a moment..."
+msgstr ""
+"S'està seleccionant les llistes per a ser eliminades. Espereu un moment..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:259
-msgid "Error activating lists:"
-msgstr "S'ha produït un error en activar les llistes:"
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:71
+msgid "Selecting lists to be restored. Wait a moment..."
+msgstr ""
+"S'està seleccionant les llistes per a ser restaurades. Espereu un moment..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:263
-msgid "Lliurex Guard mode readed sucessfully"
-msgstr "El mode Lliurex Guard s'ha llegit correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:265
-msgid "Error reading Lliurex Guard mode:"
-msgstr "S'ha produït un error en llegir el mode Lliurex Guard:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:267
-msgid "List code readed successfully"
-msgstr "El codi de la llista s'ha llegit correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:269
-msgid "Error reading list headers:"
-msgstr "S'ha produït un error en llegir les capçaleres de la llista:"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:271
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:74
 msgid "Saving changes. Wait a moment..."
 msgstr "S'estan guardant els canvis. Espereu..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:273
-msgid ""
-"The file loaded is empty or the url than containt do not have the correct "
-"format"
-msgstr ""
-"El fitxer carregat està buit o les url que conté no tenen el format correcte"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:275
-msgid "No match found for the indicated search"
-msgstr "No s'ha trobat cap coincidència per a la cerca indicada"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:277
-#, python-format
-msgid "%s matches found for the indicated search"
-msgstr "%s coincidències trobades per a la cerca indicada"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:279
-msgid ""
-"It is not possible to load the selected file.\n"
-"Its size exceeds the recommended limit of 28 Mb"
-msgstr ""
-"No és possible carregar el fitxer seleccionat.\n"
-"La seua grandària excedeix el límit recomanat de 28 Mb"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:281
-msgid ""
-"It is not possible to edit the list.\n"
-"The file size exceeds the recommended limit of 28 Mb"
-msgstr ""
-"No és possible editar la llista.\n"
-"La grandària del fitxer excedeix el límit recomanat de 28 Mb"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:283
-msgid "Copying selected content. Wait a moment..."
-msgstr "Copiant el contingut seleccionat.Espereu..."
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:285
-msgid ""
-"It is not possible to copy all the selected content.\n"
-"Only the first 2500 lines have been copied"
-msgstr ""
-"No s'ha pogut copiar tot el contingut seleccionat.\n"
-"Només s'han copiat les primeres 2500 línies"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:287
-msgid "It is not possible to update white list dns"
-msgstr "No és possible actualitzar els dns de la llista blanca"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:289
-msgid "The url list is empty. Urls entered with wrong format have been removed"
-msgstr ""
-"La llista de *url està buida. Les url introduïdes amb format incorrecte han "
-"sigut eliminades"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:291
-msgid "The white list dns update was successful"
-msgstr ""
-"L'actualització dels dns de les llistes blanques s'ha realitzat correctament"
-
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:293
+#: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:77
 msgid "Updating white list dns. Wait a moment..."
 msgstr "Actualitzant els dns de les llistes blanques. Espereu..."
 
-#: lliurex-guard/python3-lliurexguard/MainWindow.py:314
-msgid ""
-"There are pending changes to apply.\n"
-"Do you want to close the application and lose the changes or cancel and "
-"return to the application?"
-msgstr ""
-"Hi ha canvis pendents d'aplicar.\n"
-"Voleu tancar l'aplicació i perdre els canvis o cancel·lar i tornara "
-"l'aplicació?"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml:33
+msgid "Click to filter list by status"
+msgstr "Feu clic per a filtrar les llistes per estat"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:223
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml:43
+msgid "Show activated lists "
+msgstr "Mostra les llistes actives "
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml:56
+msgid "Show disabled lists"
+msgstr "Mostra les llistes desactivades"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml:68
+msgid "Remove filter"
+msgstr "Elimina el filtre"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml:90
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:42
+msgid "Search..."
+msgstr "Busca..."
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml:150
+msgid "No list is configured"
+msgstr "No hi ha llistes configurades"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:11
+msgid "Current configuration"
+msgstr "Configuració actual"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:56
+msgid "New List"
+msgstr "Nova llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:74
+msgid "Add custom list"
+msgstr "Afig una llista personalitzada"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:80
+msgid "Add custom list from file"
+msgstr "Afig una llista personalitzada per fitxer"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:91
+msgid "Global Options"
+msgstr "Opcions globals"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:103
+msgid "Enable all list"
+msgstr "Activa totes les llistes"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:110
+msgid "Disable all lists"
+msgstr "Desactiva totes les llistes"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:117
+msgid "Delete all lists"
+msgstr "Elimina totes les llistes"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:123
+msgid "Restore all lists"
+msgstr "Restaura totes les llistes"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:129
+msgid "Update white list dns"
+msgstr "Actualitza els dns de les llistes blanques"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:156
 msgid "Black List mode"
 msgstr "Mode llista negra"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:226
-msgid "White List mode"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:159
+msgid "White list mode"
 msgstr "Mode llista blanca"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:229
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:162
 msgid "Lliurex Guard is disabled"
 msgstr "Lliurex Guard està inhabilitat"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:233
-msgid "Unknown mode"
-msgstr "Mode desconegut"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:178
+msgid "Activate BackList mode"
+msgstr "Activa el mode de llista negra"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:337
-msgid " entries"
-msgstr " entrades"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:191
+msgid "Activate WhiteList mode"
+msgstr "Activa el mode de llista blanca"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:375
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:741
-msgid "Click to disable the list"
-msgstr "Feu clic per a inhabilitar la llista"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:204
+msgid "Disable LliureX-Guard"
+msgstr "Desactiva LliureX Guard"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:378
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:743
-msgid "Click to enable the list"
-msgstr "Feu clic per a habilitar la llista"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:224
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:295
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:155
+msgid "Apply"
+msgstr "Aplica"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:393
-msgid "Manage list"
-msgstr "Gestiona la llista"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:248
+msgid "Change Mode"
+msgstr "Canvia el mode"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:408
-msgid "Edit the list"
-msgstr "Edita la llista"
-
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:422
-msgid "Remove the list"
-msgstr "Suprimeix la llista"
-
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:436
-msgid "Restore the list"
-msgstr "Restaura la llista"
-
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:509
-msgid "Please choose a file to add new list"
-msgstr "Trieu un fitxer per a afegir-hi una llista nova"
-
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:604
-msgid "Do you want delete all lists?"
-msgstr "Voleu suprimir totes les llistes?"
-
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:625
-msgid "Do you want to update white list dns?"
-msgstr "Voleu actualitzar els dns de les llistes blanques?"
-
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:685
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:252
 msgid ""
 "Do yo want to change to black list mode?\n"
 "If you activate this mode, you will not be able to access the urls contained "
@@ -262,7 +169,7 @@ msgstr ""
 "Si activeu aquest mode, no podreu accedir als url que estiguen en les "
 "llistes actives"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:687
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:255
 msgid ""
 "Do yo want to change to white list mode?\n"
 "If you activate this mode, you can only access the urls contained in the "
@@ -272,7 +179,7 @@ msgstr ""
 "Si activeu aquest mode, sols podreu accedir als url que estiguen en les "
 "llistes actives"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:689
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:258
 msgid ""
 "Do you want to deactivate LliureX Guard?\n"
 "If you deactivate it, no filter will be applied"
@@ -280,21 +187,336 @@ msgstr ""
 "Voleu desactivar LliureX Guard?\n"
 "Si el desactiveu, no s'aplicarà cap filtre"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:761
-msgid "Do you want delete the list?"
-msgstr "Voleu suprimir la llista?"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:269
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:377
+msgid "Accept"
+msgstr "Accepta"
 
-#: lliurex-guard/python3-lliurexguard/OptionsBox.py:779
-msgid "Do you want restore the list?"
-msgstr "Voleu restaurar la llista?"
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:272
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:299
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:380
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:136
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:159
+msgid "Cancel"
+msgstr "Cancel·la"
 
-#: lliurex-guard/python3-lliurexguard/LoginBox.py:65
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:290
+msgid "Pending changes"
+msgstr "Canvis pendents"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:291
 msgid ""
-"Correct user\n"
-"Loading information. Wait a moment..."
-msgstr "L'usuari és correcte  S'està carregant la informació. Espereu..."
+"There are pendin changes to apply.\n"
+"Do you want to apply the changes or discard them?"
+msgstr ""
+"Hi ha canvis pendents d'aplicar.\n"
+"Voleu aplicar els canvis o descartar-los?"
 
-#: lliurex-guard/python3-lliurexguard/LoginBox.py:84
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:296
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:156
+msgid "Discard"
+msgstr "Descarta"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:320
+msgid "Remove Lists"
+msgstr "Elimina la lista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:321
+msgid "Do you want select alls list to be remove?"
+msgstr "Voleu seleccionar totes les llistes per a eliminar-les?"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:321
+msgid "Do you want select the list to be remove?"
+msgstr "Voleu seleccionar la llista per a ser eliminada?"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:326
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:351
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:204
+msgid "Yes"
+msgstr "Si"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:329
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:354
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:207
+msgid "No"
+msgstr "No"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:345
+msgid "Restore Lists"
+msgstr "Restaura la lista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:346
+msgid "Do you want select alls list to be restore?"
+msgstr "Voleu seleccionar totes les llistes per a restaurades?"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:371
+msgid "Update whitelists dns"
+msgstr "Actualitza els dns de les llistes blanques"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:372
+msgid "Do you want to update white list dns?"
+msgstr "Voleu actualitzar els dns de les llistes blanques?"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:397
+msgid "Error saving the changes of the list:"
+msgstr "S'ha produït un error en guardar els canvis de la llista:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:400
+msgid "Error changing Lliurex Guard mode:"
+msgstr "S'ha produït un error en canviar el mode Lliurex Guard:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:403
+msgid ""
+"Error restarting dnsmasq. Lliurex Guard and the lists have been disabled:"
+msgstr ""
+"S'ha produït un error en reiniciar dnsmasq. Lliurex Guard i les llistes "
+"seran desactivats:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:406
+msgid "Error loading the information from the list:"
+msgstr "S'ha produït un error en carregar la informació de la llista:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:409
+msgid "Error loading file:"
+msgstr "S'ha produït un error en carregar el fitxer:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:413
+msgid "Error removing lists:"
+msgstr "S'ha produït un error en eliminar les llistes:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:416
+msgid "Error activating lists:"
+msgstr "S'ha produït un error en activar les llistes:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:419
+msgid "Error deactivating lists:"
+msgstr "S'ha produït un error en activar les llistes:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:422
+#: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:61
+msgid "Error reading Lliurex Guard mode:"
+msgstr "S'ha produït un error en llegir el mode Lliurex Guard:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:425
+#: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:64
+msgid "Error reading list headers:"
+msgstr "S'ha produït un error en llegir les capçaleres de la llista:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:428
+msgid ""
+"The file loaded is empty or the url than containt do not have the correct "
+"format"
+msgstr ""
+"El fitxer carregat està buit o les url que conté no tenen el format correcte"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:431
+msgid ""
+"It is not possible to load the selected file.\n"
+"Its size exceeds the recommended limit of 28 Mb"
+msgstr ""
+"No és possible carregar el fitxer seleccionat.\n"
+"La seua grandària excedeix el límit recomanat de 28 Mb"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:434
+msgid "It is not possible to update white list dns"
+msgstr "No és possible actualitzar els dns de la llista blanca"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:437
+msgid "The url list is empty. Urls entered with wrong format have been removed"
+msgstr ""
+"La llista d'url està buida. Les url introduïdes amb format incorrecte han "
+"sigut eliminades"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:440
+msgid "List created successfully"
+msgstr "S'ha creat la llista correctament"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:443
+msgid "List edited successfully"
+msgstr "S'ha editat la llista correctament"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:446
+msgid "The change of Lliurex Guard mode has been successfull"
+msgstr "S'ha canviat el mode Lliurex Guard correctament"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:449
+msgid "Changes applied successfully"
+msgstr "Els canvis s'han aplicat correctament"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml:452
+msgid "The white list dns update was successful"
+msgstr ""
+"L'actualització dels dns de les llistes blanques s'ha realitzat correctament"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:30
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:78
+msgid "Relationship of urls and domains:"
+msgstr "Relació d'url i de dominis:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:57
+msgid "Url separated by space"
+msgstr "Url separats per espai"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:69
+msgid "Click to add the urls to list"
+msgstr "Feu clic per a afegir url a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:92
+msgid "Click to close"
+msgstr "Feu clic per a tancar"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:147
+msgid "No url is configured"
+msgstr "No hi ha cap url configurada"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:161
+msgid "Add url"
+msgstr "Afig url"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:177
+msgid "Remove list"
+msgstr "Esborra la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:198
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:11
+msgid "Edit list"
+msgstr "Edita la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:199
+msgid "Do you want delete all urls from the list?"
+msgstr "Voleu eliminar totes les url de la llista?"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:88
+msgid "entries"
+msgstr "entrades"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:117
+msgid "Click to manage this list"
+msgstr "Feu clic per a gestionar la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:130
+msgid "Disable list"
+msgstr "Desactiva la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:130
+msgid "Enable list"
+msgstr "Activa la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
+msgid "Restore the list"
+msgstr "Restaura la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
+msgid "Delete the list"
+msgstr "Elimina la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:69
+msgid "Click to manage this url"
+msgstr "Feu clic per a gestionar l'url"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:86
+msgid "Edit url"
+msgstr "Edita l'url"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:96
+msgid "Delete the url"
+msgstr "Elimina l'url"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:48
+msgid "Name:"
+msgstr "Nom:"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:63
+msgid "Description: "
+msgstr "Descripció: "
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:88
+msgid "Clic to see/edit the list"
+msgstr "Feu clic per a vore/editar la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:121
+msgid "Save"
+msgstr "Guarda"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:150
+msgid "List edition"
+msgstr "Edició de la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:152
+msgid ""
+"The are pending changes to save.\n"
+"Do you want save the changes or discard them?"
+msgstr ""
+"Hi ha canvis pendents d'aplicar.\n"
+"Voleu guardar els canvis o descartar-los?"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:182
+msgid "You must indicate a name for the list"
+msgstr "Heu d'indicar un nom per a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:185
+msgid "The name of the list is duplicate"
+msgstr "El nom de la llista està duplicat"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:188
+msgid "The loaded file is empty"
+msgstr "El fitxer carregat està buit"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:191
+msgid ""
+"It is not possible to edit the list.\n"
+"The file size exceeds the recommended limit of 28 Mb"
+msgstr ""
+"No és possible editar la llista.\n"
+"La grandària del fitxer excedeix el límit recomanat de 28 Mb"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:194
+msgid "Duplicate url have not been added to the list"
+msgstr "Les url duplicades no s'han afegit a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:197
+msgid "The url entered already exists in the list"
+msgstr "L'url introduïda ja existix en la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:200
+msgid "The url list is empty"
+msgstr "La llista d'url està buida"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:203
+msgid ""
+"Duplicate url and url with incorrect format have not been added to the list"
+msgstr "Les url duplicades i amb format incorrecte no s'han afegit a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:206
+msgid "Url with incorrect format have not been added to the list"
+msgstr "Les url amb format incorrecte no s'han afegit a la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:209
+msgid "The url entered is not in the correct format"
+msgstr "L'url introduïda té un format incorrecte"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:212
+msgid "Waiting while viewing / editing the list. To continue close the file"
+msgstr "S'està esperant mentre es visualitza/s'edita la llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListOptions.qml:18
+msgid "Home"
+msgstr "Inici"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/ListOptions.qml:42
+msgid "List"
+msgstr "Llista"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:40
+msgid "Loading. Wait a moment..."
+msgstr "S'està carregant. Espereu un moment..."
+
+#: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:67
+msgid "Invalid user"
+msgstr "L'usuari no és vàlid"
+
+#: lliurex-guard/python3-lliurexguard/rsrc/LoadWaiting.qml:70
 msgid ""
 "Unable to load LliureX-Guard. The number of parametres received is not "
 "correct"
@@ -302,104 +524,10 @@ msgstr ""
 "No és possible carregar LliureX-Guard. El nombre de paràmetres rebuts no és "
 "correcte"
 
-#: lliurex-guard/python3-lliurexguard/LoginBox.py:103
-msgid "Invalid user"
-msgstr "L'usuari no és vàlid"
+#: lliurex-guard/python3-lliurexguard/rsrc/MainOptions.qml:25
+msgid "Configuration"
+msgstr "Configuració"
 
-#: lliurex-guard/python3-lliurexguard/EditBox.py:112
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:133
-msgid "New list"
-msgstr "Llista nova"
-
-#: lliurex-guard/python3-lliurexguard/EditBox.py:245
-msgid "Edit list"
-msgstr "Edita la llista"
-
-#: lliurex-guard/python3-lliurexguard/EditBox.py:468
-msgid "Searching. Wait a moment..."
-msgstr "S'està buscant. Espereu..."
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:172
-msgid "Name"
-msgstr "Nom"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:198
-msgid "Description"
-msgstr "Descripció"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:232
-msgid "Relationship of urls and domains:"
-msgstr "Relació d'url i de dominis:"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:247
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:637
-msgid "Search..."
-msgstr "Busca..."
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:502
-msgid "LliureX Guard"
-msgstr "LliureX Guard"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:586
-msgid "Add new list"
-msgstr "Afig una llista nova"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:600
-msgid "Global management"
-msgstr "Gestió global"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:614
+#: lliurex-guard/python3-lliurexguard/rsrc/MainOptions.qml:37
 msgid "Help"
 msgstr "Ajuda"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:634
-msgid "Search by list name and description"
-msgstr "Busca per nom de llista i per descripció"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:676
-msgid "Established mode: "
-msgstr "S'ha establit el mode: "
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:706
-msgid "Manage Lliurex Guard modes"
-msgstr "Gestiona els modes de Lliurex Guard"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:891
-msgid "Add custom list"
-msgstr "Afig una llista personalitzada"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:927
-msgid "Add custom list by file"
-msgstr "Afig una llista personalitzada per fitxer"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:974
-msgid "Activate all lists"
-msgstr "Activa totes les llistes"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1010
-msgid "Deactivate all lists"
-msgstr "Desactiva totes les llistes"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1046
-msgid "Remove all lists"
-msgstr "Suprimeix totes les llistes"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1082
-msgid "Update white list dns"
-msgstr "Actualitza els dns de les llistes blanques"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1129
-msgid "Activate Black List mode"
-msgstr "Activa el mode de llista negra"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1165
-msgid "Activate White List mode"
-msgstr "Activa el mode de llista blanca"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1201
-msgid "Deactivate LliureX Guard"
-msgstr "Desactiva LliureX Guard"
-
-#: lliurex-guard/python3-lliurexguard/rsrc/lliurex-guard.ui:1233
-msgid "To view or edit the url list click here"
-msgstr "Cliqueu ací per a veure o editar la llista d'url"
