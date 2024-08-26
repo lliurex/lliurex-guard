@@ -205,15 +205,16 @@ class Bridge(QObject):
 	@Slot()
 	def closeLliureXGuard(self):
 
-		try:
-			Bridge.guardManager.removeTmpFile()
-		except:
-			pass
 		if self.core.guardOptionsStack.arePendingChanges:
 			if self.currentStack!=2:
 				self.closeGui=False
 				self.core.guardOptionsStack.showPendingChangesDialog=True
-				
+		else:
+			try:
+				Bridge.guardManager.removeTmpFile()
+			except:
+				pass
+
 	#def closeLliurexGuard
 	
 	on_currentStack=Signal()
