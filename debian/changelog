@@ -1,3 +1,9 @@
+lliurex-guard (5.19.2) jammy; urgency=medium
+
+  * Fixed bug wnen apply/discard changes on exit
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Thu, 29 Aug 2024 11:12:31 +0200
+
 lliurex-guard (5.19.1) jammy; urgency=medium
 
   * Fixed minor bug in list form
