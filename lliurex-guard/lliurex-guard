@@ -1,7 +1,7 @@
 #! /usr/bin/python3
-from PySide2.QtWidgets import QApplication
-from PySide2.QtQuick import QQuickView
-from PySide2.QtCore import QUrl, QObject, Slot, Signal,Property
+from PySide6.QtWidgets import QApplication
+from PySide6.QtQuick import QQuickView
+from PySide6.QtCore import QUrl, QObject, Slot, Signal,Property
 import os
 import subprocess
 import sys
@@ -125,7 +125,7 @@ view.rootContext().setContextProperty("tunnel", tunnel)
 url = QUrl("/usr/lib/python3/dist-packages/lliurexguard/rsrc/login.qml")
 view.setSource(url)
 view.show()
-ret=app.exec_()
+ret=app.exec()
 del view
 del app
 sys.exit(ret)

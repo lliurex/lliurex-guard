@@ -1,9 +1,9 @@
-import org.kde.plasma.components 3.0 as PC3
-import org.kde.kirigami 2.16 as Kirigami
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQml.Models 2.8
-import QtQuick.Layouts 1.15
+import org.kde.plasma.components as PC
+import org.kde.kirigami as Kirigami
+import QtQuick
+import QtQuick.Controls
+import QtQml.Models
+import QtQuick.Layouts
 
 
 Rectangle {
@@ -78,7 +78,7 @@ Rectangle {
                 }
                 
             }
-            PC3.TextField{
+            PC.TextField{
                 id:listSearchEntry
                 font.pointSize:10
                 horizontalAlignment:TextInput.AlignLeft
@@ -105,7 +105,7 @@ Rectangle {
             border.color: "#d3d3d3"
 
 
-            PC3.ScrollView{
+            PC.ScrollView{
                 implicitWidth:parent.width
                 implicitHeight:parent.height
                 anchors.leftMargin:10
@@ -145,7 +145,7 @@ Rectangle {
                     Kirigami.PlaceholderMessage { 
                         id: emptyHint
                         anchors.centerIn: parent
-                        width: parent.width - (units.largeSpacing * 4)
+                        width: parent.width - (Kirigami.Units.largeSpacing * 4)
                         visible: guardLists.count==0?true:false
                         text: i18nd("lliurex-guard","No list is configured")
                     }

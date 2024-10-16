@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 
 Popup {
@@ -28,7 +28,7 @@ Popup {
                 width:30
                 height:30
                 AnimatedImage{
-                    source: "/usr/lib/python3/dist-packages/lliurexguard/rsrc/loading.gif"
+                    source: "/usr/lib/python3.12/dist-packages/lliurexguard/rsrc/loading.gif"
                     transform: Scale {xScale:0.45;yScale:0.45}
                 }
             }

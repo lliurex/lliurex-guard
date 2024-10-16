@@ -629,8 +629,8 @@ class GuardManager(object):
 
 		listId= ''.join((c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn'))
 		listId=listId.lower().replace(" ","_")
-		listId=re.sub('[^\w\s-]', '', listId).strip()
-		listId=re.sub('[-\s]+', '-', listId)
+		listId=re.sub(r'[^\w\s-]', '', listId).strip()
+		listId=re.sub(r'[-\s]+', '-', listId)
 
 		return listId
 

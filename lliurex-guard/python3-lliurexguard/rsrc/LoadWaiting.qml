@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import org.kde.kirigami 2.16 as Kirigami
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
 
 Rectangle{
     visible: true
@@ -24,7 +24,7 @@ Rectangle{
                 height:30
                 
                 AnimatedImage{
-                    source: "/usr/lib/python3/dist-packages/lliurexguard/rsrc/loading.gif"
+                    source: "/usr/lib/python3.12/dist-packages/lliurexguard/rsrc/loading.gif"
                     transform: Scale {xScale:0.45;yScale:0.45}
                 }
             }
