@@ -14,8 +14,9 @@
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
 export PYBUILD_NAME=lliurex-guard
+export PYBUILD_DESTDIR_python3=debian/output
 %:
-	dh $@ --with llxsrc,zero,python3 --buildsystem pybuild
+	dh $@ --with llxsrc,zero,i18n,python3 --buildsystem pybuild
 
 # dh_make generated override targets
 # This is example for Cmake (See https://bugs.debian.org/641051 )
@@ -23,6 +24,4 @@ export PYBUILD_NAME=lliurex-guard
 #	dh_auto_configure -- #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
 
-override_dh_auto_install:
-	dh_auto_install
-	python3 setup.py install --install-layout=deb --root $(CURDIR)/debian/lliurex-guard --prefix=/usr
+override_dh_auto_test:

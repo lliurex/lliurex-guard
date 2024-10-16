@@ -3,12 +3,12 @@ Section: utils
 Priority: optional
 Maintainer: Equipo LliureX <lliurex@gva.es>
 Uploaders: Equipo LliureX <lliurex@gva.es>
-Build-Depends: llxsrchelper,debhelper (>= 10),dh-python, python3-poinstaller,python3-setuptools,python3-all,zero-dev
+Build-Depends: llxsrchelper,debhelper (>= 10),dh-python, python3-poinstaller,python3-setuptools,python3-all,zero-dev,pybuild-plugin-pyproject
 Standards-Version: 4.1.2
 
 Package: lliurex-guard
 Architecture: all
-Depends: n4d,n4d-lliurex-base,python3-n4d-client,python3-jsondiff,lliurex-guard-zerofiles,n4d-qt-agent,python3-pyside2.qtqml, python3-pyside2.qtwidgets, python3-pyside2.qtquick,python3-pyside2.qtgui,python3-pyside2.qtquickwidgets
+Depends: n4d,n4d-lliurex-base,python3-n4d-client,python3-jsondiff,lliurex-guard-zerofiles,n4d-qt-agent,pyside6-tools,python3-pyside6.qtqml, python3-pyside6.qtwidgets, python3-pyside6.qtquick,python3-pyside6.qtgui,python3-pyside6.qtquickwidgets
 Description: Contains lliurex-guard
  This package contains the : lliurex-guard gui
 

@@ -1,0 +1,5 @@
+lliurex-guard/lliurex-guard /usr/sbin
+lliurex-guard/lliurex-guard-gui /usr/sbin
+lliurex-guard/lliurex-guard-fix-blacklist /usr/sbin
+lliurex-guard/lliurex-guard-sanitize-blacklists /usr/sbin
+debian/output/usr/lib/python3.12/dist-packages/lliurexguard /usr/lib/python3.12/dist-packages
