@@ -1,9 +1,9 @@
-import org.kde.plasma.components 2.0 as Components
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQml.Models 2.8
+import org.kde.plasma.components as Components
+import QtQuick
+import QtQuick.Controls
+import QtQml.Models
 
-Components.ListItem{
+Components.ItemDelegate{
 
     id: listFilterItem
     property int listOrder
@@ -16,18 +16,8 @@ Components.ListItem{
     property string metaInfo
 
     enabled:true
-
-    onContainsMouseChanged: {
-        if (!optionsMenu.activeFocus){
-
-            if (containsMouse) {
-                guardLists.currentIndex=filterModel.visibleElements.indexOf(index)
-            }else {
-                guardLists.currentIndex = -1
-            }
-        }
-    }
-
+    height:65
+    
     Rectangle {
         height:visible?60:0
         width:parent.width
@@ -39,15 +29,28 @@ Components.ListItem{
             }
         }
         border.color: "transparent"
+	
         Item{
             id: menuItem
             height:visible?60:0
             width:listFilterItem.width-manageListBtn.width
-            
+
+            MouseArea {
+                id: mouseAreaOption
+                anchors.fill: parent
+                hoverEnabled:true
+                propagateComposedEvents:true
+
+                onEntered: {
+                    if (!optionsMenu.activeFocus){
+                        guardLists.currentIndex=filterModel.visibleElements.indexOf(index)
+                    }
+                }
+            }
             Column{
                 id:description
                 anchors.verticalCenter:parent.verticalCenter
-                anchors.leftMargin:15
+		leftPadding:10
                 spacing:10
                 width:{
                     if (listFilterItem.ListView.isCurrentItem){

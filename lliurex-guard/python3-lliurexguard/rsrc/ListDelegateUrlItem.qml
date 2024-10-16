@@ -1,26 +1,16 @@
-import org.kde.plasma.components 2.0 as Components
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQml.Models 2.8
+import org.kde.plasma.components as Components
+import QtQuick
+import QtQuick.Controls
+import QtQml.Models
 
-Components.ListItem{
+Components.ItemDelegate{
 
     id: listUrlItem
     property int urlId
     property string url
 
     enabled:true
-
-    onContainsMouseChanged: {
-         if (!optionsUrlMenu.activeFocus){
-            if (containsMouse) {
-                urlList.currentIndex=filterModel.visibleElements.indexOf(index)
-            }else {
-                urlList.currentIndex = -1
-            }
-        }
-
-    }
+    height:40
 
     Rectangle {
         height:visible?35:0
@@ -31,7 +21,20 @@ Components.ListItem{
             id: menuItem
             height:visible?35:0
             width:listUrlItem.width-manageUrlBtn.width
-            
+
+            MouseArea {
+                id: mouseAreaOption
+                anchors.fill: parent
+                hoverEnabled:true
+                propagateComposedEvents:true
+
+                onEntered: {
+                    if (!optionsUrlMenu.activeFocus){
+                        urlList.currentIndex=filterModel.visibleElements.indexOf(index)
+                    }
+                }
+            }
+
             Text{
                 id:urlText
                 text:url
@@ -44,7 +47,8 @@ Components.ListItem{
                     }
                 }
                 anchors.verticalCenter:parent.verticalCenter
-                anchors.leftMargin:30
+                leftPadding:10
+
                 elide:Text.ElideMiddle
 
             }
