@@ -20,7 +20,7 @@ context.setContextProperty("mainStackBridge", mainStackBridge)
 context.setContextProperty("guardOptionsStackBridge", guardOptionsStackBridge)
 context.setContextProperty("listStackBridge", listStackBridge)
 
-url = QUrl("/usr/lib/python3/dist-packages/lliurexguard/rsrc/lliurex-guard.qml")
+url = QUrl("/usr/lib/python3.12/dist-packages/lliurexguard/rsrc/lliurex-guard.qml")
 
 engine.load(url)
 if not engine.rootObjects():
