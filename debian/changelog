@@ -1,3 +1,9 @@
+lliurex-guard (5.29.3) noble; urgency=medium
+
+  * Fixed path in launchers
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 16 Oct 2024 13:38:03 +0200
+
 lliurex-guard (5.29.2) noble; urgency=medium
 
   * Initial release for noble
