@@ -1,3 +1,9 @@
+lliurex-guard (5.29.4) noble; urgency=medium
+
+  * Fixed dialog style
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 21 Oct 2024 12:39:33 +0200
+
 lliurex-guard (5.29.3) noble; urgency=medium
 
   * Fixed path in launchers
