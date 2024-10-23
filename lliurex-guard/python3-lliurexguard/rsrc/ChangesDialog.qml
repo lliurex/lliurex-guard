@@ -29,7 +29,7 @@ Dialog {
         color:"#ebeced"
         border.color:"#b8b9ba"
         border.width:1
-        radius:0,5
+        radius:5.0
     }
 
 
