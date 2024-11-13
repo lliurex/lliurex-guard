@@ -1,3 +1,9 @@
+lliurex-guard (5.29.5) noble; urgency=medium
+
+  * Minor fixes in style
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 13 Nov 2024 09:03:35 +0100
+
 lliurex-guard (5.29.4) noble; urgency=medium
 
   * Fixed dialog style
