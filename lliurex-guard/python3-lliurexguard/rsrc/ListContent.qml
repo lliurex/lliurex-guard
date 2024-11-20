@@ -23,7 +23,7 @@ Rectangle {
             id:searchRow
             Layout.alignment:Qt.AlignLeft
             visible:true
-            Layout.rightMargin:addUrlBtn.width+15
+            Layout.rightMargin:addUrlBtn.width+40
 
             Text{
                 id:headText
@@ -50,7 +50,7 @@ Rectangle {
             id:entryRow
             Layout.alignment:Qt.AlignLeft
             visible:false
-            Layout.rightMargin:addUrlBtn.width+15
+            Layout.rightMargin:addUrlBtn.width+40
 
             TextField{
                 id:urlEntry
