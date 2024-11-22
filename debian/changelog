@@ -1,3 +1,9 @@
+lliurex-guard (5.29.7) noble; urgency=medium
+
+  * Fixed launcher to show app icon in Wayland
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 22 Nov 2024 11:21:38 +0100
+
 lliurex-guard (5.29.6) noble; urgency=medium
 
   * Fixed to run in Wayland
