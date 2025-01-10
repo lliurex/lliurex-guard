@@ -1,3 +1,9 @@
+lliurex-guard (5.8.6) focal; urgency=medium
+
+  * Changed to read only .list files
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 10 Jan 2025 09:59:30 +0100
+
 lliurex-guard (5.8.5) focal; urgency=medium
 
   * Fixed postinstall to disable dnsmasq in desktop when lliurex-guard is off.
