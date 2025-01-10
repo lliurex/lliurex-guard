@@ -1,3 +1,9 @@
+lliurex-guard (5.19.3) jammy; urgency=medium
+
+  * Changed to read only .list files
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 10 Jan 2025 09:56:15 +0100
+
 lliurex-guard (5.19.2) jammy; urgency=medium
 
   * Fixed bug wnen apply/discard changes on exit
