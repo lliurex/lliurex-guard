@@ -353,7 +353,7 @@ class LliurexGuardManager:
 		try:
 			for item in listdir(folder):
 				t=join(folder,item)
-				if isfile(t):
+				if isfile(t) and item.endswith('.list'):
 					f=codecs.open(t,'r')
 					tmp={}
 					tmp["id"]=item.split(".")[0]
