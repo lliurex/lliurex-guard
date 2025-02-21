@@ -47,7 +47,7 @@ Rectangle{
             visible:mainStackBridge.showLoadErrorMessage[0]
             text:getMsgText(mainStackBridge.showLoadErrorMessage[1])+"\n"+mainStackBridge.showLoadErrorMessage[2]
             type:Kirigami.MessageType.Error;
-            Layout.minimumWidth:960
+            Layout.minimumWidth:750
             Layout.fillWidth:true
             Layout.rightMargin:15
             Layout.leftMargin:15
