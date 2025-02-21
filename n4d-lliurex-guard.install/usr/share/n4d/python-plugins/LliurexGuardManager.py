@@ -42,6 +42,10 @@ class LliurexGuardManager:
 
 	def _check_dnsmasq_conf(self):
 		
+		if not os.path.exists('/etc/dnsmasq.conf'):
+			with open('/etc/dnsmasq.conf','w') as fd:
+				pass
+
 		with open("/etc/dnsmasq.conf","r") as fd:
 			lines = fd.readlines()
 
