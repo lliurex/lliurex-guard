@@ -1,3 +1,10 @@
+lliurex-guard (5.19.4) jammy; urgency=medium
+
+  * Fixed perfomance in desktops
+  * Fixed filter used to check url
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 04 Nov 2025 15:53:18 +0100
+
 lliurex-guard (5.19.3) jammy; urgency=medium
 
   * Changed to read only .list files
