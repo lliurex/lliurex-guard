@@ -1,31 +1,47 @@
-#!/usr/bin/env python3
+#! /usr/bin/python3
 import subprocess
 import n4d.client
+import netifaces
 import sys
+from pathlib import Path
+try:
+    interface_by_default = netifaces.gateways()['default'][2][1]
+except:
+    interface_by_default = None
+
+if interface_by_default is None:
+    sys.exit(0)
+
+p = subprocess.Popen(['resolvectl','dns',interface_by_default],stdout=subprocess.PIPE)
 dns = []
-dns_section = False
-p = subprocess.Popen(['systemd-resolve','--status'],stdout=subprocess.PIPE)
 for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
-    if "DNS Servers:" in x:
-        dns_section = True
-    elif ":" in x and dns_section:
-        dns_section = False
-    if dns_section:
-        aux_dns = x.split(':')[-1].strip()
-        if aux_dns.startswith('127'):
-            continue
-        dns.append(aux_dns)
+    aux_dns = x.split(':')[-1].strip()
+    if aux_dns.startswith('127'):
+        continue
+    dns.append(aux_dns)
+
 if len(dns) <= 0 :
     sys.exit(0)
 
-with open('/var/lib/dnsmasq/config/extra-dns','w') as fd:
+extradns = Path('/var/lib/dnsmasq/config/extra-dns')
+
+if not extradns.parent.exists():
+    extradns.parent.mkdir(parents=True)
+
+with extradns.open('w') as fd:
     for x in dns:
         fd.write("server=" + x + "\n")
     fd.write('\n')
 
-master_key=n4d.client.Key.master_key() 
-if(master_key.valid()):
-    c=n4d.client.Client(key=master_key) 
+master_key = n4d.client.Key.master_key() 
+if master_key.valid() :
+    c = n4d.client.Client( key=master_key)
+    try:
+        c.get_methods()
+    except Exception as e:
+        if type(e) == n4d.client.ServerError:
+            sys.exit(0)
+
     result = c.LliurexGuardManager.read_guardmode()
     if result['status'] and result['data'] == 'WhiteMode':
         result = c.LliurexGuardManager.update_whitelist_dns()
