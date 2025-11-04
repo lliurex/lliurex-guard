@@ -849,14 +849,10 @@ class GuardManager(object):
 				rejectLine=False
 				for item in sanitizeItems:
 					if item in line:
-						print("match")
 						rejectLine=True
 						break
 
-				if not rejectLine:
-					if len(line.split("-"))>2:
-						line=""
-				else:
+				if rejectLine:
 					line=""
 
 		return line
