@@ -80,7 +80,7 @@ class Bridge(QObject):
 			else:
 				self.showLoadErrorMessage=[True,self.gatherInfo.readGuardmodeHeaders['code'],self.gatherInfo.readGuardmodeHeaders['data']]
 		else:
-			self.showLoadErrorMessage=[True,self.gatherInfo.readGuardmode['code'].self.gatherInfo.readGuarMode['data']]
+			self.showLoadErrorMessage=[True,self.gatherInfo.readGuardmode['code'],self.gatherInfo.readGuardmode['data']]
 	
 		self.closeGui=True
 
