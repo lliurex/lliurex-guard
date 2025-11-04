@@ -30,10 +30,7 @@ def process_folder(folder):
                             reject_line=True
                             break
                     if not reject_line:
-                        if len(line.split("-"))>2:
-                            pass
-                        else:
-                            write_line(line,fd_temp.file)
+                        write_line(line,fd_temp.file)
 
         fd_temp.file.close()
         shutil.copy(fd_temp.name, str(blacklist_file))
