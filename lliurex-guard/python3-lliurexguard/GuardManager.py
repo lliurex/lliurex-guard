@@ -853,10 +853,7 @@ class GuardManager(object):
 						rejectLine=True
 						break
 
-				if not rejectLine:
-					if len(line.split("-"))>2:
-						line=""
-				else:
+				if rejectLine:
 					line=""
 
 		return line
