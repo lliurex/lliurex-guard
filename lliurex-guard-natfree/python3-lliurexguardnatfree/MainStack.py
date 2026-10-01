@@ -52,7 +52,7 @@ class Bridge(QObject):
 		self.currentStack=0
 		self.closeGui=False
 		try:
-			Bridge.guardManager.createN4dClient(sys.argv[1],sys.argv[2])
+			Bridge.guardManager.createN4dClient(sys.argv[1])
 
 			if Bridge.guardManager.userValidated:
 				self.gatherInfo=GatherInfo()

@@ -55,7 +55,7 @@ class GuardManager(object):
 
 		super(GuardManager, self).__init__()
 
-		self.dbg=0
+		self.dbg=1
 		self.userValidated=True
 		self.limitLines=2500
 		self.limitFileSize=28000000
@@ -103,18 +103,14 @@ class GuardManager(object):
 
 	#def _getSystemLocale	
 	
-	def createN4dClient(self,ticket,passwd):
+	def createN4dClient(self,ticket):
 
 		ticket=ticket.replace('##U+0020##',' ')
-		self.credentials.append(ticket.split(' ')[2])
-		self.credentials.append(passwd)
+		tk=n4d.client.Ticket(ticket)
+		self.client=n4d.client.Client(ticket=tk,timeout=120)
 
-		self.tk=n4d.client.Ticket(ticket)
-		self.client=n4d.client.Client(ticket=self.tk)
-
-		msgLog='Session user: %s Lliurex-Guard user: %s'%(os.environ["USER"],self.credentials[0])
+		msgLog=f'Session user: {os.environ["USER"]}'
 		self.writeLog(msgLog)
-
 
 	#def create_n4dClient
 
@@ -140,7 +136,7 @@ class GuardManager(object):
 
 	def readGuardmode(self):
 			
-		readGuardmode=self.client.LliurexGuardManagerNatFree.read_guardmode(True)
+		readGuardmode=self.client.LliurexGuardManagerNatFree.read_guardmode()
 		msg="Read LliureX Guard Mode: "
 		self._debug(msg,readGuardmode)
 		msgLog=msg+str(readGuardmode)
@@ -661,7 +657,8 @@ class GuardManager(object):
 						listToRemove.append(origName)
 			
 			if len(listToRemove)>0:
-				resultRemove=self.client.LliurexGuardManagerNatFree.remove_guardmode_list(listToRemove)	
+				resultRemove=self.client.LliurexGuardManagerNatFree.remove_guardmode_list(listToRemove).get("return")	
+				print(resultRemove)
 				msg="Applied Changes.Removed list "
 				self._debug(msg,resultRemove)
 				msgLog=msg+str(resultRemove)+". List removed: "+str(listToRemove)

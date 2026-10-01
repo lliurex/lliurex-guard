@@ -13,43 +13,38 @@ class Tunnel(QObject):
 
 		QObject.__init__(self)
 		self.clearCache()
-		self.isStandAlone()
 
-	#def __init	
+	#def __init
 
 	def clearCache(self):
 
 		clear=False
-		user=os.environ["USER"]
-		configPath="/home/%s/.config/"%user
-		versionFile=os.path.join(configPath,"lliurex-guard-natfree.conf")
-		cachePath="/home/%s/.cache/lliurex-guard"%user
+		userHome=os.path.expanduser("~")
+		versionFile=os.path.join(userHome,".config/lliurex-guard-natfree.conf")
+		cachePath1=os.path.join(userHome,".cache/lliurex-guard-natfree")
+		cachePath2=os.path.join(userHome,".cache/lliurex-guard-natfree-gui.py")
 		installedVersion=self.getPackageVersion()
 
-		if not os.path.exists(configPath):
-			os.mkdir(configPath)
-			
 		if not os.path.exists(versionFile):
 			with open(versionFile,'w') as fd:
 				fd.write(installedVersion)
-				fd.close()
 
 			clear=True
 
 		else:
 			with open(versionFile,'r') as fd:
 				fileVersion=fd.readline()
-				fd.close()
 
 			if fileVersion!=installedVersion:
 				with open(versionFile,'w') as fd:
 					fd.write(installedVersion)
-					fd.close()
 				clear=True
 		
 		if clear:
-			if os.path.exists(cachePath):
-				shutil.rmtree(cachePath)
+			if os.path.exists(cachePath1):
+				shutil.rmtree(cachePath1)
+			if os.path.exists(cachePath2):
+				shutil.rmtree(cachePath2)
 
 	#def clearCache
 
@@ -61,39 +56,16 @@ class Tunnel(QObject):
 		if os.path.exists(packageVersionFile):
 			with open(packageVersionFile,'r') as fd:
 				pkgVersion=fd.readline()
-				fd.close()
 
 		return pkgVersion
 
 	#def getPackageVersion
-
-	def isStandAlone(self):
-
-		self._standAlone=True
-
-	#def is_StandAlone
-
-	def _getStandAlone(self):
-
-		return self._standAlone
-
-	#def _getStandAlone	
-
-	standAlone=Property(bool,_getStandAlone,constant=True)
-
-	@Slot(str)
-	def on_authenticated(self,passwd):
-		
-		self.passwd=passwd
-	
-	#def on_authenticated
 		
 	@Slot(str)
 	def on_ticket(self, ticket):
 	
 		tk=ticket.replace(' ','##U+0020##')
-		passwd="'"+self.passwd+"'"
-		os.system("/usr/sbin/lliurex-guard-natfree-gui %s %s &"%(tk,passwd))
+		os.system(f"/usr/sbin/lliurex-guard-natfree-gui {tk} &")
 		app.quit()
 	
 	#def on_ticket
