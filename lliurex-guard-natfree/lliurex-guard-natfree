@@ -1,0 +1,114 @@
+#! /usr/bin/python3
+from PySide2.QtWidgets import QApplication
+from PySide2.QtQuick import QQuickView
+from PySide2.QtCore import QUrl, QObject, Slot, Signal,Property
+import os
+import subprocess
+import sys
+import shutil
+
+class Tunnel(QObject):
+	
+	def __init__(self):
+
+		QObject.__init__(self)
+		self.clearCache()
+		self.isStandAlone()
+
+	#def __init	
+
+	def clearCache(self):
+
+		clear=False
+		user=os.environ["USER"]
+		configPath="/home/%s/.config/"%user
+		versionFile=os.path.join(configPath,"lliurex-guard-natfree.conf")
+		cachePath="/home/%s/.cache/lliurex-guard"%user
+		installedVersion=self.getPackageVersion()
+
+		if not os.path.exists(configPath):
+			os.mkdir(configPath)
+			
+		if not os.path.exists(versionFile):
+			with open(versionFile,'w') as fd:
+				fd.write(installedVersion)
+				fd.close()
+
+			clear=True
+
+		else:
+			with open(versionFile,'r') as fd:
+				fileVersion=fd.readline()
+				fd.close()
+
+			if fileVersion!=installedVersion:
+				with open(versionFile,'w') as fd:
+					fd.write(installedVersion)
+					fd.close()
+				clear=True
+		
+		if clear:
+			if os.path.exists(cachePath):
+				shutil.rmtree(cachePath)
+
+	#def clearCache
+
+	def getPackageVersion(self):
+
+		packageVersionFile="/var/lib/lliurex-guard-natfree/version"
+		pkgVersion=""
+
+		if os.path.exists(packageVersionFile):
+			with open(packageVersionFile,'r') as fd:
+				pkgVersion=fd.readline()
+				fd.close()
+
+		return pkgVersion
+
+	#def getPackageVersion
+
+	def isStandAlone(self):
+
+		self._standAlone=True
+
+	#def is_StandAlone
+
+	def _getStandAlone(self):
+
+		return self._standAlone
+
+	#def _getStandAlone	
+
+	standAlone=Property(bool,_getStandAlone,constant=True)
+
+	@Slot(str)
+	def on_authenticated(self,passwd):
+		
+		self.passwd=passwd
+	
+	#def on_authenticated
+		
+	@Slot(str)
+	def on_ticket(self, ticket):
+	
+		tk=ticket.replace(' ','##U+0020##')
+		passwd="'"+self.passwd+"'"
+		os.system("/usr/sbin/lliurex-guard-natfree-gui %s %s &"%(tk,passwd))
+		app.quit()
+	
+	#def on_ticket
+	
+
+#class Tunnel
+
+app = QApplication([])
+tunnel = Tunnel()
+view = QQuickView()
+view.rootContext().setContextProperty("tunnel", tunnel)
+url = QUrl("/usr/lib/python3/dist-packages/lliurexguardnatfree/rsrc/login.qml")
+view.setSource(url)
+view.show()
+ret=app.exec_()
+del view
+del app
+sys.exit(ret)

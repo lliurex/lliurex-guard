@@ -1,0 +1,16 @@
+#!/bin/sh
+
+case "$1" in
+	configure)
+		zero-center set-configured lliurex-guard-installer || true
+	    newVersion=$(dpkg-query --showformat='${Version}' --show lliurex-guard-natfree)
+		tokenDir=/var/lib/lliurex-guard-natfree/version
+		echo "$newVersion" > "$tokenDir" || true
+
+		;;
+	*)
+		echo "Unknow action"
+		;;
+esac
+
+#DEBHELPER#

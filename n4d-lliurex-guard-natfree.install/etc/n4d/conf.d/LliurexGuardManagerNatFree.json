@@ -1,0 +1,62 @@
+{
+    "SETUP": {
+        "type": "python",
+        "path": "LliurexGuardManagerNatFree.py",
+        "class": "LliurexGuardManagerNatFree"
+    },
+    "METHODS": {
+       "read_guardmode": {
+            "allowed_groups": [
+                "*",
+                "anonymous"
+            ]
+        },
+       "change_guardmode": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        },
+        "read_guardmode_headers": {
+            "allowed_groups": [
+                "*",
+                "anonymous"
+            ]
+        },
+        "read_guardmode_list": {
+            "allowed_groups": [
+                "*",
+                "anonymous"
+            ]
+        },
+        "remove_guardmode_list": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        },
+        "activate_guardmode_list": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        },
+        "deactivate_guardmode_list": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        },
+        "remove_tmp_file": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        }
+    }
+}

@@ -1,0 +1,4 @@
+lliurex-guard-standalone-natfree/02-lliurex-guard-natfree /etc/NetworkManager/dispatcher.d/
+lliurex-guard-standalone-natfree/updatednstolliurexguardnatfree /usr/bin
+lliurex-guard-standalone-natfree/default_white_list.list /usr/share/lliurex-guard-natfree/data/
+

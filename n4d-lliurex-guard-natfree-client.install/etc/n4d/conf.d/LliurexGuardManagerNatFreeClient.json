@@ -1,0 +1,35 @@
+{
+    "SETUP": {
+        "type": "python",
+        "path": "LliurexGuardManagerNatFreeClient.py",
+        "class": "LliurexGuardManagerNatFreeClient"
+    },
+    "METHODS": {
+        "read_guardmode":{
+            "allowed_groups":[
+                "anonymous"
+            ]
+        },
+        "change_guardmode": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        },
+        "restart_dnsmasq": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        },
+        "update_whitelist_dns": {
+            "allowed_groups": [
+                "sudo",
+                "admins",
+		"teachers"
+            ]
+        }
+    }
+}
