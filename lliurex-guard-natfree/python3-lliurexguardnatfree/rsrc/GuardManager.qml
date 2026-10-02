@@ -102,14 +102,14 @@ Rectangle{
                     icon.name:"security-high.svg"
                     text:i18nd("lliurex-guard","Enable all list")
                     enabled:!guardOptionsStackBridge.enableListsStatusOptions[0]
-                    onClicked:guardOptionsStackBridge.changeListStatus([true,true])
+                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":true,"listId":""})
                 }
 
                 MenuItem{
                     icon.name:"lliurex-guard-disable-mode.svg"
                     text:i18nd("lliurex-guard","Disable all lists")
                     enabled:!guardOptionsStackBridge.enableListsStatusOptions[1]
-                    onClicked:guardOptionsStackBridge.changeListStatus([true,false])
+                    onClicked:guardOptionsStackBridge.changeListStatus(true,false])
 
                 }
                 MenuItem{

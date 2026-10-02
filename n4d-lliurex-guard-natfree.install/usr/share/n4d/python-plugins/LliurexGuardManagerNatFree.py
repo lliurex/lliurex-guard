@@ -72,12 +72,12 @@ class LliurexGuardManagerNatFree:
 
 		mapping = {
 			"BlackMode": (self.blacklist_dir, self.blacklist_disable_dir, self.blacklist_redirection),
-     	"WhiteMode": (self.whitelist_dir, self.whitelist_disable_dir, self.whitelist_redirection)
-    	}
+			"WhiteMode": (self.whitelist_dir, self.whitelist_disable_dir, self.whitelist_redirection)
+		}
 
-    	default_values = ("", "", "")
+		default_values = ("", "", "")
 
-    	self.active_path, self.disable_path, self.redirection = mapping.get(self.guardMode, default_values)
+		self.active_path, self.disable_path, self.redirection = mapping.get(self.guardMode, default_values)
 	
 	#def _set_variables
 
@@ -196,19 +196,19 @@ class LliurexGuardManagerNatFree:
 			return n4d.responses.build_successful_call_response(result)
 
 		except Exception as e:
-    		print(f"[LliurexGuardManagerNatFreeClient]: Unable to read content list: {e}")
+			print(f"[LliurexGuardManagerNatFreeClient]: Unable to read content list: {e}")
 			result = {'status': False, 'msg': "Unable to read content list", 'data': str(e)}
 			return n4d.responses.build_successful_call_response(result)
 	
 	#def read_guardmode_list
 
-	def remove_guardmode_list(self, lists: list) :
+	def remove_guardmode_list(self, list_to_manage: list) :
 
 		active_dir = Path(self.active_path)
 		disable_dir = Path(self.disable_path)
 
 		try:
-			for item in lists:
+			for item in list_to_manage:
 				filename = f"{item}.list"
 				active_file = active_dir / filename
 				disable_file = disable_dir / filename
@@ -221,40 +221,40 @@ class LliurexGuardManagerNatFree:
 			ret = self.change_guardmode(self.guardMode)
 			
 			if not ret.get("status"):
-				return n4d.responses.build_successful_call_response(ret)
+				return n4d.responses.build_successful_call_response(ret.get("return"))
 
-			result = {'status': True, 'msg': "Lists removed successfully"}
+			result = {'status': True, 'msg': "list_to_manage removed successfully"}
 			return n4d.responses.build_successful_call_response(result)      
 		
 		except Exception as e:
-    		print(f"[LliurexGuardManagerNatFreeClient]: Error removing lists: {e}")
-			result = {'status': False, 'msg': "Error removing lists", 'data': str(e)}      
+			print(f"[LliurexGuardManagerNatFreeClient]: Error removing list_to_manage: {e}")
+			result = {'status': False, 'msg': "Error removing list_to_manage", 'data': str(e)}      
 			return n4d.responses.build_successful_call_response(result)
 
 	#def remove_guardmode_list
 	
-	def activate_guardmode_list(self,lists:lists):
+	def activate_guardmode_list(self,list_to_manage:list):
 
-		result=self._move_guardmode_list(lists,self.active_path,self.disable_path)
+		result=self._move_guardmode_list(list_to_manage,self.active_path,self.disable_path)
 
 		if result.get('status'):
-			result={'status':True,'msg':"Lists activated successfully"}
+			result={'status':True,'msg':"list_to_manage activated successfully"}
 			ret=self.change_guardmode(self.guardMode)
-			final_response = result if ret.get("status") else ret
+			final_response = result if ret.get("status") else ret.get("return")
 			return n4d.responses.build_successful_call_response(final_response)
 		else:
 			return n4d.responses.build_successful_call_response(result)
 	
 	#def activate_guardmode_list
 	
-	def deactivate_guardmode_list(self, lists: list):
+	def deactivate_guardmode_list(self, list_to_manage: list):
 
-		result = self._move_guardmode_list(lists, self.disable_path, self.active_path)
+		result = self._move_guardmode_list(list_to_manage, self.disable_path, self.active_path)
 
 		if result.get('status'):
-			result = {'status': True, 'msg': "Lists deactivated successfully"}
+			result = {'status': True, 'msg': "list_to_manage deactivated successfully"}
 			ret = self.change_guardmode(self.guardMode)
-			final_response = result if ret.get("status") else ret
+			final_response = result if ret.get("status") else ret.get("return")
 			return n4d.responses.build_successful_call_response(final_response)
 		else:
 			return n4d.responses.build_successful_call_response(result)
@@ -274,42 +274,41 @@ class LliurexGuardManagerNatFree:
 
 		directories = [
 			Path(self.conf_dir),
-        	Path(self.blacklist_dir),
-        	Path(self.blacklist_disable_dir),
-        	Path(self.whitelist_dir),
-        	Path(self.whitelist_disable_dir),
-        	Path(self.shared_folder)
-    	]
+			Path(self.blacklist_dir),
+			Path(self.blacklist_disable_dir),
+			Path(self.whitelist_dir),
+			Path(self.whitelist_disable_dir),
+			Path(self.shared_folder)
+		]
 
-    	try:
-    		for directory in directories:
-    			directory.mkdir(parents=True, exist_ok=True)
+		try:
+			for directory in directories:
+				directory.mkdir(parents=True, exist_ok=True)
 
-    		return True 
-    	except OSError as e:
-    		print(f"[LliurexGuardManagerNatFreeClient]: Error creating guardmode configuration directories: {e}")
-    		return False
+			return True 
+		except OSError as e:
+			print(f"[LliurexGuardManagerNatFreeClient]: Error creating guardmode configuration directories: {e}")
+			return False
 
-    #def _create_guardmode_conf_dir
+	#def _create_guardmode_conf_dir
 
 	def _is_server(self):
 
 		try:
 			result = subprocess.run(
 				['lliurex-version', '-v'],
-            	stdout=subprocess.PIPE,
-            	stderr=subprocess.PIPE,
-            	text=True,
-            	check=True
-        	)
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
 
-        	flavours = [x.strip() for x in result.stdout.split(',') if x.strip()]
+			flavours = [x.strip() for x in result.stdout.split(',') if x.strip()]
 
-        	return any('adi' in item or 'pro' in item for item in flavours)
-        
-        except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        	print(f"[LliurexGuardManagerNatFree]: Error checking LliureX version: {e}")
-        	return False
+			return any('adi' in item or 'pro' in item for item in flavours)
+		except (subprocess.CalledProcessError, FileNotFoundError) as e:
+			print(f"[LliurexGuardManagerNatFree]: Error checking LliureX version: {e}")
+			return False
 	
 	#def _is_server
 	
@@ -324,43 +323,43 @@ class LliurexGuardManagerNatFree:
 					if file_path.is_file() and file_path.suffix == '.list':
 						tmp = {
 							"id": file_path.stem,
-                        	"active": folder not in (self.blacklist_disable_dir, self.whitelist_disable_dir),
-                        	"name": "",
-                        	"description": "",
-                        	"lines": 0
-                    	}
+							"active": folder not in (self.blacklist_disable_dir, self.whitelist_disable_dir),
+							"name": "",
+							"description": "",
+							"lines": 0
+						}
 
-                    	lines = file_path.read_text(encoding="utf-8").splitlines()
-                    	match_count = 0
+						lines = file_path.read_text(encoding="utf-8").splitlines()
+						match_count = 0
 
-                    	for line in lines:
-                    		line = line.strip()
-                    		if "NAME" in line and ":" in line:
-                    			tmp["name"] = line.split(":", 1)[1].strip()
-                    			match_count += 1
-                    		elif "DESCRIPTION" in line and ":" in line:
-                    			tmp["description"] = line.split(":", 1)[1].strip()
-                    			match_count += 1
+						for line in lines:
+							line = line.strip()
+							if "NAME" in line and ":" in line:
+								tmp["name"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							elif "DESCRIPTION" in line and ":" in line:
+								tmp["description"] = line.split(":", 1)[1].strip()
+								match_count += 1
 
-                    		if match_count == 2:
-                    			tmp["lines"] = max(0, len(lines) - 2)
-                    			break
-                    	files_headers.append(tmp)
-            return {'status': True, 'msg': "Lists read successfully", 'data': files_headers}
+							if match_count == 2:
+								tmp["lines"] = max(0, len(lines) - 2)
+								break
+						files_headers.append(tmp)
+			return {'status': True, 'msg': "list_to_manage read successfully", 'data': files_headers}
 
-        except Exception as e: 
-			print(f"[LliurexGuardManagerNatFree]: Error reading lists: {e}")
-        	return {'status': False, 'msg': "Unable to read lists", 'data': str(e)}
+		except Exception as e: 
+			print(f"[LliurexGuardManagerNatFree]: Error reading list_to_manage: {e}")
+			return {'status': False, 'msg': "Unable to read list_to_manage", 'data': str(e)}
 
   	#def _read_list_headers
 
-	def _move_guardmode_list(self, lists: list, dest_path: str, orig_path: str):
+	def _move_guardmode_list(self, list_to_manage:list, dest_path: str, orig_path: str):
 		
 		dest_dir = Path(dest_path)
 		orig_dir = Path(orig_path)
 
 		try:
-			for item in lists:
+			for item in list_to_manage:
 				item_id = item.get("id")
 				tmp_file_str = item.get("tmpfile", "")
 

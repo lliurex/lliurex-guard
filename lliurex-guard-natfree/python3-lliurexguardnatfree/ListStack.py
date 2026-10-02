@@ -341,11 +341,11 @@ class Bridge(QObject):
 			self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
 			self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
 			self._initializeVars()
-			if not self.newListT.ret["data"][0]:
+			if not self.newListT.ret.get("data").get("content"):
 				self.showUrlsList=True
 				self.updateUrlModel()
 			else:
-				self.fileToLoad=self.newListT.ret["data"][1]
+				self.fileToLoad=self.newListT.ret.get("data").get("tmpFile")
 				self.lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
 				self.showUrlsList=False
 			self.core.mainStack.currentStack=2

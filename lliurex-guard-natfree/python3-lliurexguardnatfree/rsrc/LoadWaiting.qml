@@ -3,77 +3,83 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import org.kde.kirigami 2.16 as Kirigami
 
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import org.kde.kirigami 2.16 as Kirigami
+
 Rectangle{
     visible: true
     color:"transparent"
 
-    GridLayout{
-        id: loadGrid
-        rows: 3
-        flow: GridLayout.TopToBottom
-        anchors.centerIn:parent
+    ColumnLayout{
+        id: loadRoot
+        anchors.centerIn: parent
+        width: parent.width * 0.9
+        spacing: 15
+       
+        ColumnLayout {
+            Layout.alignment: Qt.AlignHCenter
+            visible: !mainStackBridge.showLoadErrorMessage.show
+            spacing: 10
 
-        RowLayout{
-            Layout.fillWidth: true
-            Layout.alignment:Qt.AlignHCenter
-            visible:!mainStackBridge.showLoadErrorMessage[0]
+            Image{
+                id:spinnerImage
+                source: "/usr/lib/python3/dist-packages/lliurexguardnatfree/rsrc/loading.png"
+                Layout.preferredWidth: 24
+                Layout.preferredHeight: 24
+                Layout.alignment: Qt.AlignHCenter
+                fillMode: Image.PreserveAspectFit
+                smooth:false
+                antialiasing:false
 
-            Rectangle{
-                color:"transparent"
-                width:30
-                height:30
-                
-                AnimatedImage{
-                    source: "/usr/lib/python3/dist-packages/lliurexguard/rsrc/loading.gif"
-                    transform: Scale {xScale:0.45;yScale:0.45}
+                rotation:0
+            }
+            
+            Timer{
+                id:rotationTimer
+                running:(spinnerImage!==null && loadRoot!==null) && spinnerImage.visible && loadRoot.visible
+                repeat:true
+                interval:100
+
+                onTriggered:{
+                    spinnerImage.rotation=(spinnerImage.rotation+330)%360
                 }
             }
-        }
 
-        RowLayout{
-            Layout.fillWidth: true
-            Layout.alignment:Qt.AlignHCenter
-            visible:!mainStackBridge.showLoadErrorMessage[0]
-
-            Text{
-                id:loadtext
-                text:i18nd("bell-scheduler", "Loading. Wait a moment...")
+            Text {
+                id: loadText
+                text: i18nd("lliurex-guard-natfree", "Loading. Wait a moment...")
                 font.pointSize: 10
-                Layout.alignment:Qt.AlignHCenter
+                color: palette.windowText
+                Layout.alignment: Qt.AlignHCenter
             }
         }
+
         Kirigami.InlineMessage {
             id: errorLabel
-            visible:mainStackBridge.showLoadErrorMessage[0]
-            text:getMsgText(mainStackBridge.showLoadErrorMessage[1])+"\n"+mainStackBridge.showLoadErrorMessage[2]
-            type:Kirigami.MessageType.Error;
-            Layout.minimumWidth:750
-            Layout.fillWidth:true
-            Layout.rightMargin:15
-            Layout.leftMargin:15
+            visible: mainStackBridge.showLoadErrorMessage.show
+            text: getMsgText(mainStackBridge.showLoadErrorMessage.msgCode)
+            type: Kirigami.MessageType.Error
+            Layout.fillWidth: true
+
         }
+
     }
 
     function getMsgText(msgCode){
 
         switch (msgCode){
             case -23:
-                var msg=i18nd("lliurex-guard","Error reading Lliurex Guard mode:")
-                break;
+                return i18nd("lliurex-guard","Error reading Lliurex Guard mode:")
             case -25:
-                var msg=i18nd("lliurex-guard","Error reading list headers:")
-                break;
+                return i18nd("lliurex-guard","Error reading list headers:")
             case -36:
-                var msg=i18nd("lliurex-guard","Invalid user")
-                break;
+                return i18nd("lliurex-guard","Invalid user")
             case -37:
-                var msg=i18nd("lliurex-guard","Unable to load LliureX-Guard. The number of parametres received is not correct")
-                break;
+                return i18nd("lliurex-guard","Unable to load LliureX-Guard. The number of parametres received is not correct")
             default:
-                var msg=""
-                break;
+                return ""
         }
-        return msg
-
     }
 }
