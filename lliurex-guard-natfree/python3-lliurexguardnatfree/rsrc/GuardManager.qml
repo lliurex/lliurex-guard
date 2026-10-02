@@ -109,20 +109,20 @@ Rectangle{
                     icon.name:"lliurex-guard-disable-mode.svg"
                     text:i18nd("lliurex-guard","Disable all lists")
                     enabled:!guardOptionsStackBridge.enableListsStatusOptions[1]
-                    onClicked:guardOptionsStackBridge.changeListStatus(true,false])
+                    onClicked:guardOptionsStackBridge.changeListStatus("allLists":true,"active":false,"listId":""])
 
                 }
                 MenuItem{
                     icon.name:"delete.svg"
                     text:i18nd("lliurex-guard","Delete all lists")
                     enabled:guardOptionsStackBridge.enableRemoveListsOption
-                    onClicked:guardOptionsStackBridge.removeLists([true])
+                    onClicked:guardOptionsStackBridge.removeLists({"allLists":true,"listId":""})
                 }
                 MenuItem{
                     icon.name:"restoration.svg"
                     text:i18nd("lliurex-guard","Restore all lists")
                     enabled:guardOptionsStackBridge.enableRestoreListsOption
-                    onClicked:guardOptionsStackBridge.restoreLists([true])
+                    onClicked:guardOptionsStackBridge.restoreLists({"allLists":true."listId":""})
                 }
             }
            
@@ -241,7 +241,7 @@ Rectangle{
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
         dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Change Mode")
         dialogMsg:{
-            switch(guardOptionsStackBridge.showChangeModeDialog[1]){
+            switch(guardOptionsStackBridge.showChangeModeDialog.guardMode){
                 case "BlackMode":
                     i18nd("lliurex-guard","Do yo want to change to black list mode?\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
                     break;
@@ -256,7 +256,7 @@ Rectangle{
                     break
             }
         }
-        dialogVisible:guardOptionsStackBridge.showChangeModeDialog[0]
+        dialogVisible:guardOptionsStackBridge.showChangeModeDialog.show
         dialogWidth:650
         btnAcceptVisible:false
         btnAcceptText:""
@@ -312,8 +312,8 @@ Rectangle{
         id:removeListsDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
         dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Remove Lists")
-        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog[1]?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove?")
-        dialogVisible:guardOptionsStackBridge.showRemoveListsDialog[0]
+        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog.removeAll?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove?")
+        dialogVisible:guardOptionsStackBridge.showRemoveListsDialog.show
         dialogWidth:500
         btnAcceptVisible:false
         btnAcceptText:""
@@ -360,84 +360,64 @@ Rectangle{
     } 
 
     function getTextMessage(){
-        switch (guardOptionsStackBridge.showMainMessage[1]){
+        switch (guardOptionsStackBridge.showMainMessage.msgCode){
             case -5:
-                var msg=i18nd("lliurex-guard","Error saving the changes of the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error saving the changes of the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -9:
-                var msg=i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -10:
-                var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard and the lists have been disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard and the lists have been disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -13:
-                var msg=i18nd("lliurex-guard","Error loading the information from the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error loading the information from the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -16:
-                var msg=i18nd("lliurex-guard","Error loading file:")
+                return i18nd("lliurex-guard","Error loading file:")
                 " "+guardOptionsStackBridge.showMainMessage[3]
-                break;
             case -19:
-                var msg=i18nd("lliurex-guard","Error removing lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error removing lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -20:
-                var msg=i18nd("lliurex-guard","Error activating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error activating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -21:
-                var msg=i18nd("lliurex-guard","Error deactivating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error deactivating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -23:
-                var msg=i18nd("lliurex-guard","Error reading Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error reading Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -25:
-                var msg=i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -27:
-                var msg=i18nd("lliurex-guardd","The file loaded is empty or the url than containt do not have the correct format")
-                break;
+                return i18nd("lliurex-guardd","The file loaded is empty or the url than containt do not have the correct format")
             case -30:
-                var msg=i18nd("lliurex-guard","It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
-                break;
+                return i18nd("lliurex-guard","It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
             case -34:
-                var msg=i18nd("lliurex-guard","It is not possible to update white list dns")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","It is not possible to update white list dns")+" "+guardOptionsStackBridge.showMainMessage[3]
             case -35:
-                var msg=i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")
-                break;
+                return i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")
             case 3:
-                var msg=i18nd("lliurex-guard","List created successfully")
-                break;
+                return i18nd("lliurex-guard","List created successfully")
             case 4:
-                var msg=i18nd("lliurex-guard","List edited successfully")
+                return i18nd("lliurex-guard","List edited successfully")
                 break;
             case 8:
-                var msg=i18nd("lliurex-guard","The change of Lliurex Guard mode has been successfull")
-                break;
+                return i18nd("lliurex-guard","The change of Lliurex Guard mode has been successfull")
             case 18:
-                var msg=i18nd("lliurex-guard","Changes applied successfully")
-                break;
+                return i18nd("lliurex-guard","Changes applied successfully")
             case 35:
-                var msg=i18nd("lliurex-guard","The white list dns update was successful")
-                break;
+                return i18nd("lliurex-guard","The white list dns update was successful")
           default:
-              var msg=""
-              break;
+              return ""
         }
-        return msg
     } 
 
     function getTypeMessage(){
 
-        switch (guardOptionsStackBridge.showMainMessage[2]){
-            case "Information":
-                return Kirigami.MessageType.Information
-            case "Ok":
+        switch (guardOptionsStackBridge.showMainMessage.type){
+            case 0:
                 return Kirigami.MessageType.Positive
-            case "Error":
+            case 1:
                 return Kirigami.MessageType.Error
-            case "Warning":
+            case 2:
                 return Kirigami.MessageType.Warning
-        }
+            case 3:
+            return Kirigami.MessageType.Information
+          }
     }
 
 } 

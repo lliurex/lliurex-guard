@@ -43,18 +43,21 @@ class ChangeListStatus(QThread):
 
 class RemoveLists(QThread):
 
-	def __init__(self,*args):
+	listRemoved=Signal()
+	def __init__(self,manager,allLists,listToRemove):
 
-		QThread.__init__(self)
-		self.allLists=args[0]
-		self.listToRemove=args[1]
+		super.__init__()
+		self.manager=manager
+		self.allLists=allLists
+		self.listToRemove=listToRemove
 
 	#def __init__
 
 	def run(self,*args):
 		
 		time.sleep(0.5)
-		ret=self.guardManager.removeLists(self.allLists,self.listToRemove)
+		ret=self.manager.removeLists(self.allLists,self.listToRemove)
+		self.listRemoved.emit()
 
 	#def run
 
@@ -407,7 +410,7 @@ class Bridge(QObject):
 
 	#def manageStatusFilter
 
-	@Slot('QJValue')
+	@Slot('QJSValue')
 	def changeListStatus(self,data):
 
 		if hasattr(data,'toVariant'):
@@ -441,39 +444,45 @@ class Bridge(QObject):
 		else:
 			self.arePendingChanges=False
 		
-		self.core.mainStack.closePopUp={"show":False,"msgCode":""}
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.core.mainStack.closeGui=True
 
 	#def _changeStatusRet
 
-	@Slot('QVariantList')
+	@Slot('QJSValue')
 	def removeLists(self,data):
 
-		self.showMainMessage=[False,"","Ok",""]
-		self.removeAllLists=data[0]
+		if hasattr(data,'toVariant'):
+			data=data.toVariant()
+
+
+		self.showMainMessage={"show":False,"msgCode":"","type":"","data"}
+		self.removeAllLists=data.get("allLists")
 
 		if self.removeAllLists:
 			self.listToRemove=None
 		else:
-			self.listToRemove=data[1]
+			self.listToRemove=data.get("listId")
 
-		self.showRemoveListsDialog=[True,self.removeAllLists]
+		self.showRemoveListsDialog={"show":True,"removeAll":self.removeAllLists}
 
 	#def removeLists
 
 	@Slot(str)
 	def manageRemoveListsDialog(self,response):
 
-		self.showRemoveListsDialog=[False,False]
+		self.showRemoveListsDialog={"show":False,"removeAll":False}
 		if response=="Apply":
 			self.core.mainStack.closeGui=False
-			self.core.mainStack.closePopUp=[False,WAITING_REMOVE_LISTS_CODE]
-			self.removeListsT=RemoveLists(self.removeAllLists,self.listToRemove)
+			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_REMOVE_LISTS_CODE}
+			self.removeListsT=RemoveLists(self.manager,self.removeAllLists,self.listToRemove)
 			self.removeListsT.start()
-			self.removeListsT.finished.connect(self._removeListsRet)	
+			self.removeListsT.listRemoved.connect(self._removeListsRet)
+			self.removeListsT.finished.connect(self.removeListT.deleteLater)	
 
 	#def manageRemoveListsDialog
 
+	@Slot()
 	def _removeListsRet(self):
 
 		self._updateListsModelInfo('remove')
@@ -486,7 +495,7 @@ class Bridge(QObject):
 		else:
 			self.arePendingChanges=False
 		
-		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.core.mainStack.closeGui=True
 
 	#def _removeListRet
@@ -511,7 +520,7 @@ class Bridge(QObject):
 		self.showRestoreListsDialog=[False,False]
 		if response=="Apply":
 			self.core.mainStack.closeGui=False
-			self.core.mainStack.closePopUp=[False,WAITING_RESTORE_LIST_CODE]
+			self.core.mainStack.showPopUp=[False,WAITING_RESTORE_LIST_CODE]
 			self.restoreListT=RestoreList(self.restoreAllLists,self.listToRestore)
 			self.restoreListT.start()
 			self.restoreListT.finished.connect(self._restoreListRet)
@@ -529,7 +538,7 @@ class Bridge(QObject):
 		else:
 			self.arePendingChanges=False
 
-		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.showPopUp=[True,""]
 		self.core.mainStack.closeGui=True
 
 	#def _restoreListRet
@@ -549,7 +558,7 @@ class Bridge(QObject):
 		self.showChangeModeDialog=[False,""]
 		if response=="Accept":
 			self.core.mainStack.closeGui=False
-			self.core.mainStack.closePopUp=[False,WAITING_CHANGE_GUARDMODE_CODE]
+			self.core.mainStack.showPopUp=[False,WAITING_CHANGE_GUARDMODE_CODE]
 			self.changeModeT=ChangeMode(self.modeToChange)
 			self.changeModeT.start()
 			self.changeModeT.finished.connect(self._changeModeRet)
@@ -573,7 +582,7 @@ class Bridge(QObject):
 
 		self.manageGlobalOptions()
 		self.filterStatusValue="all"
-		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.showPopUp=[True,""]
 		self.core.mainStack.closeGui=True
 
 	#def _changeModeRet
@@ -608,7 +617,7 @@ class Bridge(QObject):
 
 		self.showMainMessage=[False,"","Ok",""]
 		self.core.mainStack.closeGui=False
-		self.core.mainStack.closePopUp=[False,WAITING_APPLY_CHANGES_CODE]
+		self.core.mainStack.showPopUp=[False,WAITING_APPLY_CHANGES_CODE]
 		self.applyChangesT=ApplyChanges()
 		self.applyChangesT.start()
 		self.applyChangesT.finished.connect(self._applyChangesRet)
@@ -640,7 +649,7 @@ class Bridge(QObject):
 				self.manageGlobalOptions()
 			self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Error",self.applyChangesT.retChange["data"]]
 
-		self.core.mainStack.closePopUp=[True,""]		
+		self.core.mainStack.showPopUp=[True,""]		
 
 	#def _applyChangesRet
 
