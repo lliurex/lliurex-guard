@@ -3,21 +3,19 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 
-GridLayout{
+RowLayout{
     id: listGrid
-    columns: 2
-    flow: GridLayout.LeftToRight
-    columnSpacing:10
+    spacing:10
 
-    GridLayout{
-        rows:2
-        flow: GridLayout.TopToBottom
+    ColumnLayout{
+        Layout.fillHeight:true
+        spacing:5
 
         MenuOptionBtn {
             id:goBackBtn
             optionText:i18nd("lliurex-guard","Home")
             optionFontSize:14
-            optionIcon:"/usr/share/icons/breeze/actions/24/arrow-left.svg"
+            optionIcon:"actions/24/arrow-left.svg"
             enabled:listStackBridge.enableForm
             Connections{
                 function onMenuOptionClicked(){
@@ -28,19 +26,20 @@ GridLayout{
         }  
         Rectangle{
             width:130
-            Layout.minimumHeight:475
             Layout.fillHeight:true
-            border.color: "#d3d3d3"
-            GridLayout{
-                id: menuGrid
-                rows:1 
-                flow: GridLayout.TopToBottom
-                rowSpacing:0
+            border.color: palette.mid
+            ColumnLayout{
+               anchors.fill:parent
+               spacing:0
 
                 MenuOptionBtn {
                     id:infoItem
                     optionText:i18nd("lliurex-guard","List")
-                    optionIcon:"/usr/share/icons/breeze/actions/22/view-list-details.svg"
+                    optionIcon:"actions/22/view-list-details.svg"
+                 }
+
+                 Item{
+                    Layout.fillHeight:true
                  }
 
             }
@@ -49,9 +48,11 @@ GridLayout{
 
     StackView {
         id: manageView
-        property int currentOption:listStackBridge.listCurrentOption
         Layout.fillWidth:true
         Layout.fillHeight: true
+        
+        property int currentOption:listStackBridge.listCurrentOption
+
         initialItem:listView
 
         onCurrentOptionChanged:{
@@ -63,12 +64,13 @@ GridLayout{
             }
 
         }
+
         replaceEnter: Transition {
             PropertyAnimation {
                 property: "opacity"
                 from: 0
                 to:1
-                duration: 600
+                duration: 60
             }
         }
         replaceExit: Transition {
@@ -76,10 +78,10 @@ GridLayout{
                 property: "opacity"
                 from: 1
                 to:0
-                duration: 600
+                duration: 60
             }
         }
-
+        
         Component{
             id:emptyView
             Item{
