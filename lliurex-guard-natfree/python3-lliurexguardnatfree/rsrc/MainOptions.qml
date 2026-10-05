@@ -3,53 +3,46 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 
-GridLayout{
+RowLayout{
     id: mainGrid
-    columns: 2
-    flow: GridLayout.LeftToRight
-    columnSpacing:10
+    spacing:10
 
     Rectangle{
         width:130
         Layout.fillHeight:true
         border.color: "#d3d3d3"
 
-        GridLayout{
+        ColumnLayout{
             id: menuGrid
-            rows:3 
-            flow: GridLayout.TopToBottom
-            rowSpacing:0
+            Layout.fillWidth:true
+            Layout.fillHeight:true
+            spacing:0
 
             MenuOptionBtn {
                 id:listItem
+                Layout.fillWidth:true
                 optionText:i18nd("lliurex-guard","Configuration")
-                optionIcon:"/usr/share/icons/breeze/status/22/security-high.svg"
-               
-                Connections{
-                    function onMenuOptionClicked(){
-                        mainStackBridge.moveToMainOptions(0)
-                    }
-                }
-                
+                optionIcon:"status/22/security-high.svg"
+                onMenuOptionClicked:mainStackBridge.moveToMainOptions(0)
             }
+
             MenuOptionBtn {
                 id:helpItem
+                Layout.fillWidth:true
                 optionText:i18nd("lliurex-guard","Help")
-                optionIcon:"/usr/share/icons/breeze/actions/22/help-contents.svg"
-                Connections{
-                    function onMenuOptionClicked(){
-                        mainStackBridge.openHelp();
-                    }
-                }
+                optionIcon:"actions/22/help-contents.svg"
+                onMenuOptionClicked:mainStackBridge.openHelp();
             }
         }
     }
 
     StackView {
         id: optionsView
-        property int currentIndex:mainStackBridge.mainCurrentOption
         Layout.fillWidth:true
         Layout.fillHeight:true
+
+        property int currentIndex:mainStackBridge.mainCurrentOption
+      
         initialItem:guardView
 
         onCurrentIndexChanged:{
@@ -60,28 +53,28 @@ GridLayout{
             }
          }
         replaceEnter: Transition {
-            PropertyAnimation {
+            NumberAnimation {
                 property: "opacity"
                 from: 0
-                to:1
-                duration: 600
+                to: 1
+                duration: 60
             }
         }
         replaceExit: Transition {
-            PropertyAnimation {
+            NumberAnimation {
                 property: "opacity"
                 from: 1
-                to:0
-                duration: 600
+                to: 0
+                duration: 60
             }
         }
+
         Component{
             id:guardView
             GuardManager{
                 id:guardManager
             }
         }
-
      
     }
 }

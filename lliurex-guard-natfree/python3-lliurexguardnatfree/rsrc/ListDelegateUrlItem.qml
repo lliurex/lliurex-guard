@@ -79,7 +79,7 @@ Components.ListItem{
                         icon.name:"document-edit.svg"
                         text:i18nd("lliurex-guard","Edit url")
                         onClicked:{
-                            listStackBridge.manageEditUrlBtn([index,urlText.text])
+                            listStackBridge.manageEditUrlBtn({"urlIndex":index,"urlValue":urlText.text})
                             manageEntryRow(true)
                             urlEntry.forceActiveFocus()
                             urlEntry.text=urlText.text

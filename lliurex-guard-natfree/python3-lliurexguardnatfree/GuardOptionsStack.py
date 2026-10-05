@@ -15,7 +15,6 @@ WAITING_APPLY_LISTS_CHANGES_CODE=18
 WAITING_REMOVE_LISTS_CODE=19
 WAITING_RESTORE_LIST_CODE=20
 WAITING_APPLY_CHANGES_CODE=17
-WAITING_UPDATE_DNS=27
 
 class ChangeListStatus(QThread):
 
@@ -37,6 +36,7 @@ class ChangeListStatus(QThread):
 		ret=self.manager.changeListsStatus(self.allLists,self.active,self.listToEdit)
 
 		self.listStatusChanged.emit()
+	
 	#def run
 
 #class ChangeListsStatus
@@ -44,6 +44,7 @@ class ChangeListStatus(QThread):
 class RemoveLists(QThread):
 
 	listRemoved=Signal()
+	
 	def __init__(self,manager,allLists,listToRemove):
 
 		super.__init__()
@@ -65,18 +66,22 @@ class RemoveLists(QThread):
 
 class RestoreList(QThread):
 
-	def __init__(self,*args):
+	listRestored=Signal()
 
-		QThread.__init__(self)
-		self.allLists=args[0]
-		self.listToRestore=args[1]
+	def __init__(self,manager,allLists,listToRestore):
+
+		super().__init__()
+		self.manager=
+		self.allLists=allLists
+		self.listToRestore=listToRestore
 
 	#def __init__
 
 	def run(self,*args):
 
 		time.sleep(0.5)
-		ret=self.guardManager.restoreList(self.allLists,self.listToRestore)
+		ret=self.manager.restoreList(self.allLists,self.listToRestore)
+		self.listRestored.emit()
 
 	#def run
 
@@ -84,48 +89,70 @@ class RestoreList(QThread):
 
 class ChangeMode(QThread):
 
-	def __init__(self,*args):
+	modeChanged=Signal(dict)
 
-		QThread.__init__(self)
-		self.mode=args[0]
-		self.retChange={}
-		self.retMode={}
-		self.retHeaders={}
+	def __init__(self,manager,modeToChange):
+
+		super().__init__()
+		self.manager=manager
+		self.modeToChange=modeToChange
 
 	#def __init__
 
 	def run(self,*args):
 
-		self.retChange=self.guardManager.changeGuardmode(self.mode)
-		if self.retChange["status"]:
-			self.retMode=self.guardManager.readGuardmode()
-			if self.retMode['status']:
-				if self.retMode['data']!="DisableMode":
-					self.retHeaders=self.guardManager.readGuardmodeHeaders()
+		retMode={"status":False,"code":"","data":""}
+		retHeaders={"status":True,"code":"","data":""}
+		retChange=self.manager.changeGuardmode(self.modeToChange)
+		if retChange.get("status"):
+			retMode=self.manager.readGuardmode()
+			if retMode.get('status'):
+				if retMode.get('data')!="DisableMode":
+					retHeaders=self.manager.readGuardmodeHeaders()
 				else:
-					self.retHeaders={"status":True}
+					retHeaders={"status":True}
+
+		dataToEmit={
+			"retMode":retMode,
+			"retChange":retChange,
+			"retHeaders":retHeaders
+		}
+
+		self.modeChanged.emit(dataToEmit)
+
 	#def run
 
 #class ChangeMode
 
 class ApplyChanges(QThread):
 
-	def __init__(self,*args):
+	changesApplied=Signal(dict)
 
-		QThread.__init__(self)
-		self.retChange={}
-		self.retHeaders={}
+	def __init__(self,manager):
+
+		super().__init__()
+		self.manager=manager
 
 	#def __init__
 
 	def run(self,*args):
 
-		self.retChange=self.guardManager.applyChanges()
-		if self.retChange["status"]:
-			self.retHeaders=self.guardManager.readGuardmodeHeaders()
+		retHeaders={"status":True,"code":"","data":""}
+		retChange=self.manager.applyChanges()
+
+		if retChange.get("status"):
+			retHeaders=self.manager.readGuardmodeHeaders()
 		else:
-			if self.retChange["code"]==-10:
+			if retChange.get("code")==-10:
 				ret=self.guardManager.readGuardmode()
+
+		dataToEmit={
+			"retChange":retChange,
+			"retHeaders":retHeaders
+		}
+
+		self.changesApplied.emit(dataToEmit)
+
 	#def run
 
 #class ApplyChanges
@@ -426,7 +453,7 @@ class Bridge(QObject):
 			listToEdit=data.get("listId")
 
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_APPLY_LISTS_CHANGES_CODE}
-		self.changeStatusT=ChangeListStatus(self.manager,self.changeAllLists,active,listToEdit)
+		self.changeStatusT=ChangeListStatus(self.guardManager,self.changeAllLists,active,listToEdit)
 		self.changeStatusT.start()
 		self.changeStatusT.listStatusChanged.connect(self._changeStatusRet)
 		self.changeStatusT.finished.connect(self.changeStatusT.deleteLater)		
@@ -439,11 +466,7 @@ class Bridge(QObject):
 		self._updateListsModelInfo('activated')
 		self.enableListsStatusOptions=self.guardManager.checkChangeStatusListsOption()
 		self.filterStatusValue="all"
-		if self.guardManager.listsConfig!=self.guardManager.listsConfigOrig:
-			self.arePendingChanges=True
-		else:
-			self.arePendingChanges=False
-		
+		self._detectChangesInConfig()		
 		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.core.mainStack.closeGui=True
 
@@ -454,7 +477,6 @@ class Bridge(QObject):
 
 		if hasattr(data,'toVariant'):
 			data=data.toVariant()
-
 
 		self.showMainMessage={"show":False,"msgCode":"","type":"","data"}
 		self.removeAllLists=data.get("allLists")
@@ -475,7 +497,7 @@ class Bridge(QObject):
 		if response=="Apply":
 			self.core.mainStack.closeGui=False
 			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_REMOVE_LISTS_CODE}
-			self.removeListsT=RemoveLists(self.manager,self.removeAllLists,self.listToRemove)
+			self.removeListsT=RemoveLists(self.guardManager,self.removeAllLists,self.listToRemove)
 			self.removeListsT.start()
 			self.removeListsT.listRemoved.connect(self._removeListsRet)
 			self.removeListsT.finished.connect(self.removeListT.deleteLater)	
@@ -486,44 +508,41 @@ class Bridge(QObject):
 	def _removeListsRet(self):
 
 		self._updateListsModelInfo('remove')
-
 		self.manageGlobalOptions()
 		self.filterStatusValue="all"
-		
-		if self.guardManager.listsConfig!=self.guardManager.listsConfigOrig:
-			self.arePendingChanges=True
-		else:
-			self.arePendingChanges=False
-		
+		self._detectChangesInConfig()
 		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.core.mainStack.closeGui=True
 
 	#def _removeListRet
 
-	@Slot('QVariantList')
+	@Slot('QJSValue')
 	def restoreLists(self,data):
 
-		self.showMainMessage=[False,"","Ok",""]
-		self.restoreAllLists=data[0]
+		if hasattr(data,'toVariant'):
+			data=data.toVariant()
+
+		self.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
+		self.restoreAllLists=data.get("allLists")
 
 		if self.restoreAllLists:
 			self.listToRestore=None
 			self.showRestoreListsDialog=True
 		else:
-			self.listToRestore=data[1]
+			self.listToRestore=data.get("listId")
 			self.manageRestoreListsDialog('Apply')
-
 		
 	@Slot(str)
 	def manageRestoreListsDialog(self,response):
 
-		self.showRestoreListsDialog=[False,False]
+		self.showRestoreListsDialog=False
 		if response=="Apply":
 			self.core.mainStack.closeGui=False
-			self.core.mainStack.showPopUp=[False,WAITING_RESTORE_LIST_CODE]
-			self.restoreListT=RestoreList(self.restoreAllLists,self.listToRestore)
+			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_RESTORE_LIST_CODE}
+			self.restoreListT=RestoreList(self.guardManager,self.restoreAllLists,self.listToRestore)
 			self.restoreListT.start()
-			self.restoreListT.finished.connect(self._restoreListRet)
+			self.removeListsT.listRestored.connect(self._restoreListRet)
+			self.restoreListT.finished.connect(self.removeListT.deleteLater)
 	
 	#def manageRestoreListsDialog
 
@@ -532,57 +551,74 @@ class Bridge(QObject):
 		self._updateListsModelInfo('remove')
 		self.manageGlobalOptions()
 		self.filterStatusValue="all"
-		
+		self._detectChangesInConfig()
+
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
+		self.core.mainStack.closeGui=True
+
+	#def _restoreListRet
+
+	def _detectChangesInConfig(self):
+
 		if self.guardManager.listsConfig!=self.guardManager.listsConfigOrig:
 			self.arePendingChanges=True
 		else:
 			self.arePendingChanges=False
 
-		self.core.mainStack.showPopUp=[True,""]
-		self.core.mainStack.closeGui=True
-
-	#def _restoreListRet
+	#def _detectChangesInConfig
 
 	@Slot(str)
 	def changeGuardMode(self,mode):
 
 		self.modeToChange=mode
-		self._showMainMessage=[False,"","Ok",""]
-		self.showChangeModeDialog=[True,self.modeToChange]
+		self.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
+		self.showChangeModeDialog={"show":True,"modeToChange":self.modeToChange}
 	
 	#def changeGuardMode
 
 	@Slot(str)
 	def manageChangeModeDialog(self,response):
 
-		self.showChangeModeDialog=[False,""]
+		self.showChangeModeDialog={"show":False,"modeToChange":""}
 		if response=="Accept":
 			self.core.mainStack.closeGui=False
-			self.core.mainStack.showPopUp=[False,WAITING_CHANGE_GUARDMODE_CODE]
-			self.changeModeT=ChangeMode(self.modeToChange)
+			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_CHANGE_GUARDMODE_CODE}
+			self.changeModeT=ChangeMode(self.guardManager,self.modeToChange)
 			self.changeModeT.start()
-			self.changeModeT.finished.connect(self._changeModeRet)
+			self.changeModeT.modeChanged.connect(self._changeModeRet)
+			self.changeModeT.finished.connect(self.changeModeT.deleteLater)
 
 	#def manageChangeModeDialog
 
-	def _changeModeRet(self):
+	@Slot(dict)
+	def _changeModeRet(self,ret):
 
-		if self.changeModeT.retChange['status']:
-			if self.changeModeT.retMode['status']:
+		retChange=ret.get("retChange")
+		msgCode=retChange.get("code")
+		msgType=retChange.get("type")
+		msgData=retChange.get("data")
+
+		if retChange.get('status'):
+			retMode=ret.get("retMode")
+			msgCode=retMode.get("code")
+			msgType=retMode.get("type")
+			msgData=retMode.get("data")
+
+			if retMode.get('status'):
 				self.guardMode=self.guardManager.guardMode
-				if self.changeModeT.retHeaders['status']:
+				retHeaders=ret.get("retHeaders")
+				msgCode=ret.get("code")
+				msgType=ret.get("type")
+				msgData=ret.get("data")
+
+				if retHeaders.get('status'):
 					self._updateListsModel()
-					self.showMainMessage=[True,self.changeModeT.retChange['code'],"Ok"]
-				else:
-					self.showMainMessage=[True,self.changeModeT.retHeaders['code'],"Error",self.changeModeT.retHeaders['data']]		
-			else:
-				self.showMainMessage=[True,self.changeModeT.retMode['code'],"Error",self.changeModeT.retMode['data']]
-		else:
-			self.showMainMessage=[True,self.changeModeT.retChange['code'],"Error",self.changeModeT.retChange['data']]
+		
+		self.showMainMessage={"show":True,"msgCode":msgCode,"type":msgType,"data":msgData}
 
 		self.manageGlobalOptions()
 		self.filterStatusValue="all"
-		self.core.mainStack.showPopUp=[True,""]
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.core.mainStack.closeGui=True
 
 	#def _changeModeRet
@@ -615,41 +651,47 @@ class Bridge(QObject):
 	@Slot()
 	def applyChanges(self):
 
-		self.showMainMessage=[False,"","Ok",""]
+		self.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.core.mainStack.closeGui=False
-		self.core.mainStack.showPopUp=[False,WAITING_APPLY_CHANGES_CODE]
-		self.applyChangesT=ApplyChanges()
+		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_APPLY_CHANGES_CODE}
+		self.applyChangesT=ApplyChanges(self.guardManager)
 		self.applyChangesT.start()
-		self.applyChangesT.finished.connect(self._applyChangesRet)
+		self.applyChangesT.changesApplied.connect(self._applyChangesRet)
+		self.applyChangesT.finished.connect(self.applyChangesT.deleteLater)
 
 	#def applyChanges
 
-	def _applyChangesRet(self):
+	@Slot(dict)
+	def _applyChangesRet(self,ret):
 
-		if self.applyChangesT.retChange["status"]:
-			if self.applyChangesT.retHeaders["status"]:
+		retChange=ret.get("retChange")
+		msgCode=retChange.get("code")
+		msgType=retChange.get("type")
+		msgData=retChange.get("data")
+
+		if retChange.get("status"):
+			retHeaders=ret.get("retHeaders")
+			msgCode=ret.get("code")
+			msgType=ret.get("type")
+			msgData=ret.get("data")
+			
+			if retHeaders.get("status"):
 				self.loadConfig()
-				self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Ok",""]
-			else:
-				self.showMainMessage=[True,self.applyChangesT.retHeaders["code"],"Error",self.applyChangesT.retHeaders["data"]]
 
 			self.arePendingChanges=False
 			try:
 				self.guardManager.removeTmpFile()
 			except:
 				pass
-			self.core.mainStack.closeGui=True
-
 		else:
-			if self.applyChangesT.retChange["code"]==-10:
-				self.core.mainStack.closeGui=True
-				self.arePendingChanges=False
+			if retChange.get("code")==-10:
 				self.guardMode=self.guardManager.guardMode
 				self._updateListsModel(True)
 				self.manageGlobalOptions()
-			self.showMainMessage=[True,self.applyChangesT.retChange["code"],"Error",self.applyChangesT.retChange["data"]]
-
-		self.core.mainStack.showPopUp=[True,""]		
+		
+		self.showMainMessage={"show":True,"msgCode":msgCode,"type":msgType,"data":msgData}
+		self.core.mainStack.closeGui=True
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}		
 
 	#def _applyChangesRet
 

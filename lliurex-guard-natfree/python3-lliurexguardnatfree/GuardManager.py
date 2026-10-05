@@ -440,11 +440,13 @@ class GuardManager(object):
 
 			data = {
 				'limitLines': limitLines,
-				'tmpFile': tmpFile
+				'tmpFile': tmpFile,
+				'errorInfo':""
 			}
 		else:
 			data = {
 				'limitLines': False,
+				'tmpFile': tmpFile,
 				'errorInfo': ret.get("data", "")
 			}
 

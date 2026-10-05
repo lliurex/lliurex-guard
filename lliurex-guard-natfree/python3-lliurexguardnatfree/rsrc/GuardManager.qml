@@ -416,8 +416,8 @@ Rectangle{
             case 2:
                 return Kirigami.MessageType.Warning
             case 3:
-            return Kirigami.MessageType.Information
-          }
+                return Kirigami.MessageType.Information
+        }
     }
 
 } 

@@ -23,7 +23,7 @@ Rectangle{
 
         Kirigami.InlineMessage {
             id: messageLabel
-            visible:listStackBridge.showListFormMessage[0]
+            visible:listStackBridge.showListFormMessage.show
             text:getMessageText()
             type:getTypeMessage()
             Layout.minimumWidth:650
@@ -176,44 +176,32 @@ Rectangle{
 
    function getMessageText(){
 
-        switch (listStackBridge.showListFormMessage[1]){
+        switch (listStackBridge.showListFormMessage.msgCode){
                 
             case -1:
-                var msg=i18nd("lliurex-guard","You must indicate a name for the list")
-                break;
+               return i18nd("lliurex-guard","You must indicate a name for the list")
             case -2:
-                var msg=i18nd("lliurex-guard","The name of the list is duplicate")
-                break;
+               return i18nd("lliurex-guard","The name of the list is duplicate")
             case -27:
-                var msg=i18nd("lliurex-guard","The loaded file is empty")
-                break;
+               return i18nd("lliurex-guard","The loaded file is empty")
             case -31:
-                var msg=i18nd("lliurex-guard","It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")
-                break;
+               return i18nd("lliurex-guard","It is not possible to edit the list.\nThe file size exceeds the recommended limit of 28 Mb")
             case -32:
-                var msg=i18nd("lliurex-guard","Duplicate url have not been added to the list")
-                break;
+               return i18nd("lliurex-guard","Duplicate url have not been added to the list")
             case -33:
-                var msg=i18nd("lliurex-guard","The url entered already exists in the list")
-                break;
+               return i18nd("lliurex-guard","The url entered already exists in the list")
             case -35:
-                var msg=i18nd("lliurex-guard","The url list is empty")
-                break;
+               return i18nd("lliurex-guard","The url list is empty")
             case -36:
-                var msg=i18nd("lliurex-guard","Duplicate url and url with incorrect format have not been added to the list")
-                break;
+               return i18nd("lliurex-guard","Duplicate url and url with incorrect format have not been added to the list")
             case -37:
-                var msg=i18nd("lliurex-guard","Url with incorrect format have not been added to the list")
-                break;
+               return i18nd("lliurex-guard","Url with incorrect format have not been added to the list")
             case -38:
-                var msg=i18nd("lliurex-guard","The url entered is not in the correct format")
-                break;
+               return i18nd("lliurex-guard","The url entered is not in the correct format")
             case 6:
-                var msg=i18nd("lliurex-guard","Waiting while viewing / editing the list. To continue close the file")
-                break
+               return i18nd("lliurex-guard","Waiting while viewing / editing the list. To continue close the file")
             default:
-                var msg=""
-                break
+               return ""
         }
         return msg    
 
@@ -221,16 +209,17 @@ Rectangle{
 
     function getTypeMessage(){
 
-        switch (listStackBridge.showListFormMessage[2]){
-            case "Information":
-                return Kirigami.MessageType.Information
-            case "Ok":
+        switch (guardOptionsStackBridge.showMainMessage.type){
+            case 0:
                 return Kirigami.MessageType.Positive
-            case "Error":
+            case 1:
                 return Kirigami.MessageType.Error
-            case "Warning":
+            case 2:
                 return Kirigami.MessageType.Warning
+            case 3:
+                return Kirigami.MessageType.Information
         }
     }
+
    
 }
