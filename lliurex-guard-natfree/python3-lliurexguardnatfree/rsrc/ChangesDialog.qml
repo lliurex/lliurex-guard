@@ -8,7 +8,7 @@ import org.kde.kirigami 2.16 as Kirigami
 Dialog {
     id: customDialog
     property string dialogIcon:""
-    property string dialogTitle:
+    property string dialogTitle:""
     property bool dialogVisible:false
     property string dialogMsg:""
     property real dialogWidth:400
@@ -75,7 +75,7 @@ Dialog {
                 visible:customDialog.btnAcceptVisible
                 font.pointSize: 10
                 DialogButtonBox.buttonRole: DialogButtonBox.ApplyRole
-                onClicked: customDialog.dialogApplyClicked()
+                onClicked: customDialog.applyDialogClicked()
 
 
             }
@@ -89,8 +89,6 @@ Dialog {
                 font.pointSize: 10
                 DialogButtonBox.buttonRole: DialogButtonBox.DestructiveRole
                 onClicked: customDialog.discardDialogClicked()
-
-
             }
 
             Button {
@@ -101,9 +99,7 @@ Dialog {
                 focus:true
                 font.pointSize: 10
                 DialogButtonBox.buttonRole:DialogButtonBox.RejectRole
-                onClicked: {
-                    customDialog.rejectDialogClicked()
-
+                onClicked: customDialog.rejectDialogClicked()
             }
 
         }

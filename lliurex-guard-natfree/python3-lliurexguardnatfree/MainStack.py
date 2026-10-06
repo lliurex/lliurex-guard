@@ -157,7 +157,7 @@ class Bridge(QObject):
 	@Slot(dict)
 	def _loadConfig(self,ret):
 
-		guardMode=ret.get("guarMode")
+		guardMode=ret.get("guardMode")
 
 		if not guardMode.get("status"):
 			self.showLoadErrorMessage={"show":True,"msgCode":guardMode.get("code"),"data":guardMode.get("data"),"type":guardMode.get("type")}
@@ -165,7 +165,7 @@ class Bridge(QObject):
 			return
 		
 		headers=ret.get("headers")
-		if not headers,get("status"):
+		if not headers.get("status"):
 			self.showLoadErrorMessage={"show":True,"msgCode":headers.get("code"),"data":headers.get("data"),"type":headers.get("type")}
 			self.closeGui
 			return
@@ -201,7 +201,7 @@ class Bridge(QObject):
 	@Slot()
 	def openHelp(self):
 		
-		self.helpCmd='https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex+Guard+en+Lliurex'
+		helpUrl='https://wiki.edu.gva.es/lliurex/tiki-index.php?page=Lliurex+Guard+en+Lliurex'
 		QDesktopServices.openUrl(helpUrl)
 	
 	#def openHelp

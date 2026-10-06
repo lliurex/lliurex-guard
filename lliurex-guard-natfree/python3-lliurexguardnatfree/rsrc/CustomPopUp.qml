@@ -10,7 +10,7 @@ Popup {
     anchors.centerIn: Overlay.overlay
     modal:true
     focus:true
-    visible:!mainStackBridge.showPopUp.show
+    visible:mainStackBridge.showPopUp.show
     closePolicy:Popup.NoAutoClose
 
     background: Rectangle {

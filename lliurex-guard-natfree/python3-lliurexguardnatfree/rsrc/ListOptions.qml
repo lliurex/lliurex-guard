@@ -13,8 +13,8 @@ RowLayout{
 
         MenuOptionBtn {
             id:goBackBtn
-            optionText:i18nd("lliurex-guard","Home")
-            optionFontSize:14
+            optionText:i18nd("lliurex-guard-natfree","Home")
+            optionPointSize:14
             optionIcon:"actions/24/arrow-left.svg"
             enabled:listStackBridge.enableForm
             Connections{
@@ -34,7 +34,7 @@ RowLayout{
 
                 MenuOptionBtn {
                     id:infoItem
-                    optionText:i18nd("lliurex-guard","List")
+                    optionText:i18nd("lliurex-guard-natfree","List")
                     optionIcon:"actions/22/view-list-details.svg"
                  }
 

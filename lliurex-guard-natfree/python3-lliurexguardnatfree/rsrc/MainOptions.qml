@@ -21,7 +21,7 @@ RowLayout{
             MenuOptionBtn {
                 id:listItem
                 Layout.fillWidth:true
-                optionText:i18nd("lliurex-guard","Configuration")
+                optionText:i18nd("lliurex-guard-natfree","Configuration")
                 optionIcon:"status/22/security-high.svg"
                 onMenuOptionClicked:mainStackBridge.moveToMainOptions(0)
             }
@@ -29,7 +29,7 @@ RowLayout{
             MenuOptionBtn {
                 id:helpItem
                 Layout.fillWidth:true
-                optionText:i18nd("lliurex-guard","Help")
+                optionText:i18nd("lliurex-guard-natfree","Help")
                 optionIcon:"actions/22/help-contents.svg"
                 onMenuOptionClicked:mainStackBridge.openHelp();
             }

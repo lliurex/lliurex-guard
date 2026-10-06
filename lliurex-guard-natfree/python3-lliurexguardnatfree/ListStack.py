@@ -1,5 +1,4 @@
-from PySide2.QtCore import QObject,Signal,Slot,QThread,Property,QTimer,Qt,QModelIndex,QUrl
-from PySide2.QtGui import QDesktopServices
+from PySide2.QtCore import QObject,Signal,Slot,QThread,Property,QTimer,Qt,QModelIndex,QProcess
 import os 
 import sys
 import threading
@@ -9,6 +8,7 @@ import copy
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+from pathlib import Path
 from . import UrlModel
 
 WAITING_LOADING_LIST_CODE=11
@@ -27,7 +27,7 @@ class AddList(QThread):
 
 	def __init__(self,manager,fileToLoad):
 
-		super().__init__(self)
+		super().__init__()
 		self.manager=manager
 		self.fileToLoad=fileToLoad
 
@@ -36,12 +36,12 @@ class AddList(QThread):
 	def run(self,*args):
 
 		time.sleep(0.5)
-		retFile={'status':True,'data':{'limitLines': False,"errorInfo":""}}
-		ret=self.guardManager.initValues()
+		retFile={'status':True,'data':{},'errorInfo':""}
+		ret=self.manager.initValues()
 		if self.fileToLoad!="":
 			retFile=self.manager.loadFile(self.fileToLoad)
 		
-		self.listAdded.emit(retFil)
+		self.listAdded.emit(retFile)
 	
 	#def run
 
@@ -62,8 +62,8 @@ class LoadList(QThread):
 	def run(self,*args):
 
 		time.sleep(0.5)
-		ret=self.guardManager.initValues()
-		retLoad=self.manager.loadListConfig(self.listInfo)
+		ret=self.manager.initValues()
+		retLoad=self.manager.loadListConfig(self.listToLoad)
 		self.listLoaded.emit(retLoad)
 
 	#def run
@@ -72,21 +72,23 @@ class LoadList(QThread):
 
 class OpenListFile(QThread):
 
-	fileOpened=Signal()
+	fileClosed=Signal()
 	def __init__(self,manager,fileToLoad):
 
 		super().__init__()
 		self.manager=manager
-		self.fileToLoad=fileToLoad
+		self.fileToLoad=Path(fileToLoad).resolve()
 
 	#def __init__
 
 	def run(self,):
 
-		fileToLoad=QUrl.fromLocalFile(self.fileToLoad)
-		QDesktopServices.openUrl(fileToLoad)
+		if self.fileToLoad.exists():
+			process=QProcess()
+			process.start("kate",["-b",self.fileToLoad.as_posix()])
+			process.waitForFinished(-1)
 
-		self.fileOpened.emit()
+		self.fileClosed.emit()
 
 	#def run
 
@@ -216,7 +218,7 @@ class Bridge(QObject):
 
 		if self._showListFormMessage!=showListFormMessage:
 			self._showListFormMessage=showListFormMessage
-			self.on_showListFormMessage.emit()
+			self.showListFormMessageChanged.emit()
 
 	#def showListFormMessage
 
@@ -275,6 +277,7 @@ class Bridge(QObject):
 
 	#def showChangesInListDialog
 
+	@showChangesInListDialog.setter
 	def showChangesInListDialog(self,showChangesInListDialog):
 
 		if self._showChangesInListDialog!=showChangesInListDialog:
@@ -386,7 +389,7 @@ class Bridge(QObject):
 
 		if not ret.get('status'):
 			self.core.mainStack.closeGui=True
-			self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("data").get("errorInfo")}
+			self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("errorInfo")}
 			return
 		
 		self.currentListConfig=copy.deepcopy(self.guardManager.currentListConfig)
@@ -399,9 +402,10 @@ class Bridge(QObject):
 			self.fileToLoad=ret.get("data").get("tmpFile")
 			self.lastChangeFromFile=self.guardManager.getLastChangeInFile(self.fileToLoad)
 			self.showUrlsList=False
-			self.core.mainStack.currentStack=2
-			self.listCurrentOption=1
-			self.enableForm=True
+
+		self.core.mainStack.currentStack=2
+		self.listCurrentOption=1
+		self.enableForm=True
 
 	#def _newListRet
 
@@ -412,10 +416,10 @@ class Bridge(QObject):
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_LOADING_LIST_CODE}
 		self.core.guardOptionsStack.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.edit=True
-		self.editList=LoadList(self.manager,listToLoad)
-		self.editList.start()
-		self.editList.listLoaded.connect(self._loadListRet)
-		self.editList.finished.connect(self.editListT.deleteLater)
+		self.editListT=LoadList(self.guardManager,listToLoad)
+		self.editListT.start()
+		self.editListT.listLoaded.connect(self._loadListRet)
+		self.editListT.finished.connect(self.editListT.deleteLater)
 
 	#def loadList
 
@@ -424,16 +428,17 @@ class Bridge(QObject):
 
 		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		if not ret.get("status"):
-			self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("data").get("errorInfo")}
+			self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("errorInfo")}
 
 		self.currentListConfig=copy.deepcopy(self.guardManager.currentListConfig)
 		self.contentOfList=copy.deepcopy(self.guardManager.urlConfigData)
 		self._initializeVars()
-		if ret.get("data").get("tmpFile")=="":
+		tmpFile=ret.get("data").get("tmpFile")
+		if tmpFile=="":
 			self.updateUrlModel()
 			self.showUrlsList=True
 		else:
-			self.fileToLoad=self.editList.ret.get("data").get("tmpFile")
+			self.fileToLoad=tmpFile
 			self.lastChangeFromFile=self.guardManager.getLastChangeInFile(self.fileToLoad)
 			self.showUrlsList=False
 		
@@ -446,21 +451,21 @@ class Bridge(QObject):
 	@Slot()
 	def openListFile(self):
 
-		self.showListFormMessage={"show":True,"msgCode":WAITING_OPEN_FILE_CODE,"type":self.guardManager.KIRIGAMI_MSG_INFORMATION}
+		self.showListFormMessage={"show":True,"msgCode":WAITING_OPEN_FILE_CODE,"type":self.guardManager.KIRIGAMI_MSG_INFO}
 		self.core.mainStack.closeGui=False
 		self.enableForm=False
-		self.openFileT=OpenListFile(self.manager,self.fileToLoad)
+		self.openFileT=OpenListFile(self.guardManager,self.fileToLoad)
 		self.openFileT.start()
-		self.openFileT.fileOpened.connect(self._openFileRet)
+		self.openFileT.fileClosed.connect(self._openFileRet)
 		self.openFileT.finished.connect(self.openFileT.deleteLater)
 
 	#def openListFile
 
-	@slot()
+	@Slot()
 	def _openFileRet(self):
 
 		self.core.mainStack.closeGui=True
-		self.showListFormMessage={"show":False,"msgCode":,"msgType":""}
+		self.showListFormMessage={"show":False,"msgCode":"","msgType":""}
 		self.enableForm=True
 		lastChangeFromFile=self.guardManager.getLastChangeInFile(self.fileToLoad)
 
@@ -517,6 +522,7 @@ class Bridge(QObject):
 		tmpNewUrl=urlToAdd.split(" ")
 		countDuplicate=0
 		countError=0
+		msgCode=""
 		self.lastUrlId=self.lastUrlId+1
 
 		for item in tmpNewUrl:
@@ -550,7 +556,8 @@ class Bridge(QObject):
 		elif countError>0:
 			msgCode=INCORRECT_ENTRIES_CODE
 		
-		self.showListFormMessage={"show":True,"msgCode":msgCode,"type":self.guardManager.KIRIGAMI_MSG_WARNING}	
+		if msgCode:
+			self.showListFormMessage={"show":True,"msgCode":msgCode,"type":self.guardManager.KIRIGAMI_MSG_WARNING}	
  
 	#def AddNewUrl
 	@Slot('QJSValue')
@@ -670,7 +677,7 @@ class Bridge(QObject):
 		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_SAVE_CHANGES}
 		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"],len(self.contentOfList)]
-		self.checkListChangesT=CheckListChanges(self.guardManager.dataToCheck,self.edit,self.fileToLoad)
+		self.checkListChangesT=CheckListChanges(self.guardManager,dataToCheck,self.edit,self.fileToLoad)
 		self.checkListChangesT.start()
 		self.checkListChangesT.changesListChecked.connect(self._checkListChangesRet)
 		self.checkListChangesT.finished.connect(self.checkListChangesT.deleteLater)
@@ -686,7 +693,7 @@ class Bridge(QObject):
 			return
 
 		self.guardManager.urlConfigData=self.contentOfList
-		self.saveChangesT=SaveChanges(self.manager,self.currentListConfig,self.edit,self.fileToLoad)
+		self.saveChangesT=SaveChanges(self.guardManager,self.currentListConfig,self.edit,self.fileToLoad)
 		self.saveChangesT.start()
 		self.saveChangesT.changesSaved.connect(self._saveChangesRet)
 		self.saveChangesT.finished.connect(self.saveChangesT.deleteLater)
@@ -694,14 +701,14 @@ class Bridge(QObject):
 	#def _checkListChangesRet
 
 	@Slot(dict)
-	def _saveChangesRet(self):
+	def _saveChangesRet(self,ret):
 
 		if ret.get("status"):
 			self.core.guardOptionsStack._updateListsModel()
 			self.core.guardOptionsStack.arePendingChanges=True
 	
 		self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("data")}
-		self.core.mainStack.showPopUp={"show":False.,"msgCode":""}
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.arePendingChangesInList=False
 		self.core.mainStack.closeGui=True
 		self.core.mainStack.moveToStack=1

@@ -22,7 +22,7 @@ ApplicationWindow {
     onClosing: {
         close.accepted = closing;
         if (!closing) {
-            mainStackBridge.closeLliurexGuard();
+            mainStackBridge.closeLliureXGuard();
             closeTimer.start();
         }
     }
@@ -119,7 +119,6 @@ ApplicationWindow {
         }
 
     }
-
 
     CustomPopUp{
         id:waitingPopUp

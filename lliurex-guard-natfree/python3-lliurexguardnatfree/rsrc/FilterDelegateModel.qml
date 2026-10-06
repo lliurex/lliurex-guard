@@ -28,7 +28,7 @@ DelegateModel {
 
 	filterOnGroup:"visible"
 
-		function update(){
+	function update(){
 
 		if (!filterModel.model){
 			visibleElements=[]

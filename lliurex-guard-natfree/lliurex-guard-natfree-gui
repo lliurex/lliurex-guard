@@ -27,7 +27,7 @@ if not engine.rootObjects():
 	sys.exit(-1)
 
 engine.quit.connect(app.quit)
-app.setWindowIcon(QIcon("/usr/share/icons/hicolor/scalable/apps/lliurex-guard.svg"));
+app.setWindowIcon(QIcon("/usr/share/icons/hicolor/scalable/apps/lliurex-guard-natfree.svg"));
 ret=app.exec_()
 del engine
 del app

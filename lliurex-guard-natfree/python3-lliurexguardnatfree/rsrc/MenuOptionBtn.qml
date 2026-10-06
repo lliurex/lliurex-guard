@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.15
 
 Item {
     id: menuItem
-    Layout.preferredWidth: 120
+    Layout.preferredWidth: 130
     Layout.preferredHeight: 35
 
     property string optionIcon: ""

@@ -62,7 +62,7 @@ class GuardManager(object):
 
 		self.dbg=1
 		self.userValidated=True
-		self.limitLines=2500
+		self.limitLines=5
 		self.limitFileSize=28000000
 		self.garbageFiles=[]
 		self.credentials=[]
@@ -164,7 +164,6 @@ class GuardManager(object):
 		self.writeLog(msgLog)
 
 		if isinstance(response, dict) and response.get('status'):
-			msg="LliureX Guard Mode changed. Dnsmasq restarted "
 			self.listsConfig={}
 			self.listsConfigOrig={}
 			self.listsConfigData=[]
@@ -274,7 +273,7 @@ class GuardManager(object):
 		tmpFile = ""
 		content = None
 		result = ""
-		errorInfo = []
+		errorInfo = ""
 		countLines = 0
 
 		listId = self.currentListConfig.get("id", "")
@@ -292,7 +291,7 @@ class GuardManager(object):
 				isTmpFile = True
 			else:
 				status = False
-				errorInfo = readTmpFile.get('data').get("errorInfo") if isinstance(readTmpFile, dict) else readTmpFile
+				errorInfo = readTmpFile.get("errorInfo") if isinstance(readTmpFile, dict) else readTmpFile
 		else:
 			readGuardmodeList = self.client.LliurexGuardManagerNatFree.read_guardmode_list(listId, active)
 			msg = f"List {listId}. Readed file"
@@ -317,18 +316,18 @@ class GuardManager(object):
 						f.write(tmpContent)
 						self.garbageFiles.append(tmpFile)
 				else:
-					tmpFile = readTmpFile['data'][2] if isinstance(readTmpFile, dict) else ""
+					tmpFile = readTmpFile.get('data').get("tmpFile") if isinstance(readTmpFile, dict) else ""
 				contet = None
 				readTmpFile=None
 			else:
 				self._getUrlConfig(content)
 			
 			msgLog = f"{msg} successfully"
-			msgData=tmpFile
+			msgData={"tmpFile":tmpFile}
 		else:
 			msgCode = GuardManager.READ_LIST_INFO_ERROR
 			msgType = GuardManager.KIRIGAMI_MSG_ERROR
-			msgData = errorInfo
+			msgData = {}
 			msgLog = f"{msg} with errors. Error details: {errorInfo}"
 
 		self.writeLog(msgLog)
@@ -336,7 +335,8 @@ class GuardManager(object):
 			'status': status, 
 			'code': msgCode, 
 			'data': msgData,
-			'type': msgType
+			'type': msgType,
+			"errorInfo":errorInfo
 			}
 
 	# def _readGuardModeList
@@ -366,7 +366,7 @@ class GuardManager(object):
 						if line.strip() != "":
 							line = self.formatLine(line)
 							if line != "":
-								content.append(line)	
+								content.append(f"{line}\n")	
 								countLines += 1
 
 				lines = None
@@ -405,27 +405,26 @@ class GuardManager(object):
 				return {
 					'status': False,
 					'code': GuardManager.LOADING_FILE_ERROR,
-					'data': {
-						'errorInfo':'File does not exist'
-					},
-					'type': GuardManager.KIRIGAMI_MSG_ERROR
+					'data': {},
+					'type': GuardManager.KIRIGAMI_MSG_ERROR,
+					'errorInfo':'File does not exist'
+
 				}
 
 		except Exception as e:
 			return {
 				'status': False,
 				'code': GuardManager.LOADING_FILE_ERROR,
-				'data': {
-					'errorInfo':str(e)
-				},
-				'type': GuardManager.KIRIGAMI_MSG_ERROR
-
+				'data': {},
+				'type': GuardManager.KIRIGAMI_MSG_ERROR,
+				'errorInfo':str(e)
 			}
 
 	#def readLocalFile
 
 	def loadFile(self, fileToLoad):
 
+		print("Cargando archivo")
 		limitLines = False
 		ret = self.readLocalFile(fileToLoad, True)
 
@@ -441,19 +440,18 @@ class GuardManager(object):
 			data = {
 				'limitLines': limitLines,
 				'tmpFile': tmpFile,
-				'errorInfo':""
 			}
 		else:
 			data = {
 				'limitLines': False,
 				'tmpFile': tmpFile,
-				'errorInfo': ret.get("data", "")
 			}
 
 		return {
 			'status': ret.get('status'), 
 			'code': ret.get('code'), 
-			'data': data
+			'data': data,
+			"errorInfo":ret.get("errorInfo", "")
 		}
 			
 	#def loadFile
@@ -581,7 +579,6 @@ class GuardManager(object):
 
 				order = str(next_order)
 				msgCode = GuardManager.LIST_CREATED_SUCCESSFUL
-				msgType = GuardManager.KIRIGAMI_MSG_OK
 
 				self.listsConfig[order] = {
 					"active": True,
@@ -589,6 +586,7 @@ class GuardManager(object):
 					"replaced_to": ""
 				}
 
+			msgType = GuardManager.KIRIGAMI_MSG_OK
 			self.listsConfig[order]["id"] = list_id
 			self.listsConfig[order]["name"] = listInfo.get("name", "")
 			self.listsConfig[order]["description"] = listInfo.get("description", "")
@@ -634,6 +632,7 @@ class GuardManager(object):
 								formatContent.append(cleanedLine + "\n")
 								countLines += 1
 
+					print(formatContent)
 					tmpPath.write_text("".join(formatContent), encoding='utf-8')
 				else:
 					raise FileNotFoundError(f"File to save not found: {fileToSave}")
@@ -761,7 +760,7 @@ class GuardManager(object):
 		listToDeactive = []
 		self.tmpFileList = []
 		error = False
-		code = ""
+		code = GuardManager.CHANGES_APPLIED_SUCCESSFUL
 		data = ""
 		msgType= GuardManager.KIRIGAMI_MSG_OK
 
@@ -854,7 +853,7 @@ class GuardManager(object):
 	
 	def writeLog(self,msg):
 	
-		syslog.openlog("LLIUREX-GUARD")
+		syslog.openlog("LLIUREX-GUARD-NATFREE")
 		syslog.syslog(msg)	
 
 	#def writeLog	

@@ -5,9 +5,12 @@ DelegateModel {
 	id:filterModel
 	property string role
 	property string search
-	onRoleChanged:Qt.callLater(update)
-	onSearchChanged:Qt.callLater(update)
 	property var visibleElements:[]
+	property var externalTimer: null
+
+	onRoleChanged:if (externalTimer) externalTimer.restart()
+	onSearchChanged:if (externalTimer) externalTimer.restart()
+
 	
 	groups: [
 		DelegateModelGroup{
@@ -25,19 +28,42 @@ DelegateModel {
 	filterOnGroup:"visible"
 
 	function update(){
-		visibleElements=[]
-		if (allItems.count>0){
-			allItems.setGroups(0,allItems.count,[ "all"]);
-			for (let index = 0; index < allItems.count; index++) {
-	            let item = allItems.get(index).model;
-	            let visible = item[role].toLowerCase().includes(search.toLowerCase());
-	            if (!visible) continue;
-	            allItems.setGroups(index, 1, [ "all", "visible" ]);
-	            visibleElements.push(index);
-	        }
-	   }
+
+		if (!filterModel.model){
+			visibleElements=[]
+			return
+		}
+		
+	   	let count = allItems.count
+		if (count === 0) {
+			visibleElements = []
+			return
+		}
+
+		let localVisibleElements = []
+		let searchLower = search.toLowerCase()
+		allItems.removeGroups(0,count,["visible"])
+
+		for (let index = 0; index < count; index++) {
+			let item = allItems.get(index).model
+            let matchesSearch = true
+            if (role && item[role] !== undefined) {
+                matchesSearch = String(item[role]).toLowerCase().includes(searchLower)
+            } else if (searchLower !== "") {
+                matchesSearch = false
+            }
+
+            let isItemVisible = item["isVisible"] !== undefined ? item["isVisible"] : true
+
+            if (matchesSearch && isItemVisible) {
+                allItems.setGroups(index,1,["all","visible"])
+                localVisibleElements.push(index)
+            }
+ 		}
+
+        visibleElements = localVisibleElements
 
 	}
-	Component.onCompleted: Qt.callLater(update)
 
+	Component.onCompleted: if (externalTimer) externalTimer.restart()
 }

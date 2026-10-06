@@ -1,9 +1,9 @@
-import org.kde.plasma.components 3.0 as PC3
-import org.kde.kirigami 2.16 as Kirigami
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQml.Models 2.8
 import QtQuick.Layouts 1.15
+import org.kde.plasma.components 3.0 as PC3
+import org.kde.kirigami 2.16 as Kirigami
 
 
 Rectangle {
@@ -11,23 +11,19 @@ Rectangle {
     property alias listCount:urlList.count
     color:"transparent"
 
-    GridLayout{
-        id:mainGrid
-        rows:3
-        flow: GridLayout.TopToBottom
-        rowSpacing:10
-        anchors.left:parent.left
+    ColumnLayout{
         anchors.fill:parent
+        spacing:10
 
         RowLayout{
             id:searchRow
-            Layout.alignment:Qt.AlignLeft
-            visible:true
-            Layout.rightMargin:addUrlBtn.width+15
+            Layout.fillWidth:true
+            spacing:10
+            enabled:true
 
             Text{
                 id:headText
-                text:i18nd("lliurex-guard","Relationship of urls and domains:")
+                text:i18nd("lliurex-guard-natfree","Relationship of urls and domains:")
                 Layout.fillWidth:true
             }
 
@@ -38,35 +34,50 @@ Rectangle {
                 Layout.alignment:Qt.AlignRight
                 focus:true
                 width:100
-                enabled:urlList.count==0?false:true
-                placeholderText:i18nd("lliurex-guard","Search...")
+                enabled:{
+                    if (urlList.count===0){
+                        if (listSearchEntry.text.length===0){
+                            false
+                        }else{
+                            true
+                        }
+                    }else{
+                        true
+                    }
+                }
+                placeholderText:i18nd("lliurex-guard-natfree","Search...")
                 onTextChanged:{
                     filterModel.update()
                 }
                     
             }
         }
+
         RowLayout {
             id:entryRow
             Layout.alignment:Qt.AlignLeft
             visible:false
-            Layout.rightMargin:addUrlBtn.width+15
+            Layout.rightMargin:addUrlBtn.width+25
+            Layout.preferredWidth:urlList.implicitWidth
 
             TextField{
                 id:urlEntry
-                placeholderText:i18nd("lliurex-guard","Url separated by space")
+                placeholderText:i18nd("lliurex-guard-natfree","Url separated by space")
                 font.pointSize:10
                 Layout.fillWidth:true
+                focus:true
             }
+
             Button{
                 id:applyUrlBtn
                 display:AbstractButton.IconOnly
-                icon.name:"dialog-ok.svg"
+                icon.name:"dialog-ok"
                 enabled:urlEntry.text.trim().length>0?true:false
+                focus:true
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
-                ToolTip.text:i18nd("lliurex-guard","Click to add the urls to list")
+                ToolTip.text:i18nd("lliurex-guard-natfree","Click to add the urls to list")
                 Keys.onReturnPressed: applyUrlBtn.clicked()
                 Keys.onEnterPressed: applyUrlBtn.clicked()
                 onClicked:{
@@ -84,12 +95,12 @@ Rectangle {
             Button{
                 id:cancelUrlBtn
                 display:AbstractButton.IconOnly
-                icon.name:"dialog-close.svg"
+                icon.name:"dialog-close"
                 focus:true
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
-                ToolTip.text:i18nd("lliurex-guard","Click to close")
+                ToolTip.text:i18nd("lliurex-guard-natfree","Click to close")
                 Keys.onReturnPressed: cancelUserBtn.clicked()
                 Keys.onEnterPressed: cancelUserBtn.clicked()
                 onClicked:{
@@ -99,7 +110,10 @@ Rectangle {
             }
 
         }
+
         RowLayout{
+            Layout.alignment:Qt.AlignHCenter
+            Layout.rightMargin:10
 
             Rectangle {
                 id:listsTable
@@ -110,45 +124,56 @@ Rectangle {
                 border.color: "#d3d3d3"
 
                 PC3.ScrollView{
-                    implicitWidth:parent.width
-                    implicitHeight:parent.height
-                    anchors.leftMargin:10
-
+                    anchors.fill:parent
+                    
                     ListView{
                         id: urlList
-                        anchors.fill:parent
-                        height: parent.height
-                        enabled:true
-                        currentIndex:-1
-                        clip: true
-                        focus:true
-                        boundsBehavior: Flickable.StopAtBounds
-                        highlight: Rectangle { color: "#add8e6"; opacity:0.8;border.color:"#53a1c9" }
-                        highlightMoveDuration: 0
-                        highlightResizeDuration: 0
+
+                        Timer {
+                            id: searchTimer
+                            interval: 150
+                            repeat: false
+                            onTriggered: filterModel.update()
+                        }
+
                         model:FilterDelegateUrlModel{
                             id:filterModel
                             model:urlModel
                             role:"url"
                             search:listSearchEntry.text.trim()
+                            externalTimer: searchTimer
 
                             delegate: ListDelegateUrlItem{
-                                width:listsTable.width
+                                width:listsTable.width-18
                                 urlId:model.urlId
                                 url:model.url
                                 
                             }
                         }
+
+                        currentIndex:-1
+                        enabled:true
+                        clip: true
+                        focus:true
+                        boundsBehavior: Flickable.StopAtBounds
+                        highlightFollowsCurrentItem:true
+                        highlightMoveDuration: 0
+                        highlightResizeDuration: 0
+
                         Kirigami.PlaceholderMessage { 
                             id: emptyHint
                             anchors.centerIn: parent
-                            width: parent.width - (units.largeSpacing * 4)
+                            width: parent.width - (Kirigami.Units.largeSpacing * 4)
                             visible: urlList.count==0?true:false
-                            text: i18nd("lliurex-guard","No url is configured")
+                            text: listSearchEntry.text.length==0
+                              ?i18nd("lliurex-guard-natfree","No url is configured")
+                              :i18nd("lliurex-guard-natfree","No url found")
+                            icon.name:"lliurex-guard-natfree"
                         }
                     } 
                  }
             }
+
             ColumnLayout{
                 id:buttomLayout
                 Layout.leftMargin:10
@@ -157,9 +182,8 @@ Rectangle {
                     id:addUrlBtn
                     visible:true
                     display:AbstractButton.TextBesideIcon
-                    icon.name:"list-add.svg"
-                    text:i18nd("lliurex-guard","Add url")
-                    Layout.preferredHeight:40
+                    icon.name:"list-add"
+                    text:i18nd("lliurex-guard-natfree","Add url")
                     
                     enabled:true
                     onClicked:{
@@ -173,9 +197,8 @@ Rectangle {
                     id:deleteListBtn
                     visible:true
                     display:AbstractButton.TextBesideIcon
-                    icon.name:"delete.svg"
-                    text:i18nd("lliurex-guard","Remove list")
-                    Layout.preferredHeight:40
+                    icon.name:"delete"
+                    text:i18nd("lliurex-guard-natfree","Remove list")
                     enabled:{
                         if ((listCount>0)&&(!entryRow.visible)){
                             true
@@ -195,17 +218,17 @@ Rectangle {
    ChangesDialog{
         id:emptyListDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Edit list")
-        dialogMsg:i18nd("lliurex-guard","Do you want delete all urls from the list?")
+        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","Edit list")
+        dialogMsg:i18nd("lliurex-guard-natfree","Do you want delete all urls from the list?")
         dialogVisible:false
         dialogWidth:480
         btnAcceptVisible:false
         btnAcceptText:""
-        btnDiscardText:i18nd("lliurex-guard","Yes")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardText:i18nd("lliurex-guard-natfree","Yes")
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard","No")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelText:i18nd("lliurex-guard-natfree","No")
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:emptyListDialog
            function onDiscardDialogClicked(){

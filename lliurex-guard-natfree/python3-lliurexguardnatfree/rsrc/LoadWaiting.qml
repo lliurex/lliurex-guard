@@ -25,7 +25,7 @@ Rectangle{
 
             Image{
                 id:spinnerImage
-                source: "/usr/lib/python3/dist-packages/lliurexguardnatfree/rsrc/loading.png"
+                source: "loading.png"
                 Layout.preferredWidth: 24
                 Layout.preferredHeight: 24
                 Layout.alignment: Qt.AlignHCenter
@@ -49,7 +49,7 @@ Rectangle{
 
             Text {
                 id: loadText
-                text: i18nd("lliurex-guard-natfree", "Loading. Wait a moment...")
+                text: i18nd("lliurex-guard-natfree-natfree", "Loading. Wait a moment...")
                 font.pointSize: 10
                 color: palette.windowText
                 Layout.alignment: Qt.AlignHCenter
@@ -71,13 +71,11 @@ Rectangle{
 
         switch (msgCode){
             case -23:
-                return i18nd("lliurex-guard","Error reading Lliurex Guard mode:")
+                return i18nd("lliurex-guard-natfree","Error reading Lliurex Guard mode:")
             case -25:
-                return i18nd("lliurex-guard","Error reading list headers:")
+                return i18nd("lliurex-guard-natfree","Error reading list headers:")
             case -36:
-                return i18nd("lliurex-guard","Invalid user")
-            case -37:
-                return i18nd("lliurex-guard","Unable to load LliureX-Guard. The number of parametres received is not correct")
+                return i18nd("lliurex-guard-natfree","Invalid user")
             default:
                 return ""
         }
