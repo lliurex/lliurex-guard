@@ -22,14 +22,14 @@ class LliurexGuardManagerNatFreeClient:
 	def __init__(self):
 
 		self.core=n4dcore.Core.get_core()
-		self.default_white_list_path="/usr/share/lliurex-guard-natfree/data/default_white_list.list"
-		self.mode_file_path="/etc/dnsmasq.d/lliurex-guard-natfree.conf"
-		self.conf_dir="/etc/lliurex-guard-natfree"
-		self.blacklist_dir=os.path.join(self.conf_dir,"blacklist")
+		self.default_white_list_path=Path("/usr/share/lliurex-guard-natfree/data/default_white_list.list")
+		self.mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard-natfree.conf")
+		self.conf_dir=Path("/etc/lliurex-guard-natfree")
+		self.blacklist_dir=self.conf_dir / "blacklist"
 		self.set_bm_mode="conf-dir = /etc/lliurex-guard-natfree/blacklist"
 		self.blacklist_redirection="169.254.254.254"
 		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard/blacklist"
-		self.whitelist_dir=os.path.join(self.conf_dir,"whitelist")
+		self.whitelist_dir=self.conf_dir / "whitelist"
 		self.set_wm_mode="conf-dir = /etc/lliurex-guard-natfree/whitelist"
 		self.disable_wm_mode="#conf-dir = /etc/lliurex-guard/whitelist"
 		self.whitelist_redirection="server=/"
@@ -37,8 +37,8 @@ class LliurexGuardManagerNatFreeClient:
 		self.disable_whitelist_filter="#"+self.whitelist_filter
 		self.list_tmpfile=[]
 		self.list_to_active=[]
-		self.adi_server="/usr/bin/natfree-adi"
-		self.adi_client="/usr/bin/natfree-tie"
+		self.adi_server=Path("/usr/bin/natfree-adi")
+		self.adi_client=Path("/usr/bin/natfree-tie")
 		self.server_download_url="http://server/lliurex-guard-natfree/"
 		self.guardmanager_var={}
 		
@@ -80,12 +80,12 @@ class LliurexGuardManagerNatFreeClient:
 				time.sleep(1)
 
 		if configure_guard:
-			if not os.path.exists("/var/lib/lliurex-guard/first_init"):
+			if not Path("/var/lib/lliurex-guard/first_init").exists():
 				self._first_init()
 			self._startup()
 
 		else:
-			if not os.path.exists("/var/lib/lliurex-guard/first_init"):
+			if not Path("/var/lib/lliurex-guard/first_init").exists():
 				return
 			else:
 				self.change_guardmode("DisableMode",[])
@@ -134,10 +134,6 @@ class LliurexGuardManagerNatFreeClient:
 		if list_to_config is None:
 			list_to_config = []
 
-		mode_file = Path(self.mode_file_path)
-		default_white_list = Path(self.default_white_list_path)
-		whitelist_dir = Path(self.whitelist_dir)
-
 		ret = None
 
 		try:
@@ -152,12 +148,9 @@ class LliurexGuardManagerNatFreeClient:
 			else:
 				lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
 
-			mode_file.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
+			self.mode_file_path.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
 			
 			if mode_to_set != "DisableMode":
-				if mode_to_set == "WhiteMode" and default_white_list.exists():
-					shutil.copy2(default_white_list, whitelist_dir)	
-
 				ret_list = self._get_list_from_server(mode_to_set, list_to_config)
 				if ret_list:
 					ret = self._manage_dnsmasq_service(True)
@@ -209,11 +202,10 @@ class LliurexGuardManagerNatFreeClient:
 	def update_whitelist_dns(self):
 
 		dns_vars = self._get_dns()
-		whitelist_path = Path(self.whitelist_dir)
 
 		try:
-			if whitelist_path.exists():
-				for file_path in whitelist_path.iterdir():
+			if self.whitelist_dir.exists():
+				for file_path in self.whitelist_dir.iterdir():
 					if file_path.is_file():
 						content = set() 
 						format_lines = []
@@ -258,8 +250,8 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _is_client_mode(self):
 
-		is_server = Path(self.adi_server).exists()
-		is_client = Path(self.adi_client).exists()
+		is_server = self.adi_server.exists()
+		is_client = self.adi_client.exists()
 
 		return not is_server and is_client
 
@@ -269,7 +261,7 @@ class LliurexGuardManagerNatFreeClient:
 
 		try:
 			client=n4d.client.Client("https://server:9779",timeout=10)
-			test=client.LliurexGuardManagerNatfree.read_guardmode()
+			test=client.LliurexGuardManagerNatFree.read_guardmode()
 			return True
 		except Exception as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Check connection with adi Error:{e}")
@@ -281,7 +273,6 @@ class LliurexGuardManagerNatFreeClient:
 
 		dnsmasq_conf = Path('/etc/dnsmasq.conf')
 		extra_dns_file = Path('/var/lib/dnsmasq/config/extra-dns')
-		mode_file = Path(self.mode_file_path)
 
 		try:
 			if not dnsmasq_conf.exists():
@@ -304,7 +295,7 @@ class LliurexGuardManagerNatFreeClient:
 				dns_lines = [f"server={item}" for item in desktop_dns if item]
 				extra_dns_file.write_text("\n".join(dns_lines) + "\n", encoding="utf-8")
 
-			if not mode_file.exists():
+			if not self.mode_file_path.exists():
 				self._create_guardmode_conf_file()
 
 		except OSError as e:
@@ -314,15 +305,13 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _create_guardmode_conf_file(self):
 
-		mode_file = Path(self.mode_file_path)
-
 		try:
 			lines = [
 				f"{self.disable_bm_mode}",
 				f"{self.disable_wm_mode}",
 				f"{self.disable_whitelist_filter}"
 			]
-			mode_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+			self.mode_file_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 		
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error writing configuration file: {e}")
@@ -331,14 +320,12 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _create_guardmode_conf_dir(self, mode_to_set: str):
 
-		conf_dir = Path(self.conf_dir)
-
 		try:
-			conf_dir.mkdir(parents=True, exist_ok=True)
+			self.conf_dir.mkdir(parents=True, exist_ok=True)
 			if mode_to_set == "BlackMode":
-				Path(self.blacklist_dir).mkdir(parents=True, exist_ok=True)
+				self.blacklist_dir.mkdir(parents=True, exist_ok=True)
 			elif mode_to_set == "WhiteMode":
-				Path(self.whitelist_dir).mkdir(parents=True, exist_ok=True)
+				self.whitelist_dir.mkdir(parents=True, exist_ok=True)
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating configuration directories: {e}")
 
@@ -406,7 +393,7 @@ class LliurexGuardManagerNatFreeClient:
 			return False
 
 		update_dns = (mode_to_set == "WhiteMode")
-		default_path = Path(self.blacklist_dir) if mode_to_set == "BlackMode" else Path(self.whitelist_dir)
+		default_path = self.blacklist_dir if mode_to_set == "BlackMode" else self.whitelist_dir
 
 		if default_path.exists():
 			for file in default_path.iterdir():
@@ -416,7 +403,7 @@ class LliurexGuardManagerNatFreeClient:
 					except OSError as e:
 						print(f"[LliurexGuardManagerNatFreeClient]: Warning, could not delete {file.name}: {e}")
 		else:
-			default_path.mkdir(parents=True, exist_ok=True)  # Assegura que el directori existeix
+			default_path.mkdir(parents=True, exist_ok=True)
 
 		ctx = ssl._create_unverified_context() 
 
@@ -431,6 +418,9 @@ class LliurexGuardManagerNatFreeClient:
 
 			if not update_dns:
 				return True
+
+			if mode_to_set=="WhiteMode" and self.default_white_list_path.exists():
+				shutil.copy2(self.default_white_list_path,default_path)
 
 			dns_res = self.update_whitelist_dns()
 			return dns_res.get("status", False)

@@ -20,15 +20,15 @@ class LliurexGuardManagerNatFree:
 	def __init__(self):
 
 		self.core=n4dcore.Core.get_core()
-		self.conf_dir="/etc/lliurex-guard-natfree"
-		self.blacklist_dir=os.path.join(self.conf_dir,"blacklist")
-		self.blacklist_disable_dir=os.path.join(self.conf_dir,"blacklist.d")
+		self.conf_dir=Path("/etc/lliurex-guard-natfree")
+		self.blacklist_dir=self.conf_dir / "blacklist"
+		self.blacklist_disable_dir=self.conf_dir / "blacklist.d"
 		self.blacklist_redirection="169.254.254.254"
-		self.whitelist_dir=os.path.join(self.conf_dir,"whitelist")
-		self.whitelist_disable_dir=os.path.join(self.conf_dir,"whitelist.d")
+		self.whitelist_dir=self.conf_dir / "whitelist"
+		self.whitelist_disable_dir=self.conf_dir / "whitelist.d"
 		self.whitelist_redirection="server=/"
 		self.list_tmpfile=[]
-		self.shared_folder="/var/www/lliurex-guard-natfree"
+		self.shared_folder=Path("/var/www/lliurex-guard-natfree")
 	
 		#def __init__
 
@@ -75,7 +75,7 @@ class LliurexGuardManagerNatFree:
 			"WhiteMode": (self.whitelist_dir, self.whitelist_disable_dir, self.whitelist_redirection)
 		}
 
-		default_values = ("", "", "")
+		default_values = (Path(""), Path(""), Path(""))
 
 		self.active_path, self.disable_path, self.redirection = mapping.get(self.guardMode, default_values)
 	
@@ -87,23 +87,21 @@ class LliurexGuardManagerNatFree:
 		variable["mode"] = mode_to_set
 		active_list = []
 
-		dest_path = Path(self.shared_folder)
-
 		try:
-			dest_path.mkdir(parents=True, exist_ok=True)
+			self.shared_folder.mkdir(parents=False, exist_ok=True)
 
-			for file in dest_path.iterdir():
+			for file in self.shared_folder.iterdir():
 				if file.is_file():
 					file.unlink()
 
 			if mode_to_set in ("BlackMode", "WhiteMode"):
-				list_folder = Path(self.blacklist_dir) if mode_to_set == "BlackMode" else Path(self.whitelist_dir)
+				list_folder = self.blacklist_dir if mode_to_set == "BlackMode" else self.whitelist_dir
 
 				if list_folder.exists():
 					for file in list_folder.iterdir():
 						if file.is_file():
 							active_list.append(file.name)
-							shutil.copy2(file, dest_path / file.name)
+							shutil.copy2(file, self.shared_folder / file.name)
 
 			variable["list_to_config"] = active_list
 			self.internal_variable = copy.deepcopy(variable)
@@ -151,8 +149,8 @@ class LliurexGuardManagerNatFree:
 
 	def read_guardmode_list(self, listId: str, active: bool):
 
-		path_dir = Path(self.active_path) if active else Path(self.disable_path)
-		alt_dir = Path(self.disable_path) if active else Path(self.active_path)
+		path_dir = self.active_path if active else self.disable_path
+		alt_dir = self.disable_path if active else self.active_path
 
 		filename = f"{listId}.list"
 		target_file = path_dir / filename
@@ -204,8 +202,8 @@ class LliurexGuardManagerNatFree:
 
 	def remove_guardmode_list(self, list_to_manage: list) :
 
-		active_dir = Path(self.active_path)
-		disable_dir = Path(self.disable_path)
+		active_dir = self.active_path
+		disable_dir = self.disable_path
 
 		try:
 			for item in list_to_manage:
@@ -273,12 +271,12 @@ class LliurexGuardManagerNatFree:
 	def _create_guardmode_conf_dir(self):
 
 		directories = [
-			Path(self.conf_dir),
-			Path(self.blacklist_dir),
-			Path(self.blacklist_disable_dir),
-			Path(self.whitelist_dir),
-			Path(self.whitelist_disable_dir),
-			Path(self.shared_folder)
+			self.conf_dir,
+			self.blacklist_dir,
+			self.blacklist_disable_dir,
+			self.whitelist_dir,
+			self.whitelist_disable_dir,
+			self.shared_folder
 		]
 
 		try:
@@ -312,14 +310,13 @@ class LliurexGuardManagerNatFree:
 	
 	#def _is_server
 	
-	def _read_list_headers(self, folder: str):
+	def _read_list_headers(self, folder):
 
 		files_headers = []
-		folder_path = Path(folder)
 
 		try:
-			if folder_path.exists():
-				for file_path in folder_path.iterdir():
+			if folder.exists():
+				for file_path in folder.iterdir():
 					if file_path.is_file() and file_path.suffix == '.list':
 						tmp = {
 							"id": file_path.stem,
@@ -353,10 +350,10 @@ class LliurexGuardManagerNatFree:
 
   	#def _read_list_headers
 
-	def _move_guardmode_list(self, list_to_manage:list, dest_path: str, orig_path: str):
+	def _move_guardmode_list(self, list_to_manage, dest_path, orig_path):
 		
-		dest_dir = Path(dest_path)
-		orig_dir = Path(orig_path)
+		dest_dir = dest_path
+		orig_dir = orig_path
 
 		try:
 			for item in list_to_manage:

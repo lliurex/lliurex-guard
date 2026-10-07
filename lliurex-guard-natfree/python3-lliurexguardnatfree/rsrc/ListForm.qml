@@ -155,7 +155,7 @@ Rectangle{
     ChangesDialog{
         id:settingsChangesDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","List edition")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","List edition")
         dialogVisible:listStackBridge.showChangesInListDialog
         dialogMsg:i18nd("lliurex-guard-natfree","The are pending changes to save.\nDo you want save the changes or discard them?")
         dialogWidth:400
@@ -217,7 +217,7 @@ Rectangle{
 
     function getTypeMessage(){
 
-        switch (guardOptionsStackBridge.showMainMessage.type){
+        switch (listStackBridge.showListFormMessage.type){
             case 0:
                 return Kirigami.MessageType.Positive
             case 1:

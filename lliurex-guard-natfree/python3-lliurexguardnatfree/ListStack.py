@@ -578,8 +578,6 @@ class Bridge(QObject):
 
 		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		self.enableUrlEdition=False
-		self.urlToEditIndex=""
-		self.urlToEditValue=""
 
 		tmpNewUrl=newValue.split(" ")[0]
 		tmpNewUrl=self.guardManager.formatLine(tmpNewUrl)
@@ -676,7 +674,11 @@ class Bridge(QObject):
 
 		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_SAVE_CHANGES}
-		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"],len(self.contentOfList)]
+		dataToCheck={
+			"listId":self.currentListConfig["id"],
+			"name": self.currentListConfig["name"],
+			"content":len(self.contentOfList)
+		}
 		self.checkListChangesT=CheckListChanges(self.guardManager,dataToCheck,self.edit,self.fileToLoad)
 		self.checkListChangesT.start()
 		self.checkListChangesT.changesListChecked.connect(self._checkListChangesRet)
@@ -687,7 +689,7 @@ class Bridge(QObject):
 	@Slot(dict)
 	def _checkListChangesRet(self,ret):
 
-		if not ret["status"]:
+		if not ret.get("status"):
 			self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 			self.showListFormMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type")}	
 			return

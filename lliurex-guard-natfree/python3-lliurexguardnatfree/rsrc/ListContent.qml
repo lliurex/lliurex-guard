@@ -218,7 +218,7 @@ Rectangle {
    ChangesDialog{
         id:emptyListDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","Edit list")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","Edit list")
         dialogMsg:i18nd("lliurex-guard-natfree","Do you want delete all urls from the list?")
         dialogVisible:false
         dialogWidth:480

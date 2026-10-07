@@ -240,7 +240,7 @@ Rectangle{
     ChangesDialog{
         id:changeModeDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","Change Mode")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","Change Mode")
         dialogMsg:{
             switch(guardOptionsStackBridge.showChangeModeDialog.modeToChange){
                 case "BlackMode":
@@ -262,10 +262,10 @@ Rectangle{
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard-natfree","Accept")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard-natfree","Cancel")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:changeModeDialog
            function onDiscardDialogClicked(){
@@ -282,17 +282,17 @@ Rectangle{
 
         id:pendingChangesDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","Pending changes")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","Pending changes")
         dialogMsg:i18nd("lliurex-guard-natfree","There are pendin changes to apply.\nDo you want to apply the changes or discard them?")
         dialogVisible:guardOptionsStackBridge.showPendingChangesDialog
         dialogWidth:500
         btnAcceptVisible:true
         btnAcceptText:i18nd("lliurex-guard-natfree","Apply")
         btnDiscardText:i18nd("lliurex-guard-natfree","Discard")
-        btnDiscardIcon:"delete.svg"
+        btnDiscardIcon:"delete"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard-natfree","Cancel")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:pendingChangesDialog
            function onApplyDialogClicked(){
@@ -312,17 +312,17 @@ Rectangle{
     ChangesDialog{
         id:removeListsDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","Remove Lists")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","Remove Lists")
         dialogMsg:guardOptionsStackBridge.showRemoveListsDialog.removeAll?i18nd("lliurex-guard-natfree","Do you want select alls list to be remove?"):i18nd("lliurex-guard-natfree","Do you want select the list to be remove?")
         dialogVisible:guardOptionsStackBridge.showRemoveListsDialog.show
         dialogWidth:500
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard-natfree","Yes")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard-natfree","No")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:removeListsDialog
            function onDiscardDialogClicked(){
@@ -337,17 +337,17 @@ Rectangle{
     ChangesDialog{
         id:restoreListsDialog
         dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"lliurex-guard-natfree"+" - "+i18nd("lliurex-guard-natfree","Restore Lists")
+        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","Restore Lists")
         dialogMsg:i18nd("lliurex-guard-natfree","Do you want select alls list to be restore?")
         dialogVisible:guardOptionsStackBridge.showRestoreListsDialog
         dialogWidth:500
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard-natfree","Yes")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard-natfree","No")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:restoreListsDialog
            function onDiscardDialogClicked(){

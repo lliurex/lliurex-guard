@@ -62,7 +62,7 @@ class GuardManager(object):
 
 		self.dbg=1
 		self.userValidated=True
-		self.limitLines=5
+		self.limitLines=2500
 		self.limitFileSize=28000000
 		self.garbageFiles=[]
 		self.credentials=[]
@@ -71,12 +71,12 @@ class GuardManager(object):
 		self.listsConfigOrig={}
 		self.listsConfigData=[]
 		self.urlConfigData=[]
-		self.detectFlavour()
+		self._detectFlavour()
 		self.initValues()
 	
 	#def __init__	
 			
-	def detectFlavour(self):
+	def _detectFlavour(self):
 		
 		self.is_server=""
 
@@ -102,7 +102,7 @@ class GuardManager(object):
 		self.client=n4d.client.Client(ticket=tk,timeout=120)
 
 		msgLog=f'Session user: {os.environ["USER"]}'
-		self.writeLog(msgLog)
+		self._writeLog(msgLog)
 
 	#def create_n4dClient
 
@@ -133,7 +133,7 @@ class GuardManager(object):
 		
 		msg = "Read LliureX Guard Mode: "
 		self._debug(msg, response)
-		self.writeLog(f"{msg}{response}")
+		self._writeLog(f"{msg}{response}")
 		
 		if isinstance(response, dict) and response.get('status'):
 			self.guardMode = response.get('data')
@@ -161,7 +161,7 @@ class GuardManager(object):
 		msg=f"LliureX Guard Mode changed to {mode}"
 		self._debug(msg,response)
 		msgLog=f"{msg}{response}"
-		self.writeLog(msgLog)
+		self._writeLog(msgLog)
 
 		if isinstance(response, dict) and response.get('status'):
 			self.listsConfig={}
@@ -194,7 +194,7 @@ class GuardManager(object):
 		msg="LliureX Guard mode lists readed "
 		self._debug(msg,response)
 		msgLog=f"{msg}{response}"
-		self.writeLog(msgLog)
+		self._writeLog(msgLog)
 		
 		if isinstance(response, dict) and response.get('status'):
 			self.listsConfig=response.get('data')
@@ -281,7 +281,7 @@ class GuardManager(object):
 		currentTmpfile = self.currentListConfig.get("tmpfile", "")
 
 		if currentTmpfile != "":
-			readTmpFile = self.readLocalFile(currentTmpfile, False)
+			readTmpFile = self._readLocalFile(currentTmpfile, False)
 			msg = f"List {listId}. Readed local file ({currentTmpfile})"
 			self._debug(msg, readTmpFile)
 
@@ -330,7 +330,7 @@ class GuardManager(object):
 			msgData = {}
 			msgLog = f"{msg} with errors. Error details: {errorInfo}"
 
-		self.writeLog(msgLog)
+		self._writeLog(msgLog)
 		return {
 			'status': status, 
 			'code': msgCode, 
@@ -341,7 +341,7 @@ class GuardManager(object):
 
 	# def _readGuardModeList
 
-	def readLocalFile(self, filePath, createTmpfile):
+	def _readLocalFile(self, filePath, createTmpfile):
 
 		content = []
 		countLines = 0
@@ -420,13 +420,12 @@ class GuardManager(object):
 				'errorInfo':str(e)
 			}
 
-	#def readLocalFile
+	#def _readLocalFile
 
 	def loadFile(self, fileToLoad):
 
-		print("Cargando archivo")
 		limitLines = False
-		ret = self.readLocalFile(fileToLoad, True)
+		ret = self._readLocalFile(fileToLoad, True)
 
 		if ret.get("status"):
 			content= ret.get("data").get("content")
@@ -632,7 +631,6 @@ class GuardManager(object):
 								formatContent.append(cleanedLine + "\n")
 								countLines += 1
 
-					print(formatContent)
 					tmpPath.write_text("".join(formatContent), encoding='utf-8')
 				else:
 					raise FileNotFoundError(f"File to save not found: {fileToSave}")
@@ -672,7 +670,7 @@ class GuardManager(object):
 
 		msg = f"List {listId}. Saved changes"
 		self._debug(msg, result)
-		self.writeLog(f"{msg} {result}")
+		self._writeLog(f"{msg} {result}")
 
 		return result
 		
@@ -680,17 +678,17 @@ class GuardManager(object):
 
 	def checkData(self, data, edit, loadedFile):
 
-		if str(data[1]).strip() == "":
+		if str(data.get("name")).strip() == "":
 			return {"status": False, "code": GuardManager.MISSING_LIST_NAME_ERROR, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
 		checkDuplicates = True
 		if edit:
-			if data[0] == self.currentListConfig.get("id"):
+			if data.get("listId") == self.currentListConfig.get("id"):
 				checkDuplicates = False
 
 		if checkDuplicates:		
 			for item in self.listsConfig:
-				if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data[0]:
+				if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data.get("listId"):
 					return {"status": False, "code": GuardManager.LIST_NAME_DUPLICATE, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
 		if loadedFile is not None:
@@ -709,7 +707,7 @@ class GuardManager(object):
 			else:
 				return {'status': False, 'code': GuardManager.LOADING_FILE_ERROR, 'data': 'File does not exist',"type": GuardManager.KIRIGAMI_MSG_ERROR}
 		else:
-			if data[2] == 0:
+			if data.get("content") == 0:
 				return {'status': False, 'code': GuardManager.EMPTY_LIST_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}			
 
 		return {"status": True, "code": GuardManager.ALL_CORRECT_CODE, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
@@ -788,7 +786,7 @@ class GuardManager(object):
 			if len(listToRemove) > 0:
 				resultRemove = self.client.LliurexGuardManagerNatFree.remove_guardmode_list(listToRemove)
 				self._debug("Applied Changes. Removed list ", resultRemove)
-				self.writeLog(f"Applied Changes. Removed list {resultRemove}. List removed: {listToRemove}")
+				self._writeLog(f"Applied Changes. Removed list {resultRemove}. List removed: {listToRemove}")
 
 				if not resultRemove.get('status', False):
 					error = True
@@ -799,7 +797,7 @@ class GuardManager(object):
 			if not error and len(listToActive) > 0:
 				resultActive = self.client.LliurexGuardManagerNatFree.activate_guardmode_list(listToActive)
 				self._debug("Applied Changes. Actived list ", resultActive)
-				self.writeLog(f"Applied Changes. Actived list {resultActive}. List actived: {listToActive}")
+				self._writeLog(f"Applied Changes. Actived list {resultActive}. List actived: {listToActive}")
 
 				if not resultActive.get('status', False):
 					error = True
@@ -810,7 +808,7 @@ class GuardManager(object):
 			if not error and len(listToDeactive) > 0:
 				resultDeactive = self.client.LliurexGuardManagerNatFree.deactivate_guardmode_list(listToDeactive)
 				self._debug("Applied Changes. Deactived lists ", resultDeactive)
-				self.writeLog(f"Applied Changes. Deactived lists {resultDeactive}. List deactived: {listToDeactive}")
+				self._writeLog(f"Applied Changes. Deactived lists {resultDeactive}. List deactived: {listToDeactive}")
 
 				if not resultDeactive.get('status', False):
 					error = True
@@ -851,12 +849,12 @@ class GuardManager(object):
 		
 	#def removeTmpFile
 	
-	def writeLog(self,msg):
+	def _writeLog(self,msg):
 	
 		syslog.openlog("LLIUREX-GUARD-NATFREE")
 		syslog.syslog(msg)	
 
-	#def writeLog	
+	#def _writeLog	
 
 	def formatLine(self, line):
 
