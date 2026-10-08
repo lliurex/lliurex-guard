@@ -25,7 +25,11 @@ class LliurexGuardManagerNatFreeClient:
 		self.default_white_list_path=Path("/usr/share/lliurex-guard-natfree/data/default_white_list.list")
 		self.mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard-natfree.conf")
 		self.conf_dir=Path("/etc/lliurex-guard-natfree")
+		self.guard_lib_dir=Path("/var/lib/lliurex-guard-natfree")
+		self.first_init_path=self.guard_lib_dir / "first_init"
 		self.blacklist_dir=self.conf_dir / "blacklist"
+		self.dnsmasq_lib_dir=Path("/var/lib/dnsmasq/config")
+		self.dnsmasq_conf = Path('/etc/dnsmasq.conf')
 		self.set_bm_mode="conf-dir = /etc/lliurex-guard-natfree/blacklist"
 		self.blacklist_redirection="169.254.254.254"
 		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard/blacklist"
@@ -37,8 +41,6 @@ class LliurexGuardManagerNatFreeClient:
 		self.disable_whitelist_filter="#"+self.whitelist_filter
 		self.list_tmpfile=[]
 		self.list_to_active=[]
-		self.adi_server=Path("/usr/bin/natfree-adi")
-		self.adi_client=Path("/usr/bin/natfree-tie")
 		self.server_download_url="http://server/lliurex-guard-natfree/"
 		self.guardmanager_var={}
 		
@@ -80,15 +82,15 @@ class LliurexGuardManagerNatFreeClient:
 				time.sleep(1)
 
 		if configure_guard:
-			if not Path("/var/lib/lliurex-guard/first_init").exists():
+			if not self.first_init_path.exists():
 				self._first_init()
 			self._startup()
 
 		else:
-			if not Path("/var/lib/lliurex-guard/first_init").exists():
+			if not self.first_init_path.exists():
 				return
 			else:
-				self.change_guardmode("DisableMode",[])
+				self.change_guardmode("DisableMode")
 
 	#def _check_connection
 
@@ -250,10 +252,21 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _is_client_mode(self):
 
-		is_server = self.adi_server.exists()
-		is_client = self.adi_client.exists()
+		try:
+			result = subprocess.run(
+				['lliurex-version', '-v'],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
 
-		return not is_server and is_client
+			flavours = [x.strip() for x in result.stdout.split(',') if x.strip()]
+
+			return any('alu' in item for item in flavours)
+		except (subprocess.CalledProcessError, FileNotFoundError) as e:
+			print(f"[LliurexGuardManagerNatFreeClient]: Error checking LliureX version: {e}")
+			return False
 
 	#def is_client_mode
 
@@ -271,14 +284,13 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _check_dnsmasq_conf(self):
 
-		dnsmasq_conf = Path('/etc/dnsmasq.conf')
-		extra_dns_file = Path('/var/lib/dnsmasq/config/extra-dns')
+		extra_dns_file = self.dnsmasq_lib_dir / "extra-dns"
 
 		try:
-			if not dnsmasq_conf.exists():
-				dnsmasq_conf.touch(exist_ok=True)
+			if not self.dnsmasq_conf.exists():
+				self.dnsmasq_conf.touch(exist_ok=True)
 
-			content = dnsmasq_conf.read_text(encoding="utf-8")
+			content = self.dnsmasq_conf.read_text(encoding="utf-8")
 
 			new_directives = []
 			if "conf-dir=/etc/dnsmasq.d/" not in content:
@@ -287,8 +299,7 @@ class LliurexGuardManagerNatFreeClient:
 				new_directives.append("conf-dir=/var/lib/dnsmasq/config\n")
 
 			if new_directives:
-				with dnsmasq_conf.open("a", encoding="utf-8") as fd:
-					fd.writelines(new_directives)
+				self.dnsmasq_conf.write_text("".join(new_directives),encoding="utf-8", mode="a")
 
 			if not extra_dns_file.exists():
 				desktop_dns = self._get_desktop_dns()
@@ -343,21 +354,17 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _first_init(self):
 
-		natfree_dir = Path("/var/lib/lliurex-guard-natfree")
-		dnsmasq_config_dir = Path("/var/lib/dnsmasq/config")
-
 		try:
-			natfree_dir.mkdir(parents=True, exist_ok=True)
-			dnsmasq_config_dir.mkdir(parents=True, exist_ok=True)
+			self.guard_lib_dir.mkdir(parents=True, exist_ok=True)
+			self.dnsmasq_lib_dir.mkdir(parents=True, exist_ok=True)
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating directories: {e}")
 			return
 
 		self._check_dnsmasq_conf()
 
-		init_file = natfree_dir / "first_init"
 		try:
-			init_file.touch(exist_ok=True)
+			self.first_init_path.touch(exist_ok=True)
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating init file: {e}")
 

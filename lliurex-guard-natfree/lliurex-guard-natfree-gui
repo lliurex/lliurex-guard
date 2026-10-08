@@ -10,6 +10,10 @@ from lliurexguardnatfree.Core import Core
 c=Core.get_core()
 
 app=QApplication()
+app.setOrganizationName("lliurex-qml")
+app.setOrganizationDomain("lliurex-qml")
+app.setApplicationName("lliurex-guard-natfree")
+
 engine = QQmlApplicationEngine()
 engine.clearComponentCache()
 context=engine.rootContext()

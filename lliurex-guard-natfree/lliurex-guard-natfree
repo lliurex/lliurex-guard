@@ -8,12 +8,17 @@ import sys
 import shutil
 from pathlib import Path
 
+import gettext
+gettext.textdomain("lliurex-guard-natfree")
+_=gettext.gettext
+
 class Tunnel(QObject):
 	
 	def __init__(self):
 
 		QObject.__init__(self)
 		self.clearCache()
+		self.canRun()
 
 	#def __init
 
@@ -56,6 +61,42 @@ class Tunnel(QObject):
 		return pkgVersion
 
 	#def getPackageVersion
+
+	def canRun(self):
+
+		normalizedFlavours=["adi","pro"]
+		flavoursInstalled=[]
+		runApp=False
+		
+		cmd=["lliurex-version", "-v"]
+		try:
+			result=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+			pout = result.stdout
+
+		except Exception:
+			pout=""
+
+		if pout:
+			flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+			print(flavoursInstalled)
+			runApp=any(p in i for i in flavoursInstalled for p in normalizedFlavours)
+
+		if not runApp:
+			msg=_("The device is configured for use in classroom with a non standard network.\nThis configuration is not compatible with this version of LliureX-Guard")
+			cmd = [
+            	"kdialog",
+            	"--title", "LliureX-Guard",
+            	"--icon", "lliurex-guard-natfree",
+            	"--sorry", msg
+        	]
+			try:
+				subprocess.run(cmd,check=True)
+			except Exception:
+				pass
+
+			sys.exit(1)
+	
+	#def canRun
 		
 	@Slot(str)
 	def on_ticket(self, ticket):

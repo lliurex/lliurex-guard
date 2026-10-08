@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 16:07+0200\n"
+"POT-Creation-Date: 2026-10-08 13:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,12 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: lliurex-guard-natfree/lliurex-guard-natfree:85
+msgid ""
+"The device is configured for use in classroom with a non standard network.\n"
+"This configuration is not compatible with this version of LliureX-Guard"
+msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/CustomPopUp.qml:63
 msgid "Changing Lliurex Guard mode. Wait a moment..."
