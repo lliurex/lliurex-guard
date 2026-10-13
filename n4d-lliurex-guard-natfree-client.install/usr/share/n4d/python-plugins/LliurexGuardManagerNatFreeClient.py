@@ -32,10 +32,12 @@ class LliurexGuardManagerNatFreeClient:
 		self.dnsmasq_conf = Path('/etc/dnsmasq.conf')
 		self.set_bm_mode="conf-dir = /etc/lliurex-guard-natfree/blacklist"
 		self.blacklist_redirection="169.254.254.254"
-		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard/blacklist"
+		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard-natfree/blacklist"
 		self.whitelist_dir=self.conf_dir / "whitelist"
 		self.set_wm_mode="conf-dir = /etc/lliurex-guard-natfree/whitelist"
-		self.disable_wm_mode="#conf-dir = /etc/lliurex-guard/whitelist"
+		self.disable_wm_mode="#conf-dir = /etc/lliurex-guard-natfree/whitelist"
+		self.resolvconf_path=Path("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
+		self.network_plugin_path=Path("/usr/share/n4d/python-plugins/NetworkManager")
 		self.whitelist_redirection="server=/"
 		self.whitelist_filter="address=/#/"+self.blacklist_redirection
 		self.disable_whitelist_filter="#"+self.whitelist_filter
@@ -155,9 +157,22 @@ class LliurexGuardManagerNatFreeClient:
 			if mode_to_set != "DisableMode":
 				ret_list = self._get_list_from_server(mode_to_set, list_to_config)
 				if ret_list:
-					ret = self._manage_dnsmasq_service(True)
+					ret_manage = self._manage_dnsmasq_service(True)
+					if not ret_manage.get("status"):
+						result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_manage}
+						return n4d.responses.build_successful_call_response(result)
+
+					ret_restart=self.restart_dnsmasq().get("return")
+					if not ret_restart.get("status"):
+						result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_restart}
+						return n4d.responses.build_successful_call_response(result)
+
+					ret=ret_manage
 			else:
 				ret = self._manage_dnsmasq_service(False)
+				if not ret.get("status"):
+					result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret}
+					return n4d.responses.build_successful_call_response(result)
 
 			result = {'status': True, 'msg': "Changed LliureX Guard Mode successfully", 'data': ret}
 			return n4d.responses.build_successful_call_response(result)
@@ -332,7 +347,7 @@ class LliurexGuardManagerNatFreeClient:
 	def _create_guardmode_conf_dir(self, mode_to_set: str):
 
 		try:
-			self.conf_dir.mkdir(parents=True, exist_ok=True)
+			self.conf_dir.mkdir(parents=False, exist_ok=True)
 			if mode_to_set == "BlackMode":
 				self.blacklist_dir.mkdir(parents=True, exist_ok=True)
 			elif mode_to_set == "WhiteMode":
@@ -355,8 +370,8 @@ class LliurexGuardManagerNatFreeClient:
 	def _first_init(self):
 
 		try:
-			self.guard_lib_dir.mkdir(parents=True, exist_ok=True)
-			self.dnsmasq_lib_dir.mkdir(parents=True, exist_ok=True)
+			self.guard_lib_dir.mkdir(parents=False, exist_ok=True)
+			self.dnsmasq_lib_dir.mkdir(parents=False, exist_ok=True)
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating directories: {e}")
 			return
@@ -410,7 +425,7 @@ class LliurexGuardManagerNatFreeClient:
 					except OSError as e:
 						print(f"[LliurexGuardManagerNatFreeClient]: Warning, could not delete {file.name}: {e}")
 		else:
-			default_path.mkdir(parents=True, exist_ok=True)
+			default_path.parent.mkdir(parents=True, exist_ok=True)
 
 		ctx = ssl._create_unverified_context() 
 
@@ -430,7 +445,7 @@ class LliurexGuardManagerNatFreeClient:
 				shutil.copy2(self.default_white_list_path,default_path)
 
 			dns_res = self.update_whitelist_dns()
-			return dns_res.get("status", False)
+			return dns_res.get("return", {}).get("status")
 
 		except Exception as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error downloading list from server: {e}")
@@ -498,17 +513,21 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _manage_resolvconf(self, active: bool):
 
-		conf_file = Path("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
-
 		if active:
-			if not conf_file.exists():
+			if not self.resolvconf_path.exists():
 				subprocess.run(['systemctl', 'stop', 'systemd-resolved'], check=True)
-				self.core.get_plugin('NetworkManager').systemd_resolv_conf()
+				if self.network_plugin_path.exists():
+					self.core.get_plugin('NetworkManager').systemd_resolv_conf()
+				else:
+					conf = "[Resolve]\nDNS=127.0.0.1\nDNSStubListener=no\n"
+					self.resolvconf_path.parent.mkdir(parents=True, exist_ok=True)
+					self.resolvconf_path.write_text(conf,encoding='utf-8')
+
 				subprocess.run(['systemctl', 'restart', 'systemd-resolved'], check=True)
 		else:
-			if conf_file.exists():
+			if self.resolvconf_path.exists():
 				try:
-					conf_file.unlink()
+					self.resolvconf_path.unlink()
 				except OSError:
 					pass
 

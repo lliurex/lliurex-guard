@@ -23,6 +23,7 @@ for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
 if len(dns) <= 0 :
     sys.exit(0)
 
+dns=dns[0].split()
 extradns = Path('/var/lib/dnsmasq/config/extra-dns')
 
 if not extradns.parent.exists():
@@ -44,7 +45,7 @@ if master_key.valid() :
 
     result = c.LliurexGuardManagerNatFreeClient.read_guardmode()
     if result['status'] and result['data'] == 'WhiteMode':
-        result = c.LliurexGuardManager.update_whitelist_dns()
+        result = c.LliurexGuardManagerNatFreeClient.update_whitelist_dns()
         if not result['status']:
             c.LliurexGuardManagerNatFreeClient.change_guardmode('DisableMode')
 o = subprocess.Popen(['systemctl','restart','dnsmasq']).communicate()
