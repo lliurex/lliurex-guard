@@ -5,7 +5,12 @@
         "class": "LliurexGuardManagerNatFreeClient"
     },
     "METHODS": {
-        "read_guardmode":{
+        "read_guardmode_from_client":{
+            "allowed_groups":[
+                "anonymous"
+            ]
+        },
+        "read_guardmode_from_server":{
             "allowed_groups":[
                 "anonymous"
             ]

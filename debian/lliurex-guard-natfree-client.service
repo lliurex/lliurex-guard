@@ -1,0 +1,12 @@
+[Unit]
+Description=Service for disable lliurex-guard when sutting down or restart the system
+Before=shutdown.target reboot.target halt.target n4d.service dnsmasq.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/true
+ExecStop=/usr/sbin/lliurex-guard-natfree-client-disable
+
+[Install]
+WantedBy=multi-user.target

@@ -439,4 +439,6 @@ class LliurexGuardManagerNatFree:
 			print(f"[LliurexGuardManagerNatFree]: Error formatting the list: {e}")
 			return {'status': False, 'msg': 'Error formatting the list', 'data': str(e)}
 	
-	#def _format_guardmode_list	
+	#def _format_guardmode_list
+
+#class LliurexGuardManagerNatFree

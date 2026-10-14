@@ -4,6 +4,26 @@ import n4d.client
 import netifaces
 import sys
 from pathlib import Path
+
+normalizedFlavours=["alu"]
+flavoursInstalled=[]
+runScript=False
+        
+cmd=["lliurex-version", "-v"]
+try:
+    result=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+    pout = result.stdout
+
+except Exception:
+    pout=""
+
+if pout:
+    flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+    runScript=any(p in i for i in flavoursInstalled for p in normalizedFlavours):
+
+if not runScript:
+    sys.exit(0)
+    
 try:
     interface_by_default = netifaces.gateways()['default'][2][1]
 except:
@@ -43,7 +63,7 @@ if master_key.valid() :
         if type(e) == n4d.client.ServerError:
             sys.exit(0)
 
-    result = c.LliurexGuardManagerNatFreeClient.read_guardmode()
+    result = c.LliurexGuardManagerNatFreeClient.read_guardmode_from_client()
     if result['status'] and result['data'] == 'WhiteMode':
         result = c.LliurexGuardManagerNatFreeClient.update_whitelist_dns()
         if not result['status']:

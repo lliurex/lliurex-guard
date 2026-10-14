@@ -10,6 +10,7 @@ import n4d.server.core as n4dcore
 import n4d.responses
 import urllib
 import requests
+import syslog
 import time
 from os import listdir
 from os.path import isfile,isdir,join
@@ -24,6 +25,7 @@ class LliurexGuardManagerNatFreeClient:
 		self.core=n4dcore.Core.get_core()
 		self.default_white_list_path=Path("/usr/share/lliurex-guard-natfree/data/default_white_list.list")
 		self.mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard-natfree.conf")
+		self.standalone_mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard.conf")
 		self.conf_dir=Path("/etc/lliurex-guard-natfree")
 		self.guard_lib_dir=Path("/var/lib/lliurex-guard-natfree")
 		self.first_init_path=self.guard_lib_dir / "first_init"
@@ -45,6 +47,7 @@ class LliurexGuardManagerNatFreeClient:
 		self.list_to_active=[]
 		self.server_download_url="http://server/lliurex-guard-natfree/"
 		self.guardmanager_var={}
+		self.local_guardmode="DisableMode"
 		
 	#def __init__
 
@@ -61,6 +64,7 @@ class LliurexGuardManagerNatFreeClient:
 		configure_guard=False
 
 		if self._is_client_mode():
+			self._remove_standalone_config()
 			max_retries=10
 			time_to_check=1
 			time_count=0
@@ -107,6 +111,7 @@ class LliurexGuardManagerNatFreeClient:
 			self.guardmanager_var=self.core.get_variable("LLIUREXGUARD_NATFREE").get("return")
 			if self.guardmanager_var!=None:
 				self.guardmanager_trigger(self.guardmanager_var)
+				self.local_guardmode=self.guardmanager_var.get("mode","DisableMode")
 				break;
 			else:
 				time.sleep(1)
@@ -123,11 +128,19 @@ class LliurexGuardManagerNatFreeClient:
 
 	#def guardmanager_trigger
 
-	def read_guardmode(self):
+	def read_guardmode_from_client(self):
+
+		self._write_log(f"Current mode from client: {self.local_guardmode}")
+		result={'status':True,'msg':"Read LliureX Guard Mode from client",'data': self.local_guardmode}
+		return n4d.responses.build_successful_call_response(result)
+
+	#def read_guardmode_from_client
+
+	def read_guardmode_from_server(self):
 
 		current_mode=self.guardmanager_var.get("mode","DisableMode")
-
-		result={'status':True,'msg':"Read LliureX Guard Mode",'data': current_mode}
+		self._write_log(f"Current mode from server: {current_mode}")
+		result={'status':True,'msg':"Read LliureX Guard Mode from server",'data': current_mode}
 		
 		return n4d.responses.build_successful_call_response(result)
 
@@ -139,52 +152,65 @@ class LliurexGuardManagerNatFreeClient:
 			list_to_config = []
 
 		ret = None
+		ret_list = False
+		enable_dnsmasq = False
+		restart_dnsmasq = False
+
+		ret_config=self._create_guardmode_conf_dir(mode_to_set)
+
+		if not ret_config.get("status"):
+			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_config.get("data")}
+			return n4d.responses.build_successful_call_response(result)
+
+
+		if mode_to_set in ("BlackMode","WhiteMode"):
+			ret_list = self._get_list_from_server(mode_to_set, list_to_config)
+			if not ret_list:
+				mode_to_set="DisableMode"
+
+		if mode_to_set == "BlackMode":
+			lines = [self.set_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
+			enable_dnsmasq=True
+			restart_dnsmasq=True
+		elif mode_to_set == "WhiteMode":
+			lines = [self.disable_bm_mode, self.set_wm_mode, self.whitelist_filter]
+			enable_dnsmasq=True
+			restart_dnsmasq=True
+		else:
+			lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
 
 		try:
-			self._create_guardmode_conf_dir(mode_to_set)
-
-			if mode_to_set == "BlackMode":
-				lines = [self.set_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
-			elif mode_to_set == "WhiteMode":
-				lines = [self.disable_bm_mode, self.set_wm_mode, self.whitelist_filter]
-			elif mode_to_set == "DisableMode":
-				lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
-			else:
-				lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
-
 			self.mode_file_path.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
+		except OSError as file_error:
+			msg_log=f"Failed to write configuration file: {file_error}"
+			self._write_log(msg_log)
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': str(file_error)}
+			return n4d.responses.build_successful_call_response(result)
+	
+		ret_manage = self._manage_dnsmasq_service(enable_dnsmasq)
 			
-			if mode_to_set != "DisableMode":
-				ret_list = self._get_list_from_server(mode_to_set, list_to_config)
-				if ret_list:
-					ret_manage = self._manage_dnsmasq_service(True)
-					if not ret_manage.get("status"):
-						result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_manage}
-						return n4d.responses.build_successful_call_response(result)
-
-					ret_restart=self.restart_dnsmasq().get("return")
-					if not ret_restart.get("status"):
-						result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_restart}
-						return n4d.responses.build_successful_call_response(result)
-
-					ret=ret_manage
-			else:
-				ret = self._manage_dnsmasq_service(False)
-				if not ret.get("status"):
-					result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret}
-					return n4d.responses.build_successful_call_response(result)
-
-			result = {'status': True, 'msg': "Changed LliureX Guard Mode successfully", 'data': ret}
+		if not ret_manage.get("status"):
+			self._safe_fallback_to_disable()
+			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_manage}
 			return n4d.responses.build_successful_call_response(result)
 
-		except Exception as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error changing Guard Mode: {e}")
-			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': str(e)}	
-			return n4d.responses.build_successful_call_response(result)
+		if restart_dnsmasq:
+			ret_restart=self.restart_dnsmasq().get("return")
+			if not ret_restart.get("status"):
+				self._safe_fallback_to_disable()
+				result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_restart}
+				return n4d.responses.build_successful_call_response(result)
+
+		ret=ret_manage
+		result = {'status': True, 'msg': "Changed LliureX Guard Mode successfully", 'data': ret}
+		self.local_guardmode=mode_to_set
+		self._write_log(f"Changed LliureX Guard Mode successfully: {ret}")
+		return n4d.responses.build_successful_call_response(result)
 
 	#def change_guardmode
 
-	def restart_dnsmasq(self, nonretry: bool = False):
+	def restart_dnsmasq(self):
 		
 		error = False
 		data = ""
@@ -208,10 +234,9 @@ class LliurexGuardManagerNatFreeClient:
 			result = {'status': True, 'msg': "Dnsmasq restarted successfully"}
 			return n4d.responses.build_successful_call_response(result)
 		else:
-			if not nonretry:
-				self.change_guardmode("DisableMode", True)
-
-			result = {'status': False, 'msg': "Error restarting Dnsmasq", 'data': data}
+			msg="Error restarting Dnsmasq"
+			result = {'status': False, 'msg':msg, 'data': data}
+			self._write_log(f"{msg}:{data}")
 			return n4d.responses.build_successful_call_response(result)
 
 	#def restart_dnsmasq
@@ -259,8 +284,10 @@ class LliurexGuardManagerNatFreeClient:
 				return n4d.responses.build_successful_call_response(result)
 
 		except Exception as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error Updating white list dns: {e}")
+			msg_log=f"Error Updating white list dns: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
 			result = {'status': False, 'msg': 'Error updating white list dns', 'data': str(e)}
+			self._write_log(msg_log)
 			return n4d.responses.build_successful_call_response(result)
 	
 	#def update_whitelist_dns
@@ -280,7 +307,9 @@ class LliurexGuardManagerNatFreeClient:
 
 			return any('alu' in item for item in flavours)
 		except (subprocess.CalledProcessError, FileNotFoundError) as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error checking LliureX version: {e}")
+			msg_log="Error checking LliureX version: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			self._write_log(msg_log)
 			return False
 
 	#def is_client_mode
@@ -292,7 +321,9 @@ class LliurexGuardManagerNatFreeClient:
 			test=client.LliurexGuardManagerNatFree.read_guardmode()
 			return True
 		except Exception as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Check connection with adi Error:{e}")
+			msg_log=f"Check connection with adi Error: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			self._write_log(msg_log)
 			return False
 
 	#def _check_connection_with_adi
@@ -325,7 +356,9 @@ class LliurexGuardManagerNatFreeClient:
 				self._create_guardmode_conf_file()
 
 		except OSError as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error checking dnsmasq configuration: {e}")
+			msg_log=f"Error checking dnsmasq configuration: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			self._write_log(msg_log)
 
 	#def _check_dnsmasq_conf
 
@@ -340,7 +373,9 @@ class LliurexGuardManagerNatFreeClient:
 			self.mode_file_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 		
 		except OSError as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error writing configuration file: {e}")
+			msg_log=f"Error writing configuration file: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			self._write_log(msg_log)
 
 	#def _create_guardmode_conf_file:
 
@@ -352,8 +387,11 @@ class LliurexGuardManagerNatFreeClient:
 				self.blacklist_dir.mkdir(parents=True, exist_ok=True)
 			elif mode_to_set == "WhiteMode":
 				self.whitelist_dir.mkdir(parents=True, exist_ok=True)
+			return {"status":True,"data":""}
 		except OSError as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error creating configuration directories: {e}")
+			msg_log=f"Error creating configuration directories: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			return {"status":False,"data":e}
 
 	#def _create_guardmode_conf_dir
 
@@ -403,7 +441,9 @@ class LliurexGuardManagerNatFreeClient:
 				if clean_line:
 					desktop_dns = [ip.strip() for ip in clean_line.split('|')]
 		except (subprocess.CalledProcessError, FileNotFoundError) as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error getting desktop DNS: {e}")
+			msg_log=f"Error getting desktop DNS: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			self._write_log(msg_log)
 
 		return desktop_dns
 
@@ -448,7 +488,9 @@ class LliurexGuardManagerNatFreeClient:
 			return dns_res.get("return", {}).get("status")
 
 		except Exception as e:
-			print(f"[LliurexGuardManagerNatFreeClient]: Error downloading list from server: {e}")
+			msg_log=f"Error downloading list from server: {e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+			self._write_log(msg_log)
 			return False
 
 	#def _get_list_from_server
@@ -460,7 +502,9 @@ class LliurexGuardManagerNatFreeClient:
 		if not enable_service:
 			error_stop, data_stop = self._stop_dnsmasq_service()
 			if error_stop:
-				print(f"[LliurexGuardManagerNatFreeClient]: Error stopping Dnsmasq. Details: {data_stop}")
+				msg_log=f"Error stopping Dnsmasq. Details: {data_stop}"
+				print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+				self._write_log(msg_log)
 				return {'status': False, 'msg': "Error stopping Dnsmasq", 'data': data_stop}
 		try:
 			subprocess.run(
@@ -479,10 +523,12 @@ class LliurexGuardManagerNatFreeClient:
 			error_msg = f"Error: Dnsmasq {action} failed"
 			details = f"Error {e.returncode}: {e.stderr.strip()}"
 			print(f"[LliurexGuardManagerNatFreeClient]: {error_msg}. Details: {details}")
+			self._write_log(f"{error_msg}. {details}")
 			return {'status': False, 'msg': error_msg, 'data': details}
 		except Exception as e:
-			error_msg = f"Error: Dnsmasq {action} failed"
-			print(f"[LliurexGuardManagerNatFreeClient]: {error_msg}. Details: {str(e)}")
+			error_msg = f"Error: Dnsmasq {action} failed. Details:{e}"
+			print(f"[LliurexGuardManagerNatFreeClient]: {error_msg}")
+			self._write_log(msg_log)
 			return {'status': False, 'msg': error_msg, 'data': str(e)}
 
 	#def manage_dnsmasq_service
@@ -534,3 +580,36 @@ class LliurexGuardManagerNatFreeClient:
 				subprocess.run(['systemctl', 'restart', 'systemd-resolved'], check=True)
 
 	#def _manage_resolvconf
+
+	def _remove_standalone_config(self):
+
+		if self.standalone_mode_file_path.exists():
+			try:
+				self.standalone_mode_file_path.unlink()
+			except OSError:
+				pass
+
+	#def _remove_standalone_config
+
+	def _safe_fallback_to_disable(self):
+
+		try:
+			lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
+			self.mode_file_path.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
+			self.local_guardmode="DisableMode"
+			self._manage_dnsmasq_service(False)
+		except Exception as e:
+			msg_log=f"Critial error during _safe_fallback_to_disable. Error:{e}"
+			self._write_log(msg_log)
+			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
+
+	#def _safe_fallback_to_disable
+
+	def _write_log(self,msg):
+	
+		syslog.openlog("LLIUREX-GUARD-NATFREE-CLIENT")
+		syslog.syslog(msg)	
+
+	#def _writeLog
+
+#class LliurexGuardManagerNatFreeClient

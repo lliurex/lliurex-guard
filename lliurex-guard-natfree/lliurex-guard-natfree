@@ -78,11 +78,10 @@ class Tunnel(QObject):
 
 		if pout:
 			flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
-			print(flavoursInstalled)
 			runApp=any(p in i for i in flavoursInstalled for p in normalizedFlavours)
 
 		if not runApp:
-			msg=_("The device is configured for use in classroom with a non standard network.\nThis configuration is not compatible with this version of LliureX-Guard")
+			msg=_("This version of LliureX-Guard can only be used on computers configured for use in classroom with a standard network")
 			cmd = [
             	"kdialog",
             	"--title", "LliureX-Guard",
