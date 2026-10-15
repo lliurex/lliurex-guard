@@ -323,7 +323,6 @@ class LliurexGuardManagerNatFreeClient:
 		except Exception as e:
 			msg_log=f"Check connection with adi Error: {e}"
 			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
-			self._write_log(msg_log)
 			return False
 
 	#def _check_connection_with_adi
