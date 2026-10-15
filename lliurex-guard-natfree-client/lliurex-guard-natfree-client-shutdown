@@ -4,12 +4,12 @@ import subprocess
 import n4d.client
 import syslog
 
-class LliurexGuardNatFreeClientDisable():
+class LliurexGuardNatFreeClientShutdown():
 
 	def __init__(self):
 
 		self.can_run()
-		self.disable_lliurex_guard_natfree()
+		self.shutdown_lliurex_guard_natfree()
 
 	#def __init
 
@@ -34,8 +34,8 @@ class LliurexGuardNatFreeClientDisable():
 
 	#def can_run
 
-	def disable_lliurex_guard_natfree(self):
-
+	def shutdown_lliurex_guard_natfree(self):
+	
 		master_key = n4d.client.Key.master_key()
 
 		if master_key.valid() :
@@ -46,7 +46,11 @@ class LliurexGuardNatFreeClientDisable():
 				if type(e) == n4d.client.ServerError:
 					sys.exit(0)
 			try:
+
 				ret_mode=c.LliurexGuardManagerNatFreeClient.read_guardmode_from_client()
+				syslog.openlog("LLIUREX-GUARD-NATFREE-CLIENT")
+				syslog.syslog(f"Disable LliureX-Guard-Natfree from systemd.Mode: {ret_mode}")	
+
 				if ret_mode['status'] and ret_mode['data'] != 'DisableMode':
 					result = c.LliurexGuardManagerNatFreeClient.change_guardmode("DisableMode")
 					syslog.openlog("LLIUREX-GUARD-NATFREE-CLIENT")
@@ -56,10 +60,10 @@ class LliurexGuardNatFreeClientDisable():
 				syslog.syslog(f"Disable LliureX-Guard-Natfree from systemd. Error:{e}")	
 				pass
 
-    #def disable_lliurex_guard_natfree
+    #def shutdown_lliurex_guard_natfree
 
-#class LliurexGuardNatFreeClientDisable
+#class LliurexGuardNatFreeClientShutdown
 
 if __name__=="__main__":
 
-	lgn=LliurexGuardNatFreeClientDisable()
+	lgn=LliurexGuardNatFreeClientShutdown()

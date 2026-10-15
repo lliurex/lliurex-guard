@@ -56,7 +56,7 @@ Description: Lliurx Guard plugin
 
 Package: n4d-lliurex-guard-natfree
 Architecture: all
-Depends: ${misc:Depends},${python3:Depends},n4d,dnsmasq,n4d-network
+Depends: ${misc:Depends},${python3:Depends},n4d
 Description: Lliurx Guard plugin
   Plugins supporting lliurex guard functionality
 

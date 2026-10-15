@@ -8,7 +8,7 @@ ApplicationWindow {
     property bool closing: false
     id:mainWindow
     visible: true
-    title: "LliureX-Guard"
+    title: "LliureX-Guard-Natfree"
     property int margin: 1
     width: mainLayout.implicitWidth + 2 * margin
     height: mainLayout.implicitHeight + 2 * margin

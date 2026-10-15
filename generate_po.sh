@@ -1,5 +1,5 @@
 #!/bin/bash
-
+xgettext --join-existing -L python ./lliurex-guard/lliurex-guard -o ./translations/lliurex-guard/lliurex-guard.pot
 xgettext --join-existing -kde -ki18nd:2 ./lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml -o ./translations/lliurex-guard/lliurex-guard.pot
 xgettext --join-existing -kde -ki18nd:2 ./lliurex-guard/python3-lliurexguard/rsrc/GuardLists.qml -o ./translations/lliurex-guard/lliurex-guard.pot
 xgettext --join-existing -kde -ki18nd:2 ./lliurex-guard/python3-lliurexguard/rsrc/GuardManager.qml -o ./translations/lliurex-guard/lliurex-guard.pot

@@ -2,7 +2,7 @@
 
 case "$1" in
 	configure)
-		    newVersion=$(dpkg-query --showformat='${Version}' --show lliurex-guard-natfree)
+	    newVersion=$(dpkg-query --showformat='${Version}' --show lliurex-guard-natfree)
 		tokenDir=/var/lib/lliurex-guard-natfree/version
 		echo "$newVersion" > "$tokenDir" || true
 

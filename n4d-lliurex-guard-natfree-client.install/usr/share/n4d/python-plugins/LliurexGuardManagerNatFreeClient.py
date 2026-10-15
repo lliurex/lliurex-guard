@@ -61,31 +61,33 @@ class LliurexGuardManagerNatFreeClient:
 
 	def _check_connection(self):
 
+		if not self._is_client_mode():
+			self._write_log("System is not configured for use in classroom with normalized network")
+			self._abort_execution()
+		
+		self._remove_standalone_config()
 		configure_guard=False
+		max_retries=10
+		time_to_check=1
+		time_count=0
+		count_retry=1
+		time.sleep(2)
 
-		if self._is_client_mode():
-			self._remove_standalone_config()
-			max_retries=10
-			time_to_check=1
-			time_count=0
-			count_retry=1
-			time.sleep(2)
-
-			while True:
-				if time_count>=time_to_check:
-					configure_guard=self._check_connection_with_adi()
-					if configure_guard:
-						break
-					else:
-						if count_retry<max_retries:
-							count_retry+=1
-							time_count=0
-						else:
-							break
+		while True:
+			if time_count>=time_to_check:
+				configure_guard=self._check_connection_with_adi()
+				if configure_guard:
+					break
 				else:
-					time_count+=1
+					if count_retry<max_retries:
+						count_retry+=1
+						time_count=0
+					else:
+						break
+			else:
+				time_count+=1
 				
-				time.sleep(1)
+			time.sleep(1)
 
 		if configure_guard:
 			if not self.first_init_path.exists():
@@ -93,12 +95,19 @@ class LliurexGuardManagerNatFreeClient:
 			self._startup()
 
 		else:
-			if not self.first_init_path.exists():
-				return
-			else:
-				self.change_guardmode("DisableMode")
-
+			self._write_log("No connection with server")
+			self._abort_execution()
+	
 	#def _check_connection
+
+	def _abort_execution(self):
+
+		if not self.first_init_path.exists():
+			return
+		else:
+			self.change_guardmode("DisableMode")
+
+	#def _abort_execution
 
 	def _startup(self):
 
@@ -321,8 +330,6 @@ class LliurexGuardManagerNatFreeClient:
 			test=client.LliurexGuardManagerNatFree.read_guardmode()
 			return True
 		except Exception as e:
-			msg_log=f"Check connection with adi Error: {e}"
-			print(f"[LliurexGuardManagerNatFreeClient]: {msg_log}")
 			return False
 
 	#def _check_connection_with_adi
@@ -538,13 +545,22 @@ class LliurexGuardManagerNatFreeClient:
 		data = ""
 
 		try:
-			result = subprocess.run(
-				['systemctl', 'stop', 'dnsmasq.service'],
-				stdout=subprocess.PIPE,
-				stderr=subprocess.PIPE,
-				text=True,
-				check=True
+			is_active=(
+				subprocess.run(["systemctl","is-active","dnsmasq"],
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE,
+					text=True,
+				).returncode
+				==0
 			)
+			if is_active:
+				result = subprocess.run(
+					['systemctl', 'stop', 'dnsmasq.service'],
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE,
+					text=True,
+					check=True
+				)
 		except subprocess.CalledProcessError as e:
 			error = True
 			data = f"Error {e.returncode}: {e.stderr.strip()}"

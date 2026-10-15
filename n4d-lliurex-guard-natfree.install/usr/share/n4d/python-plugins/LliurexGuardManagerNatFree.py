@@ -21,6 +21,7 @@ class LliurexGuardManagerNatFree:
 
 		self.core=n4dcore.Core.get_core()
 		self.conf_dir=Path("/etc/lliurex-guard-natfree")
+		self.standalone_mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard.conf")
 		self.blacklist_dir=self.conf_dir / "blacklist"
 		self.blacklist_disable_dir=self.conf_dir / "blacklist.d"
 		self.blacklist_redirection="169.254.254.254"
@@ -29,12 +30,15 @@ class LliurexGuardManagerNatFree:
 		self.whitelist_redirection="server=/"
 		self.list_tmpfile=[]
 		self.shared_folder=Path("/var/www/lliurex-guard-natfree")
+		self.resolvconf_path=Path("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
+		self.network_plugin_path=Path("/usr/share/n4d/python-plugins/NetworkManager")
 	
 		#def __init__
 
 	def startup(self,options):
 
 		if self._is_server():
+			self._remove_standalone_config()
 			if self._create_guardmode_conf_dir():
 				self._startup()
 
@@ -440,5 +444,68 @@ class LliurexGuardManagerNatFree:
 			return {'status': False, 'msg': 'Error formatting the list', 'data': str(e)}
 	
 	#def _format_guardmode_list
+
+	def _remove_standalone_config(self):
+
+		if not self.standalone_mode_file_path.exists():
+			return
+
+		if not self._disable_dnsmasq_service():
+			return
+
+		try:
+			self.standalone_mode_file_path.unlink()
+		except OSError:
+			pass
+
+	#def _remove_standalone_config
+
+	def _disable_dnsmasq_service(self):
+
+		try:
+			is_active=(
+				subprocess.run(["systemctl","is-active","dnsmasq"],
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE,
+					text=True,
+				).returncode
+				==0
+			)
+
+			if is_active:
+				subprocess.run(["systemctl","stop","dnsmasq"],check=True)
+
+			is_enable=(
+				subprocess.run(["systemctl","is-enabled","dnsmasq"],
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE,
+					text=True,
+				).returncode
+				==0
+			)
+
+			if is_enable:
+				subprocess.run(["systemctl","disable","dnsmasq"],check=True)
+
+			self._manage_resolvconf()
+			return True
+
+		except subprocess.CalledProcessError as e:
+			print(f"[LliurexGuardManagerNatFree]: Error disabling Dnsmasq. Details{e}")
+			return False
+
+	#def _disable_dnsmasq_service
+
+	def _manage_resolvconf(self):
+
+		if self.resolvconf_path.exists():
+			try:
+				self.resolvconf_path.unlink()
+			except OSError:
+				pass
+
+			subprocess.run(['systemctl', 'restart', 'systemd-resolved'], check=True)
+
+	#def _manage_resolvconf
 
 #class LliurexGuardManagerNatFree

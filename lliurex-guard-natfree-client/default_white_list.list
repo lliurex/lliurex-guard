@@ -1,3 +1,25 @@
 #NAME:DEFAULT WHITE LIST
 #DESCRIPTION:DEFAULT WHITE LIST URL
-server=/www.aules.edu.gva.es
+server=/portal.edu.gva.es
+server=/aules.edu.gva.es
+server=/lliurex.net
+server=/lliurex.gva.es
+server=/svnlliurexnet.gva.es
+server=/microsoft.com
+server=/microsoft.net
+server=/microsoftonline
+server=/windows.com
+server=/live.com
+server=/msn.com
+server=/cloud.microsoft
+server=/static.microsoft
+server=/usercontent.microsoft
+server=/outlook.com
+server=/hotmail.com
+server=/gfx.ms
+server=/office.net
+server=/office.com
+server=/office365.com
+server=/onedrive.com
+server=/1drv.ms
+server=/sharepoint.com
