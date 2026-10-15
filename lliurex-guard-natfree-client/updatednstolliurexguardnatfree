@@ -42,8 +42,8 @@ for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
 
 if len(dns) <= 0 :
     sys.exit(0)
-
-dns=dns[0].split()
+elif len(dns) == 1:
+    dns=dns[0].split()
 extradns = Path('/var/lib/dnsmasq/config/extra-dns')
 
 if not extradns.parent.exists():

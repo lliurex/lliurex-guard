@@ -60,7 +60,7 @@ class GuardManager(object):
 
 		super(GuardManager, self).__init__()
 
-		self.dbg=1
+		self.dbg=0
 		self.userValidated=True
 		self.limitLines=2500
 		self.limitFileSize=28000000
