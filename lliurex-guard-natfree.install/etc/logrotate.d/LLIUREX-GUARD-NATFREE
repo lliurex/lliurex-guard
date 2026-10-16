@@ -1,0 +1,9 @@
+/var/log/LLIUREX-GUARD-NATFREE.log{
+	monthly
+	missingok
+	rotate 7
+	compress
+	maxsize 10M
+	notifempty
+}
+
