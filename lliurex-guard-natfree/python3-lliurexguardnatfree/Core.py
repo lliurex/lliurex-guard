@@ -35,7 +35,6 @@ class Core:
 	
 	def init(self):
 
-	
 		self.guardManager=GuardManager.GuardManager()
 		self.listStack=ListStack.Bridge()
 		self.guardOptionsStack=GuardOptionsStack.Bridge()
@@ -43,11 +42,8 @@ class Core:
 		
 		self.mainStack.initBridge()			
 		
-		
 	#def init
-	
-	
-	
+		
 	def dprint(self,msg):
 		
 		if Core.DEBUG:

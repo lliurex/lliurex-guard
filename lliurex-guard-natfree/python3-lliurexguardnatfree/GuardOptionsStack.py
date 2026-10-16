@@ -151,8 +151,6 @@ class ApplyChanges(QThread):
 			"retHeaders":retHeaders
 		}
 
-		print(f"DATA:{dataToEmit}")
-
 		self.changesApplied.emit(dataToEmit)
 
 	#def run
@@ -674,14 +672,11 @@ class Bridge(QObject):
 		msgData=retChange.get("data")
 
 		if retChange.get("status"):
-			print(1)
 			retHeaders=ret.get("retHeaders")
 			
 			if retHeaders.get("status"):
-				print(2)
 				self.loadConfig()
 			else:
-				print(3)
 				msgCode=retHeaders.get("code")
 				msgType=retHeaders.get("type")
 				msgData=retHeaders.get("data")
@@ -692,13 +687,11 @@ class Bridge(QObject):
 			except:
 				pass
 		else:
-			print(4)
 			if retChange.get("code")==-10:
 				self.guardMode=self.guardManager.guardMode
 				self._updateListsModel(True)
 				self.manageGlobalOptions()
 		
-		print(f"CODE:{msgCode}")
 		self.showMainMessage={"show":True,"msgCode":msgCode,"type":msgType,"data":msgData}
 		self.core.mainStack.closeGui=True
 		self.core.mainStack.showPopUp={"show":False,"msgCode":""}		
