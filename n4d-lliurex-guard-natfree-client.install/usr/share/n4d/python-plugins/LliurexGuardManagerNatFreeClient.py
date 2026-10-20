@@ -31,7 +31,10 @@ class LliurexGuardManagerNatFreeClient:
 		self.first_init_path=self.guard_lib_dir / "first_init"
 		self.blacklist_dir=self.conf_dir / "blacklist"
 		self.dnsmasq_lib_dir=Path("/var/lib/dnsmasq/config")
-		self.dnsmasq_conf = Path('/etc/dnsmasq.conf')
+		#self.dnsmasq_conf = Path('/etc/dnsmasq.conf')
+		self.dnsmasq_override_service=Path("/etc/systemd/system/dnsmasq.service.d/")
+		self.dnsmasq_override_service_conf=self.dnsmasq_override_service / "lliurex-guard-natfree-override.conf"
+		self.standalone_dnsmasq_override_service_conf=self.dnsmasq_override_service / "lliurex-guard-override.conf"
 		self.set_bm_mode="conf-dir = /etc/lliurex-guard-natfree/blacklist"
 		self.blacklist_redirection="169.254.254.254"
 		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard-natfree/blacklist"
@@ -164,6 +167,7 @@ class LliurexGuardManagerNatFreeClient:
 		ret_list = False
 		enable_dnsmasq = False
 		restart_dnsmasq = False
+		base_lines=["listen-address=127.0.0.1","interface=lo","bind-interfaces","conf-dir=/var/lib/dnsmasq/config"]
 
 		ret_config=self._create_guardmode_conf_dir(mode_to_set)
 
@@ -186,10 +190,12 @@ class LliurexGuardManagerNatFreeClient:
 			enable_dnsmasq=True
 			restart_dnsmasq=True
 		else:
+			base_lines=["#listen-address = 127.0.0.1","#interface = lo","#bind-interfaces","conf-dir = /var/lib/dnsmasq/config"]
 			lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
 
 		try:
-			self.mode_file_path.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
+			base_lines.extend(lines)
+			self.mode_file_path.write_text("\n".join(str(l) for l in base_lines) + "\n", encoding="utf-8")
 		except OSError as file_error:
 			msg_log=f"Failed to write configuration file: {file_error}"
 			self._write_log(msg_log)
@@ -339,6 +345,7 @@ class LliurexGuardManagerNatFreeClient:
 		extra_dns_file = self.dnsmasq_lib_dir / "extra-dns"
 
 		try:
+			'''
 			if not self.dnsmasq_conf.exists():
 				self.dnsmasq_conf.touch(exist_ok=True)
 
@@ -352,6 +359,7 @@ class LliurexGuardManagerNatFreeClient:
 
 			if new_directives:
 				self.dnsmasq_conf.write_text("".join(new_directives),encoding="utf-8", mode="a")
+			'''
 
 			if not extra_dns_file.exists():
 				desktop_dns = self._get_desktop_dns()
@@ -414,8 +422,8 @@ class LliurexGuardManagerNatFreeClient:
 	def _first_init(self):
 
 		try:
-			self.guard_lib_dir.mkdir(parents=False, exist_ok=True)
-			self.dnsmasq_lib_dir.mkdir(parents=False, exist_ok=True)
+			self.guard_lib_dir.mkdir(parents=True, exist_ok=True)
+			self.dnsmasq_lib_dir.mkdir(parents=True, exist_ok=True)
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating directories: {e}")
 			return
@@ -479,7 +487,6 @@ class LliurexGuardManagerNatFreeClient:
 			for item in list_to_config:
 				tmp_url = f"{self.server_download_url}{item}"
 				tmp_path = default_path / item
-
 				with urllib.request.urlopen(tmp_url, context=ctx, timeout=10) as response:
 					with open(tmp_path, 'wb') as local_file:
 						local_file.write(response.read())
@@ -521,6 +528,7 @@ class LliurexGuardManagerNatFreeClient:
 				check=True
 			)
 
+			self._override_dnsmasq_service(enable_service)
 			self._manage_resolvconf(enable_service)
 			msg = f"Dnsmasq {action} successfully"
 			return {'status': True, 'msg': msg}
@@ -538,6 +546,23 @@ class LliurexGuardManagerNatFreeClient:
 			return {'status': False, 'msg': error_msg, 'data': str(e)}
 
 	#def manage_dnsmasq_service
+
+	def _override_dnsmasq_service(self,enable_service=True):
+
+		reload_daemon=False
+
+		if enable_service:
+			if not self.dnsmasq_override_service_conf.exists():
+				conf = '[Service]\nEnvironment="DNSMASQ_EXCEPT=lo"\nEnvironment="IGNORE_RESOLVCONF=yes"'
+				self.dnsmasq_override_service_conf.parent.mkdir(parents=True, exist_ok=True)
+				self.dnsmasq_override_service_conf.write_text(conf,encoding='utf-8')
+				reload_daemon=True
+		
+		if reload_daemon:
+			subprocess.run(['systemctl', 'daemon-reload'], check=True)
+
+
+	#def _override_dnsmasq_service
 
 	def _stop_dnsmasq_service(self):
 
@@ -603,13 +628,20 @@ class LliurexGuardManagerNatFreeClient:
 				self.standalone_mode_file_path.unlink()
 			except OSError:
 				pass
+		if self.standalone_dnsmasq_override_service_conf.exists():
+			try:
+				self.standalone_dnsmasq_override_service_conf.unlink()
+				subprocess.run(['systemctl', 'daemon-reload'])
+			except OSError:
+				pass
+
 
 	#def _remove_standalone_config
 
 	def _safe_fallback_to_disable(self):
 
 		try:
-			lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
+			lines = ["#listen-address = 127.0.0.1","#interface = lo","#bind-interfaces","conf-dir = /var/lib/dnsmasq/config",self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
 			self.mode_file_path.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
 			self.local_guardmode="DisableMode"
 			self._manage_dnsmasq_service(False)
