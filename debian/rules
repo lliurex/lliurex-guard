@@ -16,7 +16,7 @@
 export PYBUILD_NAME=lliurex-guard
 export PYBUILD_DESTDIR_python3=debian/output
 %:
-	dh $@ --with llxsrc,zero,i18n,python3 --buildsystem pybuild
+	dh $@ --with llxsrc,zero,i18n,python3,systemd --buildsystem pybuild
 
 # dh_make generated override targets
 # This is example for Cmake (See https://bugs.debian.org/641051 )
