@@ -1,0 +1,19 @@
+#!/bin/sh
+
+case "$1" in
+	configure)
+	    systemctl --system daemon-reload > dev/null || true
+	    RC=0
+	    deb-systemd-invoke status lliurex-guard-natfree-client.service > dev/null || RC=1
+
+	    if [ "$RC" = "1" ];then
+			deb-systemd-invoke start lliurex-guard-natfree-client.service > dev/null || true
+		fi
+
+		;;
+	*)
+		echo "Unknow action"
+		;;
+esac
+
+#DEBHELPER#
