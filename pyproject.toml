@@ -14,10 +14,12 @@ license = {text="GPL-3"}
 urls = {repository="https://github.com/lliurex/lliurex-guard"}
 
 [tool.setuptools]
-packages = ["lliurexguard"]
+packages = ["lliurexguard","lliurexguardnatfree"]
 
 [tool.setuptools.package-dir]
 lliurexguard = "lliurex-guard/python3-lliurexguard"
+lliurexguardnatfree = "lliurex-guard-natfree/python3-lliurexguardnatfree"
 
 [tool.setuptools.package-data]
 lliurexguard = ["rsrc/*"]
+lliurexguardnatfree=["rsrc/*"]

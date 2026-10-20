@@ -1,0 +1,121 @@
+#! /usr/bin/python3
+from PySide6.QtWidgets import QApplication
+from PySide6.QtQuick import QQuickView
+from PySide6.QtCore import QUrl, QObject, Slot, Signal,Property
+import os
+import subprocess
+import sys
+import shutil
+from pathlib import Path
+
+import gettext
+gettext.textdomain("lliurex-guard-natfree")
+_=gettext.gettext
+
+class Tunnel(QObject):
+	
+	def __init__(self):
+
+		QObject.__init__(self)
+		self.clearCache()
+		self.canRun()
+
+	#def __init
+
+	def clearCache(self):
+
+		clear=False
+		userHome=Path.home()
+		versionFile=userHome /".config/lliurex-guard-natfree.conf"
+		cachePath1=userHome / ".cache/lliurex-guard-natfree"
+		cachePath2=userHome / ".cache/lliurex-guard-natfree-gui"
+		installedVersion=self.getPackageVersion()
+
+		if not versionFile.exists():
+			versionFile.write_text(installedVersion)
+			clear=True
+
+		else:
+			fileVersion=versionFile.read_text().strip()
+
+			if fileVersion!=installedVersion:
+				versionFile.write_text(installedVersion)
+				clear=True
+		
+		if clear:
+			if cachePath1.exists():
+				shutil.rmtree(cachePath1)
+			if cachePath2.exists():
+				shutil.rmtree(cachePath2)
+
+	#def clearCache
+
+	def getPackageVersion(self):
+
+		packageVersionFile=Path("/var/lib/lliurex-guard-natfree/version")
+		pkgVersion=""
+
+		if packageVersionFile.exists():
+			pkgVersion=packageVersionFile.read_text().strip()
+
+		return pkgVersion
+
+	#def getPackageVersion
+
+	def canRun(self):
+
+		normalizedFlavours=["adi","pro"]
+		flavoursInstalled=[]
+		runApp=False
+		
+		cmd=["lliurex-version", "-v"]
+		try:
+			result=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+			pout = result.stdout
+
+		except Exception:
+			pout=""
+
+		if pout:
+			flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+			runApp=any(p in i for i in flavoursInstalled for p in normalizedFlavours)
+
+		if not runApp:
+			msg=_("This version of LliureX-Guard can only be used on computers configured for use in classroom with a standard network")
+			cmd = [
+            	"kdialog",
+            	"--title", "LliureX-Guard",
+            	"--icon", "lliurex-guard-natfree",
+            	"--sorry", msg
+        	]
+			try:
+				subprocess.run(cmd,check=True)
+			except Exception:
+				pass
+
+			sys.exit(1)
+	
+	#def canRun
+		
+	@Slot(str)
+	def onTicket(self, ticket):
+	
+		tk=ticket.replace(' ','##U+0020##')
+		cmd=["/usr/sbin/lliurex-guard-natfree-gui",tk]
+		subprocess.Popen(cmd,)
+		QApplication.quit()
+	
+	#def on_ticket
+	
+
+#class Tunnel
+
+app = QApplication([])
+app.setDesktopFileName("lliurex-guard-natfree")
+tunnel = Tunnel()
+view = QQuickView()
+view.rootContext().setContextProperty("tunnel", tunnel)
+url = QUrl("/usr/lib/python3.12/dist-packages/lliurexguardnatfree/rsrc/login.qml")
+view.setSource(url)
+view.show()
+sys.exit(app.exec())
