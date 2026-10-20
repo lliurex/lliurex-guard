@@ -1,0 +1,71 @@
+#! /usr/bin/python3
+import subprocess
+import n4d.client
+import netifaces
+import sys
+from pathlib import Path
+
+normalizedFlavours=["alu"]
+flavoursInstalled=[]
+runScript=False
+        
+cmd=["lliurex-version", "-v"]
+try:
+    result=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+    pout = result.stdout
+
+except Exception:
+    pout=""
+
+if pout:
+    flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+    runScript=any(p in i for i in flavoursInstalled for p in normalizedFlavours):
+
+if not runScript:
+    sys.exit(0)
+    
+try:
+    interface_by_default = netifaces.gateways()['default'][2][1]
+except:
+    interface_by_default = None
+
+if interface_by_default is None:
+    sys.exit(0)
+
+p = subprocess.Popen(['resolvectl','dns',interface_by_default],stdout=subprocess.PIPE)
+dns = []
+for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
+    aux_dns = x.split(':')[-1].strip()
+    if aux_dns.startswith('127'):
+        continue
+    dns.append(aux_dns)
+
+if len(dns) <= 0 :
+    sys.exit(0)
+elif len(dns) == 1:
+    dns=dns[0].split()
+extradns = Path('/var/lib/dnsmasq/config/extra-dns')
+
+if not extradns.parent.exists():
+    extradns.parent.mkdir(parents=True)
+
+with extradns.open('w') as fd:
+    for x in dns:
+        fd.write("server=" + x + "\n")
+    fd.write('\n')
+
+master_key = n4d.client.Key.master_key() 
+if master_key.valid() :
+    c = n4d.client.Client( key=master_key)
+    try:
+        c.get_methods()
+    except Exception as e:
+        if type(e) == n4d.client.ServerError:
+            sys.exit(0)
+
+    result = c.LliurexGuardManagerNatFreeClient.read_guardmode_from_client()
+    if result['status'] and result['data'] == 'WhiteMode':
+        result = c.LliurexGuardManagerNatFreeClient.update_whitelist_dns()
+        if not result['status']:
+            c.LliurexGuardManagerNatFreeClient.change_guardmode('DisableMode')
+o = subprocess.Popen(['systemctl','restart','dnsmasq']).communicate()

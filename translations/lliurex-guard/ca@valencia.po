@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-10 08:54+0200\n"
-"PO-Revision-Date: 2024-05-30 11:18+0200\n"
+"POT-Creation-Date: 2026-10-20 15:14+0200\n"
+"PO-Revision-Date: 2026-10-20 15:15+0200\n"
 "Last-Translator: Empar Montoro Martín <montoro_mde@gva.es>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -19,6 +19,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0.1\n"
+
+#: lliurex-guard/lliurex-guard:93
+msgid ""
+"This version of LliureX-Guard can only be used on computers configured as "
+"desktop"
+msgstr ""
+"Esta versió de LliureX-Guard només pot usar-se en equips configurats com "
+"escriptori"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/CustomPopUp.qml:53
 msgid "Changing Lliurex Guard mode. Wait a moment..."
@@ -378,7 +386,7 @@ msgid "Remove list"
 msgstr "Esborra la llista"
 
 #: lliurex-guard/python3-lliurexguard/rsrc/ListContent.qml:198
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:131
 #: lliurex-guard/python3-lliurexguard/rsrc/ListForm.qml:11
 msgid "Edit list"
 msgstr "Edita la llista"
@@ -387,39 +395,39 @@ msgstr "Edita la llista"
 msgid "Do you want delete all urls from the list?"
 msgstr "Voleu eliminar totes les url de la llista?"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:88
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:82
 msgid "entries"
 msgstr "entrades"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:117
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:111
 msgid "Click to manage this list"
 msgstr "Feu clic per a gestionar la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:130
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:124
 msgid "Disable list"
 msgstr "Desactiva la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:130
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:124
 msgid "Enable list"
 msgstr "Activa la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
 msgid "Restore the list"
 msgstr "Restaura la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:143
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateItem.qml:137
 msgid "Delete the list"
 msgstr "Elimina la llista"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:69
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:63
 msgid "Click to manage this url"
 msgstr "Feu clic per a gestionar l'url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:86
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:80
 msgid "Edit url"
 msgstr "Edita l'url"
 
-#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:96
+#: lliurex-guard/python3-lliurexguard/rsrc/ListDelegateUrlItem.qml:90
 msgid "Delete the url"
 msgstr "Elimina l'url"
 
