@@ -190,7 +190,6 @@ class LliurexGuardManagerNatFreeClient:
 			enable_dnsmasq=True
 			restart_dnsmasq=True
 		else:
-			base_lines=["#listen-address = 127.0.0.1","#interface = lo","#bind-interfaces","conf-dir = /var/lib/dnsmasq/config"]
 			lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
 
 		try:
