@@ -4,6 +4,7 @@ case "$1" in
 	configure)
 	    systemctl --system daemon-reload > dev/null || true
 	    RC=0
+   	    deb-systemd-helper configure lliurex-guard-natfree-client.service > dev/null || true
 	    deb-systemd-invoke status lliurex-guard-natfree-client.service > dev/null || RC=1
 
 	    if [ "$RC" = "1" ];then
