@@ -65,7 +65,7 @@ class Bridge(QObject):
 			self.closeGui=True
 			msg="Error caused by sys.arg. Number of arguments received: %s"%len(sys.argv)
 			Bridge.guardManager._debug("LOADING",msg)
-			Bridge.guardManager.write_log(msg)
+			Bridge.guardManager.writeLog(msg)
 			self.showLoadErrorMessage=[True,Bridge.guardManager,LOAD_LLIUREXGUARD_ERROR]
 	
 	#def initBridge

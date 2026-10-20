@@ -1,0 +1,69 @@
+#! /usr/bin/python3
+import os
+import subprocess
+import n4d.client
+import syslog
+
+class LliurexGuardNatFreeClientShutdown():
+
+	def __init__(self):
+
+		self.can_run()
+		self.shutdown_lliurex_guard_natfree()
+
+	#def __init
+
+	def can_run(self):
+		
+		normalized_flavours=("alu")
+		cmd=["lliurex-version", "-v"]
+		run_script=False
+
+		try:
+			result=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+			pout = result.stdout
+		except Exception as e:
+			pout=""
+
+		if pout:
+			flavours_Installed = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+			run_script=any(p in i for i in flavours_Installed for p in normalized_flavours)
+
+		if not run_script:
+			sys.exit(0)
+
+	#def can_run
+
+	def shutdown_lliurex_guard_natfree(self):
+	
+		master_key = n4d.client.Key.master_key()
+
+		if master_key.valid() :
+			c = n4d.client.Client( key=master_key)
+			try:
+				c.get_methods()
+			except Exception as e:
+				if type(e) == n4d.client.ServerError:
+					sys.exit(0)
+			try:
+
+				ret_mode=c.LliurexGuardManagerNatFreeClient.read_guardmode_from_client()
+				syslog.openlog("LLIUREX-GUARD-NATFREE-CLIENT")
+				syslog.syslog(f"Disable LliureX-Guard-Natfree from systemd.Mode: {ret_mode}")	
+
+				if ret_mode['status'] and ret_mode['data'] != 'DisableMode':
+					result = c.LliurexGuardManagerNatFreeClient.change_guardmode("DisableMode")
+					syslog.openlog("LLIUREX-GUARD-NATFREE-CLIENT")
+					syslog.syslog(f"Disable LliureX-Guard-Natfree from systemd:{result}")	
+			except Exception as e:
+				syslog.openlog("LLIUREX-GUARD-NATFREE-CLIENT")
+				syslog.syslog(f"Disable LliureX-Guard-Natfree from systemd. Error:{e}")	
+				pass
+
+    #def shutdown_lliurex_guard_natfree
+
+#class LliurexGuardNatFreeClientShutdown
+
+if __name__=="__main__":
+
+	lgn=LliurexGuardNatFreeClientShutdown()
