@@ -17,7 +17,7 @@ set -e
 
 
 case "$1" in
-    remove|upgrade|deconfigure)
+    remove|deconfigure)
         configFile=/etc/dnsmasq.d/lliurex-guard-natfree.conf
         systemctl stop lliurex-guard-natfree-client || true
         systemctl disable lliurex-guard-natfree-client || true

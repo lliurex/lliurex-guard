@@ -17,7 +17,7 @@ set -e
 
 
 case "$1" in
-    remove|upgrade|deconfigure)
+    remove|deconfigure)
         zero-center set-non-configured lliurex-guard || true
         tokenDir=/var/lib/lliurex-guard-natfree
         if [ -d "$tokenDir" ];then
