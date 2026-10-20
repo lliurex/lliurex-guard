@@ -66,7 +66,7 @@ Rectangle{
 
             Menu{
                 id:editMenu
-                y: -newBtn.height*1.7
+                y: -height - 5
                 x: newBtn.width/2
 
                 MenuItem{
@@ -94,7 +94,7 @@ Rectangle{
             
             Menu{
                 id:actionsMenu
-                y: -actionsBtn.height*3.2
+                y: -height - 5
                 x: actionsBtn.width/2
 
                 MenuItem{
@@ -162,7 +162,7 @@ Rectangle{
 
             Menu{
                id:modeMenu
-               y: -modeBtn.height*1.7
+               y: -height - 5
                x: modeBtn.width/2
 
                MenuItem{
