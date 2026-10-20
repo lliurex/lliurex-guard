@@ -21,12 +21,11 @@ ItemDelegate{
     onHoveredChanged:{
         if (listUrlItem.ListView.view){
             if (hovered && !optionsUrlMenu.opened){
-                listUrlItem.ListView.currentIndex=index
+                listUrlItem.ListView.view.currentIndex=index
             }
         }else if (!hovered && !optionsUrlMenu.opened && listUrlItem.ListView.view.currentIndex===index){
             listUrlItem.ListView.view.currentIndex=-1
         }
-
     }
 
     background: Rectangle {

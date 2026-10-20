@@ -7,8 +7,9 @@ import time
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-class GatherInfo(QThread):
+class GatherInfoWorker(QObject):
 
+	finished=Signal()
 	infoGathered=Signal(dict)
 
 	def __init__(self,manager):
@@ -18,7 +19,7 @@ class GatherInfo(QThread):
 
 	#def _init__
 
-	def run(self,*args):
+	def process(self,*args):
 		
 		time.sleep(0.2)
 		ret=self.manager.readGuardmode()
@@ -35,10 +36,11 @@ class GatherInfo(QThread):
 		}
 
 		self.infoGathered.emit(dataToEmit)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class GatherInfo
+#class GatherInfoWorker
 
 class Bridge(QObject):
 
@@ -147,10 +149,15 @@ class Bridge(QObject):
 
 		self.currentStack=0
 		self.closeGui=False
-		self.gatherInfoT=GatherInfo(self.guardManager)
-		self.gatherInfoT.start()
-		self.gatherInfoT.infoGathered.connect(self._loadConfig)
-		self.gatherInfoT.finished.connect(self.gatherInfoT.deleteLater)
+		self._gatherInfoThread=QThread()
+		self._workerGather=GatherInfoWorker(self.guardManager)
+		self._workerGather.moveToThread(self._gatherInfoThread)
+		self._workerGather.infoGathered.connect(self._loadConfig)
+		self._gatherInfoThread.started.connect(self._workerGather.process)
+		self._workerGather.finished.connect(self._gatherInfoThread.quit)
+		self._workerGather.finished.connect(self._workerGather.deleteLater)
+		self._gatherInfoThread.finished.connect(self._gatherInfoThread.deleteLater)
+		self._gatherInfoThread.start()
 
 	#def initBridge
 	

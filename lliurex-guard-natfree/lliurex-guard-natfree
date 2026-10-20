@@ -28,7 +28,7 @@ class Tunnel(QObject):
 		userHome=Path.home()
 		versionFile=userHome /".config/lliurex-guard-natfree.conf"
 		cachePath1=userHome / ".cache/lliurex-guard-natfree"
-		cachePath2=userHome / ".cache/lliurex-guard-natfree-gui"
+		cachePath2=userHome / ".cache/lliurex-qml-apps/lliurex-guard-natfree"
 		installedVersion=self.getPackageVersion()
 
 		if not versionFile.exists():

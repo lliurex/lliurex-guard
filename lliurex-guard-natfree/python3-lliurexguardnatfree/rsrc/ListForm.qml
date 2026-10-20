@@ -96,7 +96,7 @@ Rectangle{
                 id:openFileBtn
                 visible:!listStackBridge.showUrlsList
                 display:AbstractButton.TextBesideIcon
-                icon.name:"dialog-edit.svg"
+                icon.name:"dialog-edit"
                 text:i18nd("lliurex-guard-natfree","Clic to see/edit the list")
                 Layout.alignment:Qt.AlignLeft
                 enabled:true
@@ -128,7 +128,7 @@ Rectangle{
                 id:applyBtn
                 visible:true
                 display:AbstractButton.TextBesideIcon
-                icon.name:"document-save.svg"
+                icon.name:"document-save"
                 text:i18nd("lliurex-guard-natfree","Save")
                 enabled:listStackBridge.arePendingChangesInList
                 onClicked:{
@@ -141,7 +141,7 @@ Rectangle{
                 id:cancelBtn
                 visible:true
                 display:AbstractButton.TextBesideIcon
-                icon.name:"dialog-cancel.svg"
+                icon.name:"dialog-cancel"
                 text:i18nd("lliurex-guard-natfree","Cancel")
                 enabled:listStackBridge.arePendingChangesInList
                 onClicked:{

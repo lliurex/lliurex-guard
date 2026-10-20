@@ -351,7 +351,7 @@ class LliurexGuardManagerNatFreeClient:
 				new_directives.append("conf-dir=/var/lib/dnsmasq/config\n")
 
 			if new_directives:
-				self.dnsmasq_conf.write_text("".join(new_directives),encoding="utf-8", mode="a")
+				self.dnsmasq_conf.write_text("".join(new_directives),encoding="utf-8")
 
 			if not extra_dns_file.exists():
 				desktop_dns = self._get_desktop_dns()
@@ -414,8 +414,8 @@ class LliurexGuardManagerNatFreeClient:
 	def _first_init(self):
 
 		try:
-			self.guard_lib_dir.mkdir(parents=False, exist_ok=True)
-			self.dnsmasq_lib_dir.mkdir(parents=False, exist_ok=True)
+			self.guard_lib_dir.mkdir(parents=True, exist_ok=True)
+			self.dnsmasq_lib_dir.mkdir(parents=True, exist_ok=True)
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating directories: {e}")
 			return
@@ -479,7 +479,6 @@ class LliurexGuardManagerNatFreeClient:
 			for item in list_to_config:
 				tmp_url = f"{self.server_download_url}{item}"
 				tmp_path = default_path / item
-
 				with urllib.request.urlopen(tmp_url, context=ctx, timeout=10) as response:
 					with open(tmp_path, 'wb') as local_file:
 						local_file.write(response.read())

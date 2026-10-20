@@ -53,9 +53,8 @@ Rectangle{
             id:newBtn
             visible:true
             display:AbstractButton.TextBesideIcon
-            icon.name:"list-add.svg"
+            icon.name:"list-add"
             text:i18nd("lliurex-guard-natfree","New List")
-            Layout.preferredHeight:40
             onClicked:editMenu.open()
             enabled:{
                 if (guardOptionsStackBridge.guardMode!="DisableMode"){
@@ -71,13 +70,13 @@ Rectangle{
                 x: newBtn.width/2
 
                 MenuItem{
-                    icon.name:"document-edit.svg"
+                    icon.name:"document-edit"
                     text:i18nd("lliurex-guard-natfree","Add custom list")
                     onClicked:listStackBridge.addNewList("")
                 }
 
                 MenuItem{
-                    icon.name:"document-import.svg"
+                    icon.name:"document-import"
                     text:i18nd("lliurex-guard-natfree","Add custom list from file")
                     onClicked:loadFileDialog.open()
                 }
@@ -88,9 +87,8 @@ Rectangle{
             id:actionsBtn
             visible:true
             display:AbstractButton.TextBesideIcon
-            icon.name:"configure.svg"
+            icon.name:"configure"
             text:i18nd("lliurex-guard-natfree","Global Options")
-            Layout.preferredHeight:40
             enabled:guardOptionsStackBridge.enableGlobalOptions
             onClicked:actionsMenu.open()
             
@@ -100,27 +98,27 @@ Rectangle{
                 x: actionsBtn.width/2
 
                 MenuItem{
-                    icon.name:"security-high.svg"
+                    icon.name:"security-high"
                     text:i18nd("lliurex-guard-natfree","Enable all list")
                     enabled:!guardOptionsStackBridge.enableListsStatusOptions.allActivated
                     onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":true,"listId":""})
                 }
 
                 MenuItem{
-                    icon.name:"lliurex-guard-natfree-disable-mode.svg"
+                    icon.name:"lliurex-guard-natfree-disable-mode"
                     text:i18nd("lliurex-guard-natfree","Disable all lists")
                     enabled:!guardOptionsStackBridge.enableListsStatusOptions.allDeactivated
                     onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":false,"listId":""})
 
                 }
                 MenuItem{
-                    icon.name:"delete.svg"
+                    icon.name:"delete"
                     text:i18nd("lliurex-guard-natfree","Delete all lists")
                     enabled:guardOptionsStackBridge.enableRemoveListsOption
                     onClicked:guardOptionsStackBridge.removeLists({"allLists":true,"listId":""})
                 }
                 MenuItem{
-                    icon.name:"restoration.svg"
+                    icon.name:"restoration"
                     text:i18nd("lliurex-guard-natfree","Restore all lists")
                     enabled:guardOptionsStackBridge.enableRestoreListsOption
                     onClicked:guardOptionsStackBridge.restoreLists({"allLists":true,"listId":""})
@@ -135,13 +133,13 @@ Rectangle{
             icon.name:{
                 switch(guardOptionsStackBridge.guardMode){
                     case "BlackMode":
-                        "security-high.svg"
+                        "security-high"
                         break
                     case "WhiteMode":
-                        "lliurex-guard-natfree-white-mode.svg"
+                        "lliurex-guard-natfree-white-mode"
                         break
                     case "DisableMode":
-                        "lliurex-guard-natfree-disable-mode.svg"
+                        "lliurex-guard-natfree-disable-mode"
                         break
                 }
             }
@@ -159,7 +157,6 @@ Rectangle{
                 }
             }
             enabled:!guardOptionsStackBridge.arePendingChanges
-            Layout.preferredHeight:40
             Layout.rightMargin:rectLayout.width-(actionsBtn.width+modeBtn.width+newBtn.width+applyBtn.width+40)
             onClicked:modeMenu.open()
 
@@ -169,7 +166,7 @@ Rectangle{
                x: modeBtn.width/2
 
                MenuItem{
-                   icon.name:"security-high.svg"
+                   icon.name:"security-high"
                    text:i18nd("lliurex-guard-natfree","Activate BackList mode")
                    visible:{
                         if (guardOptionsStackBridge.guardMode=="BlackMode"){
@@ -182,7 +179,7 @@ Rectangle{
                }
 
                MenuItem{
-                    icon.name:"lliurex-guard-natfree-white-mode.svg"
+                    icon.name:"lliurex-guard-natfree-white-mode"
                     text:i18nd("lliurex-guard-natfree","Activate WhiteList mode")
                     visible:{
                         if (guardOptionsStackBridge.guardMode=="WhiteMode"){
@@ -195,7 +192,7 @@ Rectangle{
                }
 
                MenuItem{
-                    icon.name:"lliurex-guard-natfree-disable-mode.svg"
+                    icon.name:"lliurex-guard-natfree-disable-mode"
                     text:i18nd("lliurex-guard-natfree","Disable LliureX-Guard")
                     visible:{
                         if (guardOptionsStackBridge.guardMode=="DisableMode"){
@@ -215,9 +212,8 @@ Rectangle{
             visible:true
             enabled:guardOptionsStackBridge.arePendingChanges
             display:AbstractButton.TextBesideIcon
-            icon.name:"dialog-ok.svg"
+            icon.name:"dialog-ok"
             text:i18nd("lliurex-guard-natfree","Apply")
-            Layout.preferredHeight:40
             onClicked:guardOptionsStackBridge.applyChanges()
         }
         

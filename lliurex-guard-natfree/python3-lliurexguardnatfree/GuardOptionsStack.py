@@ -16,8 +16,9 @@ WAITING_REMOVE_LISTS_CODE=19
 WAITING_RESTORE_LIST_CODE=20
 WAITING_APPLY_CHANGES_CODE=17
 
-class ChangeListStatus(QThread):
+class ChangeListStatusWorker(QObject):
 
+	finished=Signal()
 	listStatusChanged=Signal()
 
 	def __init__(self,manager,allLists,active,listToEdit):
@@ -30,19 +31,21 @@ class ChangeListStatus(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 		
 		time.sleep(0.5)
 		ret=self.manager.changeListsStatus(self.allLists,self.active,self.listToEdit)
 
 		self.listStatusChanged.emit()
+		self.finished.emit()
 	
-	#def run
+	#def process
 
-#class ChangeListsStatus
+#class ChangeListsStatusWorker
 
-class RemoveLists(QThread):
+class RemoveListsWorker(QObject):
 
+	finished=Signal()
 	listRemoved=Signal()
 	
 	def __init__(self,manager,allLists,listToRemove):
@@ -54,18 +57,20 @@ class RemoveLists(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 		
 		time.sleep(0.5)
 		ret=self.manager.removeLists(self.allLists,self.listToRemove)
 		self.listRemoved.emit()
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class RemoveLists
+#class RemoveListsWorker
 
-class RestoreList(QThread):
+class RestoreListWorker(QObject):
 
+	finished=Signal()
 	listRestored=Signal()
 
 	def __init__(self,manager,allLists,listToRestore):
@@ -77,18 +82,20 @@ class RestoreList(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		time.sleep(0.5)
 		ret=self.manager.restoreList(self.allLists,self.listToRestore)
 		self.listRestored.emit()
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class RestoreLists
+#class RestoreListsWorker
 
-class ChangeMode(QThread):
+class ChangeModeWorker(QObject):
 
+	finished=Signal()
 	modeChanged=Signal(dict)
 
 	def __init__(self,manager,modeToChange):
@@ -99,7 +106,7 @@ class ChangeMode(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		retMode={"status":False,"code":"","data":""}
 		retHeaders={"status":False,"code":"","data":""}
@@ -119,13 +126,15 @@ class ChangeMode(QThread):
 		}
 
 		self.modeChanged.emit(dataToEmit)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class ChangeMode
+#class ChangeModeWorker
 
-class ApplyChanges(QThread):
+class ApplyChangesWorker(QObject):
 
+	finished=Signal()
 	changesApplied=Signal(dict)
 
 	def __init__(self,manager):
@@ -135,7 +144,7 @@ class ApplyChanges(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		retHeaders={"status":True,"code":"","data":""}
 		retChange=self.manager.applyChanges()
@@ -152,10 +161,11 @@ class ApplyChanges(QThread):
 		}
 
 		self.changesApplied.emit(dataToEmit)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class ApplyChanges
+#class ApplyChangesWorker
 
 class Bridge(QObject):
 
@@ -453,11 +463,16 @@ class Bridge(QObject):
 			listToEdit=data.get("listId")
 
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_APPLY_LISTS_CHANGES_CODE}
-		self.changeStatusT=ChangeListStatus(self.guardManager,self.changeAllLists,active,listToEdit)
-		self.changeStatusT.start()
-		self.changeStatusT.listStatusChanged.connect(self._changeStatusRet)
-		self.changeStatusT.finished.connect(self.changeStatusT.deleteLater)		
-
+		self._changesStatusThread=QThread()
+		self._workerStatus=ChangeListStatusWorker(self.guardManager,self.changeAllLists,active,listToEdit)
+		self._workerStatus.moveToThread(self._changesStatusThread)
+		self._workerStatus.listStatusChanged.connect(self._changeStatusRet)
+		self._changesStatusThread.started.connect(self._workerStatus.process)
+		self._workerStatus.finished.connect(self._changesStatusThread.quit)
+		self._workerStatus.finished.connect(self._workerStatus.deleteLater)
+		self._changesStatusThread.finished.connect(self._changesStatusThread.deleteLater)
+		self._changesStatusThread.start()
+	
 	#def changeListStatus
 
 	@Slot()
@@ -497,10 +512,15 @@ class Bridge(QObject):
 		if response=="Apply":
 			self.core.mainStack.closeGui=False
 			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_REMOVE_LISTS_CODE}
-			self.removeListsT=RemoveLists(self.guardManager,self.removeAllLists,self.listToRemove)
-			self.removeListsT.start()
-			self.removeListsT.listRemoved.connect(self._removeListsRet)
-			self.removeListsT.finished.connect(self.removeListsT.deleteLater)	
+			self._removeListThread=QThread()
+			self._workerRemove=RemoveListsWorker(self.guardManager,self.removeAllLists,self.listToRemove)
+			self._workerRemove.moveToThread(self._removeListThread)
+			self._workerRemove.listRemoved.connect(self._removeListsRet)
+			self._removeListThread.started.connect(self._workerRemove.process)
+			self._workerRemove.finished.connect(self._removeListThread.quit)
+			self._workerRemove.finished.connect(self._workerRemove.deleteLater)
+			self._removeListThread.finished.connect(self._removeListThread.deleteLater)
+			self._removeListThread.start()
 
 	#def manageRemoveListsDialog
 
@@ -539,10 +559,15 @@ class Bridge(QObject):
 		if response=="Apply":
 			self.core.mainStack.closeGui=False
 			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_RESTORE_LIST_CODE}
-			self.restoreListT=RestoreList(self.guardManager,self.restoreAllLists,self.listToRestore)
-			self.restoreListT.start()
-			self.restoreListT.listRestored.connect(self._restoreListRet)
-			self.restoreListT.finished.connect(self.restoreListT.deleteLater)
+			self._restoreListThread=QThread()
+			self._workerRestore=RestoreListWorker(self.guardManager,self.restoreAllLists,self.listToRestore)
+			self._workerRestore.moveToThread(self._restoreListThread)
+			self._workerRestore.listRestored.connect(self._restoreListRet)
+			self._restoreListThread.started.connect(self._workerRestore.process)
+			self._workerRestore.finished.connect(self._restoreListThread.quit)
+			self._workerRestore.finished.connect(self._workerRestore.deleteLater)
+			self._restoreListThread.finished.connect(self._restoreListThread.deleteLater)
+			self._restoreListThread.start()
 	
 	#def manageRestoreListsDialog
 
@@ -584,11 +609,16 @@ class Bridge(QObject):
 		if response=="Accept":
 			self.core.mainStack.closeGui=False
 			self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_CHANGE_GUARDMODE_CODE}
-			self.changeModeT=ChangeMode(self.guardManager,self.modeToChange)
-			self.changeModeT.start()
-			self.changeModeT.modeChanged.connect(self._changeModeRet)
-			self.changeModeT.finished.connect(self.changeModeT.deleteLater)
-
+			self._changeModeThread=QThread()
+			self._workerChange=ChangeModeWorker(self.guardManager,self.modeToChange)
+			self._workerChange.moveToThread(self._changeModeThread)
+			self._workerChange.modeChanged.connect(self._changeModeRet)
+			self._changeModeThread.started.connect(self._workerChange.process)
+			self._workerChange.finished.connect(self._changeModeThread.quit)
+			self._workerChange.finished.connect(self._workerChange.deleteLater)
+			self._changeModeThread.finished.connect(self._changeModeThread.deleteLater)
+			self._changeModeThread.start()
+	
 	#def manageChangeModeDialog
 
 	@Slot(dict)
@@ -656,11 +686,16 @@ class Bridge(QObject):
 		self.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.core.mainStack.closeGui=False
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_APPLY_CHANGES_CODE}
-		self.applyChangesT=ApplyChanges(self.guardManager)
-		self.applyChangesT.start()
-		self.applyChangesT.changesApplied.connect(self._applyChangesRet)
-		self.applyChangesT.finished.connect(self.applyChangesT.deleteLater)
-
+		self._appplyChangedThread=QThread()
+		self._workerApply=ApplyChangesWorker(self.guardManager)
+		self._workerApply.moveToThread(self._appplyChangedThread)
+		self._workerApply.changesApplied.connect(self._applyChangesRet)
+		self._appplyChangedThread.started.connect(self._workerApply.process)
+		self._workerApply.finished.connect(self._appplyChangedThread.quit)
+		self._workerApply.finished.connect(self._workerApply.deleteLater)
+		self._appplyChangedThread.finished.connect(self._appplyChangedThread.deleteLater)
+		self._appplyChangedThread.start()
+	
 	#def applyChanges
 
 	@Slot(dict)

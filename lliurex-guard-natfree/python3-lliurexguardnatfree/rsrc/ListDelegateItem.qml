@@ -27,12 +27,11 @@ ItemDelegate{
     onHoveredChanged:{
         if (listFilterItem.ListView.view){
             if (hovered && !optionsMenu.opened){
-                listFilterItem.ListView.currentIndex=index
+                listFilterItem.ListView.view.currentIndex=index
             }
         }else if (!hovered && !optionsMenu.opened && listFilterItem.ListView.view.currentIndex===index){
             listFilterItem.ListView.view.currentIndex=-1
         }
-
     }
 
     background: Rectangle {
@@ -150,7 +149,7 @@ ItemDelegate{
                 x:-(optionsMenu.width-manageListBtn.width/2)
 
                 MenuItem{
-                    icon.name:listActivated?"lliurex-guard-disable-mode":"security-high"
+                    icon.name:listActivated?"lliurex-guard-natfree-disable-mode":"security-high"
                     text:listActivated?i18nd("lliurex-guard-natfree","Disable list"):i18nd("lliurex-guard-natfree","Enable list")
                     enabled:listRemove?false:true
                     onClicked:guardOptionsStackBridge.changeListStatus({"allLists":false,"active":!listActivated,"listId":listOrder})

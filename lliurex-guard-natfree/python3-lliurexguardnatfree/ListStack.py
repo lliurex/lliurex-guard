@@ -21,8 +21,9 @@ INCORRECT_ENTRIES_CODE=-37
 INCORRECT_URL_CODE=-38
 
 
-class AddList(QThread):
+class AddListWorker(QObject):
 
+	finished=Signal()
 	listAdded=Signal(dict)
 
 	def __init__(self,manager,fileToLoad):
@@ -33,7 +34,7 @@ class AddList(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		time.sleep(0.5)
 		retFile={'status':True,'data':{},'errorInfo':""}
@@ -42,13 +43,15 @@ class AddList(QThread):
 			retFile=self.manager.loadFile(self.fileToLoad)
 		
 		self.listAdded.emit(retFile)
+		self.finished.emit()
 	
-	#def run
+	#def process
 
-#class AddList
+#class AddListWorker
 
-class LoadList(QThread):
+class LoadListWorker(QObject):
 
+	finished=Signal()
 	listLoaded=Signal(dict)
 
 	def __init__(self,manager,listToLoad):
@@ -59,20 +62,23 @@ class LoadList(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		time.sleep(0.5)
 		ret=self.manager.initValues()
 		retLoad=self.manager.loadListConfig(self.listToLoad)
 		self.listLoaded.emit(retLoad)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class LoadList
+#class LoadListWorker
 
-class OpenListFile(QThread):
+class OpenListFileWorker(QThread):
 
+	finished=Signal()
 	fileClosed=Signal()
+
 	def __init__(self,manager,fileToLoad):
 
 		super().__init__()
@@ -81,7 +87,7 @@ class OpenListFile(QThread):
 
 	#def __init__
 
-	def run(self,):
+	def process(self,):
 
 		if self.fileToLoad.exists():
 			process=QProcess()
@@ -89,13 +95,15 @@ class OpenListFile(QThread):
 			process.waitForFinished(-1)
 
 		self.fileClosed.emit()
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class OpenListFile
+#class OpenListFileWorker
 
-class CheckListChanges(QThread):
+class CheckListWorker(QObject):
 
+	finished=Signal()
 	changesListChecked=Signal(dict)
 
 	def __init__(self,manager,dataToCheck,edit,fileToCheck):
@@ -108,17 +116,20 @@ class CheckListChanges(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	@Slot()
+	def process(self,*args):
 
 		ret=self.manager.checkData(self.dataToCheck,self.edit,self.fileToCheck)
 		self.changesListChecked.emit(ret)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class CheckListChanges
+#class CheckListWorker
 
-class SaveChanges(QThread):
+class SaveChangesWorker(QObject):
 
+	finished=Signal()
 	changesSaved=Signal(dict)
 
 	def __init__(self,manager,dataToSave,edit,fileToSave):
@@ -131,15 +142,15 @@ class SaveChanges(QThread):
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		ret=self.manager.saveConf(self.dataToSave,self.edit,self.fileToSave)
-
 		self.changesSaved.emit(ret)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class SaveChanges
+#class SaveChangesWorker
 
 class Bridge(QObject):
 
@@ -375,10 +386,16 @@ class Bridge(QObject):
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_LOADING_LIST_CODE}
 		self.core.guardOptionsStack.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.edit=False
-		self.newListT=AddList(self.guardManager,fileToLoad)
-		self.newListT.start()
-		self.newListT.listAdded.connect(self._newListRet)
-		self.newListT.finished.connect(self.newListT.deleteLater)
+		self._newListThread=QThread()
+		self._workerNew=AddListWorker(self.guardManager,fileToLoad)
+		self._workerNew.moveToThread(self._newListThread)
+		self._newListThread.started.connect(self._workerNew.process)
+		self._workerNew.listAdded.connect(self._newListRet)
+		self._workerNew.finished.connect(self._newListThread.quit)
+		self._workerNew.finished.connect(self._workerNew.deleteLater)
+		self._newListThread.finished.connect(self._newListThread.deleteLater)
+
+		self._newListThread.start()
 
 	#def addNewList
 
@@ -416,10 +433,15 @@ class Bridge(QObject):
 		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_LOADING_LIST_CODE}
 		self.core.guardOptionsStack.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.edit=True
-		self.editListT=LoadList(self.guardManager,listToLoad)
-		self.editListT.start()
-		self.editListT.listLoaded.connect(self._loadListRet)
-		self.editListT.finished.connect(self.editListT.deleteLater)
+		self._loadListThread=QThread()
+		self._workerLoad=LoadListWorker(self.guardManager,listToLoad)
+		self._workerLoad.moveToThread(self._loadListThread)
+		self._loadListThread.started.connect(self._workerLoad.process)
+		self._workerLoad.listLoaded.connect(self._loadListRet)
+		self._workerLoad.finished.connect(self._loadListThread.quit)
+		self._workerLoad.finished.connect(self._workerLoad.deleteLater)
+		self._loadListThread.finished.connect(self._loadListThread.deleteLater)
+		self._loadListThread.start()
 
 	#def loadList
 
@@ -454,10 +476,15 @@ class Bridge(QObject):
 		self.showListFormMessage={"show":True,"msgCode":WAITING_OPEN_FILE_CODE,"type":self.guardManager.KIRIGAMI_MSG_INFO}
 		self.core.mainStack.closeGui=False
 		self.enableForm=False
-		self.openFileT=OpenListFile(self.guardManager,self.fileToLoad)
-		self.openFileT.start()
-		self.openFileT.fileClosed.connect(self._openFileRet)
-		self.openFileT.finished.connect(self.openFileT.deleteLater)
+		self._openFileThread=QThread()
+		self._workerOpen=OpenListFileWorker(self.guardManager,self.fileToLoad)
+		self._workerOpen.moveToThread(self._openFileThread)
+		self._openFileThread.started.connect(self._workerOpen.process)
+		self._workerOpen.fileClosed.connect(self._openFileRet)
+		self._workerOpen.finished.connect(self._openFileThread.quit)
+		self._workerOpen.finished.connect(self._workerOpen.deleteLater)
+		self._openFileThread.finished.connect(self._openFileThread.deleteLater)
+		self._openFileThread.start()
 
 	#def openListFile
 
@@ -679,10 +706,15 @@ class Bridge(QObject):
 			"name": self.currentListConfig["name"],
 			"content":len(self.contentOfList)
 		}
-		self.checkListChangesT=CheckListChanges(self.guardManager,dataToCheck,self.edit,self.fileToLoad)
-		self.checkListChangesT.start()
-		self.checkListChangesT.changesListChecked.connect(self._checkListChangesRet)
-		self.checkListChangesT.finished.connect(self.checkListChangesT.deleteLater)
+		self._checkThread=QThread()
+		self._workerCheck=CheckListWorker(self.guardManager,dataToCheck,self.edit,self.fileToLoad)
+		self._workerCheck.moveToThread(self._checkThread)
+		self._checkThread.started.connect(self._workerCheck.process)
+		self._workerCheck.changesListChecked.connect(self._checkListChangesRet)
+		self._workerCheck.finished.connect(self._checkThread.quit)
+		self._workerCheck.finished.connect(self._workerCheck.deleteLater)
+		self._checkThread.finished.connect(self._checkThread.deleteLater)
+		self._checkThread.start()
 
 	#def saveListChanges
 
@@ -695,10 +727,15 @@ class Bridge(QObject):
 			return
 
 		self.guardManager.urlConfigData=self.contentOfList
-		self.saveChangesT=SaveChanges(self.guardManager,self.currentListConfig,self.edit,self.fileToLoad)
-		self.saveChangesT.start()
-		self.saveChangesT.changesSaved.connect(self._saveChangesRet)
-		self.saveChangesT.finished.connect(self.saveChangesT.deleteLater)
+		self._saveThread=QThread()
+		self._workerSave=SaveChangesWorker(self.guardManager,self.currentListConfig,self.edit,self.fileToLoad)
+		self._workerSave.moveToThread(self._saveThread)
+		self._saveThread.started.connect(self._workerSave.process)
+		self._workerSave.changesSaved.connect(self._saveChangesRet)
+		self._workerSave.finished.connect(self._saveThread.quit)
+		self._workerSave.finished.connect(self._workerSave.deleteLater)
+		self._saveThread.finished.connect(self._saveThread.deleteLater)
+		self._saveThread.start()
 
 	#def _checkListChangesRet
 

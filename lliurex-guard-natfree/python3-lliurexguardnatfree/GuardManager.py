@@ -89,7 +89,7 @@ class GuardManager(object):
 		flavours = [ x.strip() for x in result.split(',') ]
 
 		for item in flavours:
-			if 'adi' in item or "lab" in item:
+			if 'adi' in item or "pro" in item:
 				self.is_server=True
 				break
 	

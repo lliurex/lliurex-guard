@@ -16,7 +16,6 @@ Name=LliureX-Guard-Natfree
 Name[ca_ES.UTF-8@valencia]=LliureX-Guard-Natfree
 Name[ca_ES@valencia]=LliureX-Guard-Natfree
 Name[es]=LliureX-Guard-Natfree
-NoDisplay=true
 Path=
 StartupNotify=true
 Terminal=false
