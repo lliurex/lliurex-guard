@@ -211,8 +211,6 @@ Rectangle{
             default:
                return ""
         }
-        return msg    
-
     }
 
     function getTypeMessage(){
