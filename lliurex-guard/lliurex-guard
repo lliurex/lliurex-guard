@@ -5,7 +5,11 @@ from PySide6.QtCore import QUrl, QObject, Slot, Signal,Property
 import os
 import subprocess
 import sys
-import shutil
+from pathlib import Path
+
+import gettext
+gettext.textdomain("lliurex-guard")
+_=gettext.gettext
 
 class Tunnel(QObject):
 	
@@ -13,109 +17,94 @@ class Tunnel(QObject):
 
 		QObject.__init__(self)
 		self.clearCache()
-		self.isStandAlone()
+		self.canRun()
 
 	#def __init	
 
 	def clearCache(self):
 
-		clear=False
-		user=os.environ["USER"]
-		configPath="/home/%s/.config/"%user
-		versionFile=os.path.join(configPath,"lliurex-guard.conf")
-		cachePath="/home/%s/.cache/lliurex-guard"%user
+		userHome=Path.home()
+		versionFile=userHome /".config/lliurex-guard.conf"
+		cachePath1=userHome / ".cache/lliurex-guard"
+		cachePath2=userHome / ".cache/lliurex-guard-gui"
 		installedVersion=self.getPackageVersion()
+		clear=False
 
-		if not os.path.exists(configPath):
-			os.mkdir(configPath)
-			
-		if not os.path.exists(versionFile):
-			with open(versionFile,'w') as fd:
-				fd.write(installedVersion)
-				fd.close()
-
+		if not versionFile.exists():
+			versionFile.write_text(installedVersion)
 			clear=True
 
 		else:
-			with open(versionFile,'r') as fd:
-				fileVersion=fd.readline()
-				fd.close()
+			fileVersion=versionFile.read_text().strip()
 
 			if fileVersion!=installedVersion:
-				with open(versionFile,'w') as fd:
-					fd.write(installedVersion)
-					fd.close()
+				versionFile.write_text(installedVersion)
 				clear=True
 		
 		if clear:
-			if os.path.exists(cachePath):
-				shutil.rmtree(cachePath)
+			if cachePath1.exists():
+				shutil.rmtree(cachePath1)
+			if cachePath2.exists():
+				shutil.rmtree(cachePath2)
 
 	#def clearCache
 
 	def getPackageVersion(self):
 
-		packageVersionFile="/var/lib/lliurex-guard/version"
+		packageVersionFile=Path("/var/lib/lliurex-guard/version")
 		pkgVersion=""
 
-		if os.path.exists(packageVersionFile):
-			with open(packageVersionFile,'r') as fd:
-				pkgVersion=fd.readline()
-				fd.close()
+		if packageVersionFile.exists():
+			pkgVersion=packageVersionFile.read_text().strip()
 
 		return pkgVersion
 
 	#def getPackageVersion
 
-	def isStandAlone(self):
+	def canRun(self):
 
-		self._standAlone=False
-		cmd='lliurex-version -v'
-		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-		result=p.communicate()[0]
-
-		if type(result) is bytes:
-			result=result.decode()
-		flavours = [ x.strip() for x in result.split(',') ]
-
-		for item in flavours:
-			if 'server' in item:
-				self._standAlone=False
-				break
-			elif 'client' in item:
-				self._standAlone=False
-				break
-			elif 'desktop' in item:
-				self._standAlone=True
-
-	#def is_StandAlone
-
-	def _getStandAlone(self):
-
-		return self._standAlone
-
-	#def _getStandAlone	
-
-	standAlone=Property(bool,_getStandAlone,constant=True)
-
-	@Slot(str)
-	def on_authenticated(self,passwd):
+		normalizedFlavours=["adi","pro","alu"]
+		flavoursInstalled=[]
 		
-		self.passwd=passwd
+		cmd=["lliurex-version", "-v"]
+		try:
+			result=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+			pout = result.stdout
+
+		except Exception:
+			pout=""
+
+		if pout:
+			flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+			runApp=all(p not in i for i in flavoursInstalled for p in normalizedFlavours)
+
+		if not runApp:
+			msg=_("This version of LliureX-Guard can only be used on computers configured as desktop")
+			cmd = [
+            	"kdialog",
+            	"--title", "LliureX-Guard",
+            	"--icon", "lliurex-guard",
+            	"--sorry", msg
+        	]
+			try:
+				subprocess.run(cmd,check=True)
+			except Exception:
+				pass
+
+			sys.exit(1)
 	
-	#def on_authenticated
-		
+	#def canRun
+
 	@Slot(str)
-	def on_ticket(self, ticket):
+	def onTicket(self, ticket):
 	
 		tk=ticket.replace(' ','##U+0020##')
-		passwd="'"+self.passwd+"'"
-		os.system("/usr/sbin/lliurex-guard-gui %s %s &"%(tk,passwd))
-		app.quit()
+		cmd=["/usr/sbin/lliurex-guard-gui",tk]
+		subprocess.Popen(cmd,)
+		QApplication.quit()
 	
-	#def on_ticket
+	#def onTicket
 	
-
 #class Tunnel
 
 app = QApplication([])

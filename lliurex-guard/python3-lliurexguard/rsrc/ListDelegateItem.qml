@@ -1,9 +1,9 @@
-import org.kde.plasma.components as Components
 import QtQuick
 import QtQuick.Controls
-import QtQml.Models
+import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
 
-Components.ItemDelegate{
+ItemDelegate{
 
     id: listFilterItem
     property int listOrder
@@ -16,130 +16,149 @@ Components.ItemDelegate{
     property string metaInfo
 
     enabled:true
-    height:65
-    
-    Rectangle {
-        height:visible?60:0
-        width:parent.width
+    height:80
+    width: listFilterItem.ListView.view?listFilterItem.ListView.width-10:0
+    hoverEnabled:true
+
+    leftPadding:15
+    rightPadding:10
+
+    onHoveredChanged:{
+        if (listFilterItem.ListView.view){
+            if (hovered && !optionsMenu.opened){
+                listFilterItem.ListView.view.currentIndex=index
+            }
+        }else if (!hovered && !optionsMenu.opened && listFilterItem.ListView.view.currentIndex===index){
+            listFilterItem.ListView.view.currentIndex=-1
+        }
+    }
+
+    background: Rectangle {
+        x:5
+        y:5
+        width:parent.width-5
+        height:parent.height-5
+
         color:{
             if (listRemove){
-                "#d3d3d3"
+                Qt.alpha(Kirigami.Theme.disabledTextColor,0.45)
             }else{
+                if (listFilterItem.hovered || optionsMenu.opened){
+                   Qt.alpha(Kirigami.Theme.highlightColor,0.15)
+                }else{
+                    "transparent"
+                }
+            }
+        }
+
+        radius:6
+        border.width:1
+        border.color:{
+            if (listFilterItem.hovered || optionsMenu.opened){
+                if (listRemove){
+                    Kirigami.Theme.disabledTextColor
+                }else{
+                    Kirigami.Theme.highlightColor
+                }
+            }else{            
                 "transparent"
             }
         }
-        border.color: "transparent"
-	
-        Item{
-            id: menuItem
-            height:visible?60:0
-            width:listFilterItem.width-manageListBtn.width
+    }
 
-            MouseArea {
-                id: mouseAreaOption
-                anchors.fill: parent
-                hoverEnabled:true
-                propagateComposedEvents:true
+    contentItem:RowLayout {
+        id: filtertem
+        spacing:20
 
-                onEntered: {
-                    if (!optionsMenu.activeFocus){
-                        guardLists.currentIndex=filterModel.visibleElements.indexOf(index)
-                    }
-                }
-            }
-            Column{
-                id:description
-                anchors.verticalCenter:parent.verticalCenter
-		leftPadding:10
-                spacing:10
-                width:{
-                    if (listFilterItem.ListView.isCurrentItem){
-                        parent.width-(entriesText.width+listState.width+manageListBtn.width+80)
-                    }else{
-                        parent.width-(entriesText.width+listState.width+60)
-                    }
-                }
-               
-                Text{
-                    id:nameText
-                    text:listName
-                    font.pointSize: 12
-                    horizontalAlignment:Text.AlignLeft
-                    elide:Text.ElideMiddle
-                    width:parent.width
-                }
+        ColumnLayout{
+            id:description
+            spacing:10
+            Layout.fillWidth:true
+            Layout.alignment:Qt.AlignVCenter
+            Layout.preferredWidth:300
 
-                Text{
-                    id:descriptionText
-                    text:listDescription
-                    font.pointSize: 10
-                    horizontalAlignment:Text.AlignLeft
-                    elide:Text.ElideMiddle
-                    width:parent.width
-                }
-
+            Text{
+                id:nameText
+                text:listName
+                font.pointSize: 12
+                horizontalAlignment:Text.AlignLeft
+                elide:Text.ElideMiddle
+                Layout.fillWidth:true
             }
 
             Text{
-                id:entriesText
-                text:listEntries+" "+i18nd("lliurex-guard","entries")
-                font.pointSize: 12
-                width:150
-                anchors.left:description.right
-                anchors.verticalCenter:parent.verticalCenter
-                anchors.leftMargin:30
+                id:descriptionText
+                text:listDescription
+                font.pointSize: 10
+                horizontalAlignment:Text.AlignLeft
+                elide:Text.ElideMiddle
+                Layout.fillWidth:true
             }
 
-            Image{
-                id:listState
-                source:listActivated?"/usr/share/icons/breeze/status/24/security-high.svg":"/usr/share/icons/breeze/status/24/security-low.svg"
-                sourceSize.width:32
-                sourceSize.height:32
-                anchors.left:entriesText.right
-                anchors.verticalCenter:parent.verticalCenter
-                anchors.leftMargin:30
+        }
+
+        Text{
+            id:entriesText
+            text:listEntries+" "+i18nd("lliurex-guard","entries")
+            font.pointSize: 12
+            Layout.alignment:Qt.AlignVCenter
+            Layout.fillWidth:true
+            Layout.preferredWidth:190
+        }
+
+        Kirigami.Icon{
+            id:listState
+            source:listActivated?"security-high":"security-low"
+            Layout.preferredWidth: 32
+            Layout.preferredHeight: 32
+            Layout.alignment: Qt.AlignVCenter
+
+        }
+
+        Button{
+            id:manageListBtn
+            display:AbstractButton.IconOnly
+            icon.name:"configure"
+            Layout.alignment: Qt.AlignVCenter
+            visible:listFilterItem.hovered || optionsMenu.opened
+            ToolTip.delay: 1000
+            ToolTip.timeout: 3000
+            ToolTip.visible: hovered
+            ToolTip.text:i18nd("lliurex-guard","Click to manage this list")
+            onClicked:optionsMenu.open()
+
+            Connections{
+                target:guardLists
+                function onCurrentIndexChanged(){
+                    if (!listFilterItem.ListView.isCurrentItem && optionsMenu.opened){
+                        optionsMenu.close()
+                    }
+                }
             }
-            
-            Button{
-                id:manageListBtn
-                display:AbstractButton.IconOnly
-                icon.name:"configure.svg"
-                anchors.leftMargin:15
-                anchors.left:listState.right
-                anchors.verticalCenter:parent.verticalCenter
-                visible:listFilterItem.ListView.isCurrentItem
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
-                ToolTip.text:i18nd("lliurex-guard","Click to manage this list")
-                onClicked:optionsMenu.open();
-                onVisibleChanged:{
-                    optionsMenu.close()
+
+            Menu{
+                id:optionsMenu
+                y: manageListBtn.height
+                x:-(optionsMenu.width-manageListBtn.width/2)
+
+                MenuItem{
+                    icon.name:listActivated?"lliurex-guard-disable-mode":"security-high"
+                    text:listActivated?i18nd("lliurex-guard","Disable list"):i18nd("lliurex-guard","Enable list")
+                    enabled:listRemove?false:true
+                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":false,"active":!listActivated,"listId":listOrder})
                 }
 
-                Menu{
-                    id:optionsMenu
-                    y: manageListBtn.height
-                    x:-(optionsMenu.width-manageListBtn.width/2)
-
-                    MenuItem{
-                        icon.name:listActivated?"lliurex-guard-disable-mode.svg":"security-high.svg"
-                        text:listActivated?i18nd("lliurex-guard","Disable list"):i18nd("lliurex-guard","Enable list")
-                        enabled:listRemove?false:true
-                        onClicked:guardOptionsStackBridge.changeListStatus([false,!listActivated,listOrder])
-                    }
-
-                    MenuItem{
-                        icon.name:"document-edit.svg"
-                        text:i18nd("lliurex-guard","Edit list")
-                        enabled:listRemove?false:true
-                        onClicked:listStackBridge.loadList(listOrder)
-                    }
-                    MenuItem{
-                        icon.name:listRemove?"restoration.svg":"delete.svg"
-                        text:listRemove?i18nd("lliurex-guard","Restore the list"):i18nd("lliurex-guard","Delete the list")
-                        onClicked:listRemove?guardOptionsStackBridge.restoreLists([false,listOrder]):guardOptionsStackBridge.removeLists([false,listOrder])
-                    }
+                MenuItem{
+                    icon.name:"document-edit.svg"
+                    text:i18nd("lliurex-guard","Edit list")
+                    enabled:listRemove?false:true
+                    onClicked:listStackBridge.loadList(listOrder)
+                }
+                
+                MenuItem{
+                    icon.name:listRemove?"restoration":"delete"
+                    text:listRemove?i18nd("lliurex-guard","Restore the list"):i18nd("lliurex-guard","Delete the list")
+                    onClicked:listRemove?guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder}):guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
                 }
             }
         }

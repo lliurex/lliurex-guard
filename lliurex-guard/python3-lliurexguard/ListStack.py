@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject,Signal,Slot,QThread,Property,QTimer,Qt,QModelIndex
+from PySide6.QtCore import QObject,Signal,Slot,QThread,Property,QTimer,Qt,QModelIndex,QProcess
 import os 
 import sys
 import threading
@@ -8,6 +8,7 @@ import copy
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+from pathlib import Path
 from . import UrlModel
 
 WAITING_LOADING_LIST_CODE=11
@@ -20,120 +21,158 @@ INCORRECT_ENTRIES_CODE=-37
 INCORRECT_URL_CODE=-38
 
 
-class AddList(QThread):
+class AddListWorker(QObject):
 
-	def __init__(self,*args):
+	finished=Signal()
+	listAdded=Signal(dict)
 
-		QThread.__init__(self)
-		self.fileToLoad=args[0]
-		self.ret={}
+	def __init__(self,manager,fileToLoad):
+
+		super().__init__()
+		self.manager=manager
+		self.fileToLoad=fileToLoad
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		time.sleep(0.5)
-		ret=Bridge.guardManager.initValues()
+		retFile={'status':True,'data':{},'errorInfo':""}
+		ret=self.manager.initValues()
 		if self.fileToLoad!="":
-			self.ret=Bridge.guardManager.loadFile(self.fileToLoad)
-		else:
-			self.ret={'status':True,'data':[False]}
+			retFile=self.manager.loadFile(self.fileToLoad)
+		
+		self.listAdded.emit(retFile)
+		self.finished.emit()
 	
-	#def run
+	#def process
 
-#class AddList
+#class AddListWorker
 
-class LoadList(QThread):
+class LoadListWorker(QObject):
 
-	def __init__(self,*args):
+	finished=Signal()
+	listLoaded=Signal(dict)
 
-		QThread.__init__(self)
-		self.listInfo=args[0]
-		self.ret={}
+	def __init__(self,manager,listToLoad):
+
+		super().__init__()
+		self.manager=manager
+		self.listToLoad=listToLoad
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,*args):
 
 		time.sleep(0.5)
-		ret=Bridge.guardManager.initValues()
-		self.ret=Bridge.guardManager.loadListConfig(self.listInfo)
+		ret=self.manager.initValues()
+		retLoad=self.manager.loadListConfig(self.listToLoad)
+		self.listLoaded.emit(retLoad)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class LoadList
+#class LoadListWorker
 
-class OpenListFile(QThread):
+class OpenListFileWorker(QThread):
 
-	def __init__(self,*args):
+	finished=Signal()
+	fileClosed=Signal()
 
-		QThread.__init__(self)
-		self.fileToLoad=args[0]
+	def __init__(self,manager,fileToLoad):
 
-	#def __init__
-
-	def run(self,*args):
-
-		cmd="kwrite %s"%self.fileToLoad
-		os.system(cmd)
-
-	#def run
-
-#class OpenListFile
-
-class CheckListChanges(QThread):
-
-	def __init__(self,*args):
-
-		QThread.__init__(self)
-		self.dataToCheck=args[0]
-		self.edit=args[1]
-		self.fileToCheck=args[2]
-		self.ret={}
+		super().__init__()
+		self.manager=manager
+		self.fileToLoad=Path(fileToLoad).resolve()
 
 	#def __init__
 
-	def run(self,*args):
+	def process(self,):
 
-		self.ret=Bridge.guardManager.checkData(self.dataToCheck,self.edit,self.fileToCheck)
+		if self.fileToLoad.exists():
+			process=QProcess()
+			process.start("kate",["-b",self.fileToLoad.as_posix()])
+			process.waitForFinished(-1)
 
-	#def run
+		self.fileClosed.emit()
+		self.finished.emit()
 
-#class CheckListChanges
+	#def process
 
-class SaveChanges(QThread):
+#class OpenListFileWorker
 
-	def __init__(self,*args):
+class CheckListWorker(QObject):
 
-		QThread.__init__(self)
-		self.dataToSave=args[0]
-		self.edit=args[1]
-		self.fileToCheck=args[2]
-		self.ret={}
+	finished=Signal()
+	changesListChecked=Signal(dict)
+
+	def __init__(self,manager,dataToCheck,edit,fileToCheck):
+
+		super().__init__()
+		self.manager=manager
+		self.dataToCheck=dataToCheck
+		self.edit=edit
+		self.fileToCheck=fileToCheck
 
 	#def __init__
 
-	def run(self,*args):
+	@Slot()
+	def process(self,*args):
 
-		self.ret=Bridge.guardManager.saveConf(self.dataToSave,self.edit,self.fileToCheck)
+		ret=self.manager.checkData(self.dataToCheck,self.edit,self.fileToCheck)
+		self.changesListChecked.emit(ret)
+		self.finished.emit()
 
-	#def run
+	#def process
 
-#class SaveChanges
+#class CheckListWorker
 
+class SaveChangesWorker(QObject):
+
+	finished=Signal()
+	changesSaved=Signal(dict)
+
+	def __init__(self,manager,dataToSave,edit,fileToSave):
+
+		super().__init__()
+		self.manager=manager
+		self.dataToSave=dataToSave
+		self.edit=edit
+		self.fileToSave=fileToSave
+
+	#def __init__
+
+	def process(self,*args):
+
+		ret=self.manager.saveConf(self.dataToSave,self.edit,self.fileToSave)
+		self.changesSaved.emit(ret)
+		self.finished.emit()
+
+	#def process
+
+#class SaveChangesWorker
 
 class Bridge(QObject):
 
+	listNameChanged=Signal()
+	listDescriptionChanged=Signal()
+	showListFormMessageChanged=Signal()
+	listCurrentOptionChanged=Signal()
+	arePendingChangesInListChanged=Signal()
+	enableFormChanged=Signal()
+	showChangesInListDialogChanged=Signal()
+	showUrlsListChanged=Signal()
+	enableUrlEditionChanged=Signal()
 	
 	def __init__(self):
 
 		QObject.__init__(self)
 		self.core=Core.Core.get_core()
-		Bridge.guardManager=self.core.guardManager
+		self.guardManager=self.core.guardManager
 		self._urlModel=UrlModel.UrlModel()
-		self._listName=Bridge.guardManager.listName
-		self._listDescription=Bridge.guardManager.listDescription
-		self._showListFormMessage=[False,"","Ok"]
+		self._listName=self.guardManager.listName
+		self._listDescription=self.guardManager.listDescription
+		self._showListFormMessage={"show":False,"msgCode":"","type":""}
 		self._arePendingChangesInList=False
 		self.changesInHeaders=False
 		self.changesInContent=False
@@ -143,50 +182,153 @@ class Bridge(QObject):
 		self._showChangesInListDialog=False
 		self._enableUrlEdition=False
 		self.lastUrlId=0
+		self._activeThreads=[]
 
 	#def _init__
 
-	def _getListName(self):
+	@Property(str,notify=listNameChanged)
+	def listName(self):
 
 		return self._listName
 
-	#def _getListName
+	#def listName
 
-	def _setListName(self,listName):
+	@listName.setter
+	def listName(self,listName):
 
 		if self._listName!=listName:
 			self._listName=listName
-			self.on_listName.emit()
+			self.listNameChanged.emit()
 
-	#def _setListName
-
-	def _getListDescription(self):
+	#def listName
+	
+	@Property(str,notify=listDescriptionChanged)
+	def listDescription(self):
 
 		return self._listDescription
 
-	#def _getListDescription
+	#def listDescription
 
-	def _setListDescription(self,listDescription):
+	@listDescription.setter
+	def listDescription(self,listDescription):
 
 		if self._listDescription!=listDescription:
 			self._listDescription=listDescription
-			self.on_listDescription.emit()
+			self.listDescriptionChanged.emit()
 
-	#def _setListDescription
+	#def listDescription
+	
+	@Property(dict,notify=showListFormMessageChanged)
+	def showListFormMessage(self):
 
-	def _getListCurrentOption(self):
+		return self._showListFormMessage
+
+	#def showListFormMessage
+
+	@showListFormMessage.setter
+	def showListFormMessage(self,showListFormMessage):
+
+		if self._showListFormMessage!=showListFormMessage:
+			self._showListFormMessage=showListFormMessage
+			self.showListFormMessageChanged.emit()
+
+	#def showListFormMessage
+
+	@Property(int,notify=listCurrentOptionChanged)
+	def listCurrentOption(self):
 
 		return self._listCurrentOption
 
-	#def _getListCurrentOption
+	#def listCurrentOption
 
-	def _setListCurrentOption(self,listCurrentOption):
+	@listCurrentOption.setter
+	def listCurrentOption(self,listCurrentOption):
 
 		if self._listCurrentOption!=listCurrentOption:
 			self._listCurrentOption=listCurrentOption
-			self.on_listCurrentOption.emit()
+			self.listCurrentOptionChanged.emit()
 
-	#def _setListCurrentOption
+	#def listCurrentOption
+
+	@Property(bool,notify=arePendingChangesInListChanged)
+	def arePendingChangesInList(self):
+
+		return self._arePendingChangesInList
+
+	#def arePendingChangesInList
+
+	@arePendingChangesInList.setter
+	def arePendingChangesInList(self,arePendingChangesInList):
+
+		if self._arePendingChangesInList!=arePendingChangesInList:
+			self._arePendingChangesInList=arePendingChangesInList
+			self.arePendingChangesInListChanged.emit()
+
+	#def arePendingChangesInList
+
+	@Property(bool,notify=enableFormChanged)
+	def enableForm(self):
+
+		return self._enableForm
+
+	#def enableForm
+
+	@enableForm.setter
+	def enableForm(self,enableForm):
+
+		if self._enableForm!=enableForm:
+			self._enableForm=enableForm
+			self.enableFormChanged.emit()
+
+	#def _setEnableForm
+
+	@Property(bool,notify=showChangesInListDialogChanged)
+	def showChangesInListDialog(self):
+
+		return self._showChangesInListDialog
+
+	#def showChangesInListDialog
+
+	@showChangesInListDialog.setter
+	def showChangesInListDialog(self,showChangesInListDialog):
+
+		if self._showChangesInListDialog!=showChangesInListDialog:
+			self._showChangesInListDialog=showChangesInListDialog
+			self.showChangesInListDialogChanged.emit()
+
+	#def showChangesInListDialog	
+
+	@Property(bool,notify=showUrlsListChanged)
+	def showUrlsList(self):
+
+		return self._showUrlsList
+
+	#def showUrlsList
+
+	@showUrlsList.setter
+	def showUrlsList(self,showUrlsList):
+
+		if self._showUrlsList!=showUrlsList:
+			self._showUrlsList=showUrlsList
+			self.showUrlsListChanged.emit()
+
+	#def showUrlsList
+
+	@Property(bool,notify=enableUrlEditionChanged)
+	def enableUrlEdition(self):
+
+		return self._enableUrlEdition
+
+	#def enableUrlEdition
+
+	@enableUrlEdition.setter
+	def enableUrlEdition(self,enableUrlEdition):
+
+		if self._enableUrlEdition!=enableUrlEdition:
+			self._enableUrlEdition=enableUrlEdition
+			self.enableUrlEditionChanged.emit()
+
+	#def enableUrlEdition
 
 	def _getUrlModel(self):
 
@@ -194,95 +336,11 @@ class Bridge(QObject):
 
 	#def _getUrlModel
 
-	def _getArePendingChangesInList(self):
-
-		return self._arePendingChangesInList
-
-	#def _getArePendingChangesInList
-
-	def _setArePendingChangesInList(self,arePendingChangesInList):
-
-		if self._arePendingChangesInList!=arePendingChangesInList:
-			self._arePendingChangesInList=arePendingChangesInList
-			self.on_arePendingChangesInList.emit()
-
-	#def _setArePendingChangesInList
-
-	def _getShowListFormMessage(self):
-
-		return self._showListFormMessage
-
-	#def _getShowListFormMessage
-
-	def _setShowListFormMessage(self,showListFormMessage):
-
-		if self._showListFormMessage!=showListFormMessage:
-			self._showListFormMessage=showListFormMessage
-			self.on_showListFormMessage.emit()
-
-	#def _setShowListFormMessage
-
-	def _getShowUrlsList(self):
-
-		return self._showUrlsList
-
-	#def _getShowUrlsList
-
-	def _setShowUrlsList(self,showUrlsList):
-
-		if self._showUrlsList!=showUrlsList:
-			self._showUrlsList=showUrlsList
-			self.on_showUrlsList.emit()
-
-	#def _setShowUrlsList
-
-	def _getEnableForm(self):
-
-		return self._enableForm
-
-	#def _getEnableForm
-
-	def _setEnableForm(self,enableForm):
-
-		if self._enableForm!=enableForm:
-			self._enableForm=enableForm
-			self.on_enableForm.emit()
-
-	#def _setEnableForm
-
-	def _getShowChangesInListDialog(self):
-
-		return self._showChangesInListDialog
-
-	#def _getShowChangesInListDialog
-
-	def _setShowChangesInListDialog(self,showChangesInListDialog):
-
-		if self._showChangesInListDialog!=showChangesInListDialog:
-			self._showChangesInListDialog=showChangesInListDialog
-			self.on_showChangesInListDialog.emit()
-
-	#def _setShowChangesInListDialog
-
-	def _getEnableUrlEdition(self):
-
-		return self._enableUrlEdition
-
-	#def _getEnableUrlEdition
-
-	def _setEnableUrlEdition(self,enableUrlEdition):
-
-		if self._enableUrlEdition!=enableUrlEdition:
-			self._enableUrlEdition=enableUrlEdition
-			self.on_enableUrlEdition.emit()
-
-	#def _setEnableUrlEdition
-
 	def updateUrlModel(self):
 
 		ret=self._urlModel.clear()
 		urlEntries=self.contentOfList
-		self.lastUrlId=Bridge.guardManager.getLastUrlId()+1
+		self.lastUrlId=self.guardManager.getLastUrlId()+1
 		for item in urlEntries:
 			if item["url"]!="":
 				self._urlModel.appendRow(item["urlId"],item["url"])
@@ -291,9 +349,9 @@ class Bridge(QObject):
 
 	def _initializeVars(self):
 
-		self.listName=Bridge.guardManager.listName
-		self.listDescription=Bridge.guardManager.listDescription
-		self.showListFormMessage=[False,"","Ok"]
+		self.listName=self.guardManager.listName
+		self.listDescription=self.guardManager.listDescription
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		self.arePendingChangesInList=False
 		self.changesInHeaders=False
 		self.changesInContent=False
@@ -303,7 +361,7 @@ class Bridge(QObject):
 		self.listCurrentOption=0
 		self.showChangesInListDialog=False
 		self.lastUrlId=0
-		self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
+		self.contentOfList=copy.deepcopy(self.guardManager.urlConfigData)
 		self._urlModel.clear()
 
 	#def _initializeVars
@@ -326,36 +384,46 @@ class Bridge(QObject):
 	def addNewList(self,fileToLoad=""):
 
 		self.core.mainStack.closeGui=False
-		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
-		self.core.guardOptionsStack.showMainMessage=[False,"","Ok",""]
+		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_LOADING_LIST_CODE}
+		self.core.guardOptionsStack.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.edit=False
-		self.newListT=AddList(fileToLoad)
-		self.newListT.start()
-		self.newListT.finished.connect(self._newListRet)
+		self._newListThread=QThread()
+		self._workerNew=AddListWorker(self.guardManager,fileToLoad)
+		self._workerNew.moveToThread(self._newListThread)
+		self._newListThread.started.connect(self._workerNew.process)
+		self._workerNew.listAdded.connect(self._newListRet)
+		self._workerNew.finished.connect(self._newListThread.quit)
+		self._workerNew.finished.connect(self._workerNew.deleteLater)
+		self._newListThread.finished.connect(self._newListThread.deleteLater)
+
+		self._newListThread.start()
 
 	#def addNewList
 
-	def _newListRet(self):
+	@Slot(dict)
+	def _newListRet(self,ret):
 
-		if self.newListT.ret['status']:
-			self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
-			self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
-			self._initializeVars()
-			if not self.newListT.ret["data"][0]:
-				self.showUrlsList=True
-				self.updateUrlModel()
-			else:
-				self.fileToLoad=self.newListT.ret["data"][1]
-				self.lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
-				self.showUrlsList=False
-			self.core.mainStack.currentStack=2
-			self.listCurrentOption=1
-			self.enableForm=True
-		else:
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
+
+		if not ret.get('status'):
 			self.core.mainStack.closeGui=True
-			self.core.guardOptionsStack.showMainMessage=[True,self.newListT.ret["code"],"Error",self.newListT.ret["data"]]
+			self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("errorInfo")}
+			return
+		
+		self.currentListConfig=copy.deepcopy(self.guardManager.currentListConfig)
+		self.contentOfList=copy.deepcopy(self.guardManager.urlConfigData)
+		self._initializeVars()
+		if not ret.get("data").get("limitLines"):
+			self.showUrlsList=True
+			self.updateUrlModel()
+		else:
+			self.fileToLoad=ret.get("data").get("tmpFile")
+			self.lastChangeFromFile=self.guardManager.getLastChangeInFile(self.fileToLoad)
+			self.showUrlsList=False
 
-		self.core.mainStack.closePopUp=[True,""]
+		self.core.mainStack.currentStack=2
+		self.listCurrentOption=1
+		self.enableForm=True
 
 	#def _newListRet
 
@@ -363,57 +431,71 @@ class Bridge(QObject):
 	def loadList(self,listToLoad):
 		
 		self.core.mainStack.closeGui=False
-		self.core.mainStack.closePopUp=[False,WAITING_LOADING_LIST_CODE]
-		self.core.guardOptionsStack.showMainMessage=[False,"","Ok",""]
+		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_LOADING_LIST_CODE}
+		self.core.guardOptionsStack.showMainMessage={"show":False,"msgCode":"","type":"","data":""}
 		self.edit=True
-		self.editList=LoadList(listToLoad)
-		self.editList.start()
-		self.editList.finished.connect(self._loadListRet)
+		self._loadListThread=QThread()
+		self._workerLoad=LoadListWorker(self.guardManager,listToLoad)
+		self._workerLoad.moveToThread(self._loadListThread)
+		self._loadListThread.started.connect(self._workerLoad.process)
+		self._workerLoad.listLoaded.connect(self._loadListRet)
+		self._workerLoad.finished.connect(self._loadListThread.quit)
+		self._workerLoad.finished.connect(self._workerLoad.deleteLater)
+		self._loadListThread.finished.connect(self._loadListThread.deleteLater)
+		self._loadListThread.start()
 
 	#def loadList
 
-	def _loadListRet(self):
+	@Slot(dict)
+	def _loadListRet(self,ret):
 
-		if self.editList.ret["status"]:
-			self.currentListConfig=copy.deepcopy(Bridge.guardManager.currentListConfig)
-			self.contentOfList=copy.deepcopy(Bridge.guardManager.urlConfigData)
-			self._initializeVars()
-			if self.editList.ret["data"]=="":
-				self.updateUrlModel()
-				self.showUrlsList=True
-			else:
-				self.fileToLoad=self.editList.ret["data"]
-				self.lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
-				self.showUrlsList=False
-			self.core.mainStack.currentStack=2
-			self.listCurrentOption=1
-			self.enableForm=True
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
+		if not ret.get("status"):
+			self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("errorInfo")}
+
+		self.currentListConfig=copy.deepcopy(self.guardManager.currentListConfig)
+		self.contentOfList=copy.deepcopy(self.guardManager.urlConfigData)
+		self._initializeVars()
+		tmpFile=ret.get("data").get("tmpFile")
+		if tmpFile=="":
+			self.updateUrlModel()
+			self.showUrlsList=True
 		else:
-			self.core.guardOptionsStack.showMainMessage=[True,self.editListT.ret["code"],"Error",self.editListT.ret["data"]]
-
-		self.core.mainStack.closePopUp=[True,""]
+			self.fileToLoad=tmpFile
+			self.lastChangeFromFile=self.guardManager.getLastChangeInFile(self.fileToLoad)
+			self.showUrlsList=False
+		
+		self.core.mainStack.currentStack=2
+		self.listCurrentOption=1
+		self.enableForm=True
 
 	#def _loadListRet
 
 	@Slot()
 	def openListFile(self):
 
-		self.showListFormMessage=[False,"","Ok"]
-		self.showListFormMessage=[True,WAITING_OPEN_FILE_CODE,"Information"]
+		self.showListFormMessage={"show":True,"msgCode":WAITING_OPEN_FILE_CODE,"type":self.guardManager.KIRIGAMI_MSG_INFO}
 		self.core.mainStack.closeGui=False
 		self.enableForm=False
-		self.openFileT=OpenListFile(self.fileToLoad)
-		self.openFileT.start()
-		self.openFileT.finished.connect(self._openFileRet)
+		self._openFileThread=QThread()
+		self._workerOpen=OpenListFileWorker(self.guardManager,self.fileToLoad)
+		self._workerOpen.moveToThread(self._openFileThread)
+		self._openFileThread.started.connect(self._workerOpen.process)
+		self._workerOpen.fileClosed.connect(self._openFileRet)
+		self._workerOpen.finished.connect(self._openFileThread.quit)
+		self._workerOpen.finished.connect(self._workerOpen.deleteLater)
+		self._openFileThread.finished.connect(self._openFileThread.deleteLater)
+		self._openFileThread.start()
 
 	#def openListFile
 
+	@Slot()
 	def _openFileRet(self):
 
 		self.core.mainStack.closeGui=True
-		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage={"show":False,"msgCode":"","msgType":""}
 		self.enableForm=True
-		lastChangeFromFile=Bridge.guardManager.getLastChangeInFile(self.fileToLoad)
+		lastChangeFromFile=self.guardManager.getLastChangeInFile(self.fileToLoad)
 
 		if lastChangeFromFile!=self.lastChangeFromFile:
 			self.changesInContent=True
@@ -431,10 +513,10 @@ class Bridge(QObject):
 
 		if listName!=self.listName:
 			self.listName=listName
-			self.currentListConfig["id"]=Bridge.guardManager.getListId(listName)
+			self.currentListConfig["id"]=self.guardManager.getListId(listName)
 			self.currentListConfig["name"]=self.listName
 
-		if self.currentListConfig!=Bridge.guardManager.currentListConfig:
+		if self.currentListConfig!=self.guardManager.currentListConfig:
 			self.changesInHeaders=True
 			self.arePendingChangesInList=True
 		else:
@@ -451,7 +533,7 @@ class Bridge(QObject):
 			self.listDescription=listDescription
 			self.currentListConfig["description"]=self.listDescription
 
-		if self.currentListConfig!=Bridge.guardManager.currentListConfig:
+		if self.currentListConfig!=self.guardManager.currentListConfig:
 			self.changesInHeaders=True
 			self.arePendingChangesInList=True
 		else:
@@ -464,17 +546,18 @@ class Bridge(QObject):
 	@Slot(str)
 	def addNewUrl(self,urlToAdd):
 
-		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		tmpNewUrl=urlToAdd.split(" ")
 		countDuplicate=0
 		countError=0
+		msgCode=""
 		self.lastUrlId=self.lastUrlId+1
 
 		for item in tmpNewUrl:
-			item=Bridge.guardManager.formatLine(item)
+			item=self.guardManager.formatLine(item)
 			if item!="":
 				self.lastUrlId+=1
-				if not Bridge.guardManager.checkUrlDuplicates(item,self.contentOfList):
+				if not self.guardManager.checkUrlDuplicates(item,self.contentOfList):
 					urlId=self.lastUrlId
 					self._urlModel.appendRow(urlId,item)
 					tmp={}
@@ -486,7 +569,7 @@ class Bridge(QObject):
 			else:
 				countError+=1
 
-		if self.contentOfList!= Bridge.guardManager.urlConfigData:
+		if self.contentOfList!= self.guardManager.urlConfigData:
 			self.changesInContent=True
 			self.arePendingChangesInList=True
 		else:
@@ -495,55 +578,57 @@ class Bridge(QObject):
 				self.changesInContent=False
 
 		if countError >0 and countDuplicate>0:
-			self.showListFormMessage=[True,DUPLICATES_INCORRECT_CODE,"Warning"]
+			msgCode=DUPLICATES_INCORRECT_CODE
 		elif countDuplicate>0:
-			self.showListFormMessage=[True,DUPLICATES_ENTRIES_CODE,"Warning"] 
+			msgCode=DUPLICATES_ENTRIES_CODE
 		elif countError>0:
-			self.showListFormMessage=[True,INCORRECT_ENTRIES_CODE,"Warning"]	
+			msgCode=INCORRECT_ENTRIES_CODE
+		
+		if msgCode:
+			self.showListFormMessage={"show":True,"msgCode":msgCode,"type":self.guardManager.KIRIGAMI_MSG_WARNING}	
  
 	#def AddNewUrl
-	@Slot('QVariantList')
+	@Slot(dict)
 	def manageEditUrlBtn(self,oldValue):
 
-		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		self.enableUrlEdition=True
-		self.urlToEditIndex=oldValue[0]
-		self.urlToEditValue=oldValue[1]
+		self.urlToEditIndex=oldValue.get("urlIndex")
+		self.urlToEditValue=oldValue.get("urlValue")
 
 	#def manageEditUrlBtn
 
 	@Slot(str)
 	def editUrl(self,newValue):
 
-		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
+		self.enableUrlEdition=False
 
 		tmpNewUrl=newValue.split(" ")[0]
-		tmpNewUrl=Bridge.guardManager.formatLine(tmpNewUrl)
-		if tmpNewUrl!="":
-			if not Bridge.guardManager.checkUrlDuplicates(tmpNewUrl,self.contentOfList):
-				index=self._urlModel.index(self.urlToEditIndex)
-				self._urlModel.setData(index,"url",tmpNewUrl)
-				for item in self.contentOfList:
-					if item["url"]==self.urlToEditValue:
-						item["url"]=tmpNewUrl
-						break;
-			else:
-				self.showListFormMessage=[True,DUPLICATE_URL_CODE,"Warning"] 
+		tmpNewUrl=self.guardManager.formatLine(tmpNewUrl)
+		if tmpNewUrl=="":
+			self.showListFormMessage={"show":True,"msgCode":INCORRECT_URL_CODE,"type":self.guardManager.KIRIGAMI_MSG_WARNING}
+			return
+
+		if self.guardManager.checkUrlDuplicates(tmpNewUrl,self.contentOfList):
+			self.showListFormMessage={"show":True,"msgCode":DUPLICATE_URL_CODE,"type":self.guardManager.KIRIGAMI_MSG_WARNING} 
+			return
+
+		index=self._urlModel.index(self.urlToEditIndex)
+		self._urlModel.setData(index,"url",tmpNewUrl)
 		
-			if self.contentOfList!=Bridge.guardManager.urlConfigData:
-				self.changesInContent=True
-				self.arePendingChangesInList=True
-			else:
-				if not self.changesInHeaders:
-					self.arePendingChangesInList=False
-					self.changesInContent=False 
-
+		for item in self.contentOfList:
+			if item["url"]==self.urlToEditValue:
+				item["url"]=tmpNewUrl
+				break;
+		
+		if self.contentOfList!=self.guardManager.urlConfigData:
+			self.changesInContent=True
+			self.arePendingChangesInList=True
 		else:
-			self.showListFormMessage=[True,INCORRECT_URL_CODE,"Warning"]
-
-		self.enableUrlEdition=False
-		self.urlToEditIndex=""
-		self.urlToEditValue=""
+			if not self.changesInHeaders:
+				self.arePendingChangesInList=False
+				self.changesInContent=False 
 
 	#def editUrl
 
@@ -557,7 +642,7 @@ class Bridge(QObject):
 	@Slot(int)
 	def removeUrl(self,urlToRemove):
 
-		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		tmpId=self._urlModel._entries[urlToRemove]["urlId"]
 		self._urlModel.removeRow(urlToRemove)
 
@@ -565,7 +650,7 @@ class Bridge(QObject):
 			if tmpId==self.contentOfList[i]["urlId"]:
 				self.contentOfList.pop(i)
 
-		if self.contentOfList!=Bridge.guardManager.urlConfigData:
+		if self.contentOfList!=self.guardManager.urlConfigData:
 			self.changesInContent=True
 			self.arePendingChangesInList=True
 		else:
@@ -578,13 +663,13 @@ class Bridge(QObject):
 	@Slot(str)
 	def manageEmptyListDialog(self,response):
 		
-		self.showListFormMessage=[False,"","Ok"]
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
 		
 		if response=="Apply":
 			self._urlModel.clear()
 			self.contentOfList=[]
 
-			if self.contentOfList!=Bridge.guardManager.urlConfigData:
+			if self.contentOfList!=self.guardManager.urlConfigData:
 				self.changesInContent=True
 				self.arePendingChangesInList=True
 			else:
@@ -612,38 +697,55 @@ class Bridge(QObject):
 	@Slot() 
 	def saveListChanges(self):
 
-		self.showListFormMessage=[False,"","Ok"]
-		self.core.mainStack.closePopUp=[False,WAITING_SAVE_CHANGES]
-		dataToCheck=[self.currentListConfig["id"],self.currentListConfig["name"],len(self.contentOfList)]
-		self.checkListChangesT=CheckListChanges(dataToCheck,self.edit,self.fileToLoad)
-		self.checkListChangesT.start()
-		self.checkListChangesT.finished.connect(self._checkListChangesRet)
+		self.showListFormMessage={"show":False,"msgCode":"","type":""}
+		self.core.mainStack.showPopUp={"show":True,"msgCode":WAITING_SAVE_CHANGES}
+		dataToCheck={
+			"listId":self.currentListConfig["id"],
+			"name": self.currentListConfig["name"],
+			"content":len(self.contentOfList)
+		}
+		self._checkThread=QThread()
+		self._workerCheck=CheckListWorker(self.guardManager,dataToCheck,self.edit,self.fileToLoad)
+		self._workerCheck.moveToThread(self._checkThread)
+		self._checkThread.started.connect(self._workerCheck.process)
+		self._workerCheck.changesListChecked.connect(self._checkListChangesRet)
+		self._workerCheck.finished.connect(self._checkThread.quit)
+		self._workerCheck.finished.connect(self._workerCheck.deleteLater)
+		self._checkThread.finished.connect(self._checkThread.deleteLater)
+		self._checkThread.start()
 
 	#def saveListChanges
 
-	def _checkListChangesRet(self):
+	@Slot(dict)
+	def _checkListChangesRet(self,ret):
 
-		if self.checkListChangesT.ret["result"]:
-			Bridge.guardManager.urlConfigData=self.contentOfList
-			self.saveChangesT=SaveChanges(self.currentListConfig,self.edit,self.fileToLoad)
-			self.saveChangesT.start()
-			self.saveChangesT.finished.connect(self._saveChangesRet)
-		else:
-			self.core.mainStack.closePopUp=[True,""]
-			self.showListFormMessage=[True,self.checkListChangesT.ret["code"],"Error"]
+		if  not ret.get("status"):
+			self.core.mainStack.showPopUp={"show":False,"msgCode":""}
+			self.showListFormMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type")}	
+			return
+
+		self.guardManager.urlConfigData=self.contentOfList
+		self._saveThread=QThread()
+		self._workerSave=SaveChangesWorker(self.guardManager,self.currentListConfig,self.edit,self.fileToLoad)
+		self._workerSave.moveToThread(self._saveThread)
+		self._saveThread.started.connect(self._workerSave.process)
+		self._workerSave.changesSaved.connect(self._saveChangesRet)
+		self._workerSave.finished.connect(self._saveThread.quit)
+		self._workerSave.finished.connect(self._workerSave.deleteLater)
+		self._saveThread.finished.connect(self._saveThread.deleteLater)
+		self._saveThread.start()
 
 	#def _checkListChangesRet
 
-	def _saveChangesRet(self):
+	@Slot(dict)
+	def _saveChangesRet(self,ret):
 
-		if self.saveChangesT.ret["status"]:
+		if ret.get("status"):
 			self.core.guardOptionsStack._updateListsModel()
-			self.core.guardOptionsStack.showMainMessage=[True,self.saveChangesT.ret["code"],"Ok",""]
 			self.core.guardOptionsStack.arePendingChanges=True
-		else:
-			self.core.guardOptionsStack.showMainMessage=[True,self.saveChangesT.ret["code"],"Error",self.saveChangesT.ret["data"]]
-
-		self.core.mainStack.closePopUp=[True,""]
+	
+		self.core.guardOptionsStack.showMainMessage={"show":True,"msgCode":ret.get("code"),"type":ret.get("type"),"data":ret.get("data")}
+		self.core.mainStack.showPopUp={"show":False,"msgCode":""}
 		self.arePendingChangesInList=False
 		self.core.mainStack.closeGui=True
 		self.core.mainStack.moveToStack=1
@@ -669,33 +771,6 @@ class Bridge(QObject):
 
 	#def _cancelBellChanges
 		
-	on_listName=Signal()
-	listName=Property(str,_getListName,_setListName,notify=on_listName)
-
-	on_listDescription=Signal()
-	listDescription=Property(str,_getListDescription,_setListDescription,notify=on_listDescription)
-
-	on_showListFormMessage=Signal()
-	showListFormMessage=Property('QVariantList',_getShowListFormMessage,_setShowListFormMessage, notify=on_showListFormMessage)
-
-	on_listCurrentOption=Signal()
-	listCurrentOption=Property(int,_getListCurrentOption,_setListCurrentOption, notify=on_listCurrentOption)
-
-	on_arePendingChangesInList=Signal()
-	arePendingChangesInList=Property(bool,_getArePendingChangesInList,_setArePendingChangesInList,notify=on_arePendingChangesInList)
-
-	on_enableForm=Signal()
-	enableForm=Property(bool,_getEnableForm,_setEnableForm,notify=on_enableForm)
-
-	on_showChangesInListDialog=Signal()
-	showChangesInListDialog=Property(bool,_getShowChangesInListDialog,_setShowChangesInListDialog,notify=on_showChangesInListDialog)
-
-	on_showUrlsList=Signal()
-	showUrlsList=Property(bool,_getShowUrlsList,_setShowUrlsList,notify=on_showUrlsList)
-	
-	on_enableUrlEdition=Signal()
-	enableUrlEdition=Property(bool,_getEnableUrlEdition,_setEnableUrlEdition,notify=on_enableUrlEdition)
-
 	urlModel=Property(QObject,_getUrlModel,constant=True)
 
 #class Bridge

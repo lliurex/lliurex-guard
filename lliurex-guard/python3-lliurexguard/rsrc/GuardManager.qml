@@ -1,43 +1,44 @@
-import org.kde.kirigami as Kirigami
 import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import org.kde.kirigami as Kirigami
 
 Rectangle{
     id:rectLayout
     color:"transparent"
-    Text{ 
-        text:i18nd("lliurex-guard","Current configuration")
-        font.pointSize: 16
-    }
 
-    GridLayout{
-        id:generalGuardLayout
-        rows:2
-        flow: GridLayout.TopToBottom
-        rowSpacing:10
+    ColumnLayout{
+        id: mainContent
+        anchors.top:parent.top
         anchors.left:parent.left
-        width:parent.width-10
-        height:parent.height-90
-        enabled:true
+        anchors.right:parent.right
+        anchors.bottom:btnBox.top
+
+        anchors.leftMargin:5
+        anchors.rightMargin:15
+        anchors.bottomMargin:25
+        spacing: 10
+
+        Text{ 
+            text:i18nd("lliurex-guard","Current configuration")
+            font.pointSize: 16
+        }
+
         Kirigami.InlineMessage {
             id: messageLabel
-            visible:guardOptionsStackBridge.showMainMessage[0]
+            visible:guardOptionsStackBridge.showMainMessage.show
             text:getTextMessage()
             type:getTypeMessage()
-            Layout.minimumWidth:650
             Layout.fillWidth:true
-            Layout.topMargin: 40
         }
-        
-       GuardLists{
+
+        GuardLists{
             id:guardLists
             listsModel:guardOptionsStackBridge.listsModel
             Layout.fillHeight:true
             Layout.fillWidth:true
-            Layout.topMargin: messageLabel.visible?0:40
        }
        
     }
@@ -53,9 +54,8 @@ Rectangle{
             id:newBtn
             visible:true
             display:AbstractButton.TextBesideIcon
-            icon.name:"list-add.svg"
+            icon.name:"list-add"
             text:i18nd("lliurex-guard","New List")
-            Layout.preferredHeight:40
             onClicked:editMenu.open()
             enabled:{
                 if (guardOptionsStackBridge.guardMode!="DisableMode"){
@@ -67,17 +67,17 @@ Rectangle{
 
             Menu{
                 id:editMenu
-                y: -newBtn.height*1.7
+                y: -height - 5
                 x: newBtn.width/2
 
                 MenuItem{
-                    icon.name:"document-edit.svg"
+                    icon.name:"document-edit"
                     text:i18nd("lliurex-guard","Add custom list")
                     onClicked:listStackBridge.addNewList("")
                 }
 
                 MenuItem{
-                    icon.name:"document-import.svg"
+                    icon.name:"document-import"
                     text:i18nd("lliurex-guard","Add custom list from file")
                     onClicked:loadFileDialog.open()
                 }
@@ -88,48 +88,41 @@ Rectangle{
             id:actionsBtn
             visible:true
             display:AbstractButton.TextBesideIcon
-            icon.name:"configure.svg"
+            icon.name:"configure"
             text:i18nd("lliurex-guard","Global Options")
-            Layout.preferredHeight:40
             enabled:guardOptionsStackBridge.enableGlobalOptions
             onClicked:actionsMenu.open()
             
             Menu{
                 id:actionsMenu
-                y: -actionsBtn.height*3.2
+                y: -height - 5
                 x: actionsBtn.width/2
 
                 MenuItem{
-                    icon.name:"security-high.svg"
+                    icon.name:"security-high"
                     text:i18nd("lliurex-guard","Enable all list")
-                    enabled:!guardOptionsStackBridge.enableListsStatusOptions[0]
-                    onClicked:guardOptionsStackBridge.changeListStatus([true,true])
+                    enabled:!guardOptionsStackBridge.enableListsStatusOptions.allActivated
+                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":true,"listId":""})
                 }
 
                 MenuItem{
-                    icon.name:"lliurex-guard-disable-mode.svg"
+                    icon.name:"lliurex-guard-disable-mode"
                     text:i18nd("lliurex-guard","Disable all lists")
-                    enabled:!guardOptionsStackBridge.enableListsStatusOptions[1]
-                    onClicked:guardOptionsStackBridge.changeListStatus([true,false])
+                    enabled:!guardOptionsStackBridge.enableListsStatusOptions.allDeactivated
+                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":false,"listId":""})
 
                 }
                 MenuItem{
-                    icon.name:"delete.svg"
+                    icon.name:"delete"
                     text:i18nd("lliurex-guard","Delete all lists")
                     enabled:guardOptionsStackBridge.enableRemoveListsOption
-                    onClicked:guardOptionsStackBridge.removeLists([true])
+                    onClicked:guardOptionsStackBridge.removeLists({"allLists":true,"listId":""})
                 }
                 MenuItem{
-                    icon.name:"restoration.svg"
+                    icon.name:"restoration"
                     text:i18nd("lliurex-guard","Restore all lists")
                     enabled:guardOptionsStackBridge.enableRestoreListsOption
-                    onClicked:guardOptionsStackBridge.restoreLists([true])
-                }
-                MenuItem{
-                    icon.name:"view-refresh.svg"
-                    text:i18nd("lliurex-guard","Update white list dns")
-                    onClicked:guardOptionsStackBridge.updateWhiteListDNS()
-                    visible:guardOptionsStackBridge.showUpdateDnsOption
+                    onClicked:guardOptionsStackBridge.restoreLists({"allLists":true,"listId":""})
                 }
             }
            
@@ -141,13 +134,13 @@ Rectangle{
             icon.name:{
                 switch(guardOptionsStackBridge.guardMode){
                     case "BlackMode":
-                        "security-high.svg"
+                        "security-high"
                         break
                     case "WhiteMode":
-                        "lliurex-guard-white-mode.svg"
+                        "lliurex-guard-white-mode"
                         break
                     case "DisableMode":
-                        "lliurex-guard-disable-mode.svg"
+                        "lliurex-guard-disable-mode"
                         break
                 }
             }
@@ -165,17 +158,16 @@ Rectangle{
                 }
             }
             enabled:!guardOptionsStackBridge.arePendingChanges
-            Layout.preferredHeight:40
             Layout.rightMargin:rectLayout.width-(actionsBtn.width+modeBtn.width+newBtn.width+applyBtn.width+40)
             onClicked:modeMenu.open()
 
             Menu{
                id:modeMenu
-               y: -modeBtn.height*1.7
+               y: -height - 5
                x: modeBtn.width/2
 
                MenuItem{
-                   icon.name:"security-high.svg"
+                   icon.name:"security-high"
                    text:i18nd("lliurex-guard","Activate BackList mode")
                    visible:{
                         if (guardOptionsStackBridge.guardMode=="BlackMode"){
@@ -188,7 +180,7 @@ Rectangle{
                }
 
                MenuItem{
-                    icon.name:"lliurex-guard-white-mode.svg"
+                    icon.name:"lliurex-guard-white-mode"
                     text:i18nd("lliurex-guard","Activate WhiteList mode")
                     visible:{
                         if (guardOptionsStackBridge.guardMode=="WhiteMode"){
@@ -201,7 +193,7 @@ Rectangle{
                }
 
                MenuItem{
-                    icon.name:"lliurex-guard-disable-mode.svg"
+                    icon.name:"lliurex-guard-disable-mode"
                     text:i18nd("lliurex-guard","Disable LliureX-Guard")
                     visible:{
                         if (guardOptionsStackBridge.guardMode=="DisableMode"){
@@ -221,9 +213,8 @@ Rectangle{
             visible:true
             enabled:guardOptionsStackBridge.arePendingChanges
             display:AbstractButton.TextBesideIcon
-            icon.name:"dialog-ok.svg"
+            icon.name:"dialog-ok"
             text:i18nd("lliurex-guard","Apply")
-            Layout.preferredHeight:40
             onClicked:guardOptionsStackBridge.applyChanges()
         }
         
@@ -232,7 +223,6 @@ Rectangle{
     FileDialog{
         id:loadFileDialog
         currentFolder:StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
-        fileMode:FileDialog.OpenFile
         nameFilters:["Test files (*txt)"]
         onAccepted:{
             var selectedPath=""
@@ -243,13 +233,11 @@ Rectangle{
       
     } 
 
-
     ChangesDialog{
         id:changeModeDialog
-        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Change Mode")
+        dialogIcon:"dialog-warning"
         dialogMsg:{
-            switch(guardOptionsStackBridge.showChangeModeDialog[1]){
+            switch(guardOptionsStackBridge.showChangeModeDialog.modeToChange){
                 case "BlackMode":
                     i18nd("lliurex-guard","Do yo want to change to black list mode?\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
                     break;
@@ -264,15 +252,15 @@ Rectangle{
                     break
             }
         }
-        dialogVisible:guardOptionsStackBridge.showChangeModeDialog[0]
+        dialogVisible:guardOptionsStackBridge.showChangeModeDialog.show
         dialogWidth:650
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard","Accept")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard","Cancel")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:changeModeDialog
            function onDiscardDialogClicked(){
@@ -286,23 +274,21 @@ Rectangle{
     } 
 
     ChangesDialog{
-
         id:pendingChangesDialog
-        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Pending changes")
+        dialogIcon:"dialog-warning"
         dialogMsg:i18nd("lliurex-guard","There are pendin changes to apply.\nDo you want to apply the changes or discard them?")
         dialogVisible:guardOptionsStackBridge.showPendingChangesDialog
         dialogWidth:500
         btnAcceptVisible:true
         btnAcceptText:i18nd("lliurex-guard","Apply")
         btnDiscardText:i18nd("lliurex-guard","Discard")
-        btnDiscardIcon:"delete.svg"
+        btnDiscardIcon:"delete"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard","Cancel")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:pendingChangesDialog
-           function onApplyDialogClicked(){
+           function onDialogApplyClicked(){
                 guardOptionsStackBridge.managePendingChangesDialog("Apply")
            }
            function onDiscardDialogClicked(){
@@ -318,18 +304,17 @@ Rectangle{
 
     ChangesDialog{
         id:removeListsDialog
-        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Remove Lists")
-        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog[1]?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove?")
-        dialogVisible:guardOptionsStackBridge.showRemoveListsDialog[0]
+        dialogIcon:"dialog-warning"
+        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog.removeAll?i18nd("lliurex-guard","Do you want select alls list to be remove?"):i18nd("lliurex-guard","Do you want select the list to be remove?")
+        dialogVisible:guardOptionsStackBridge.showRemoveListsDialog.show
         dialogWidth:500
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard","Yes")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard","No")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:removeListsDialog
            function onDiscardDialogClicked(){
@@ -343,18 +328,17 @@ Rectangle{
     } 
     ChangesDialog{
         id:restoreListsDialog
-        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Restore Lists")
+        dialogIcon:"dialog-warning"
         dialogMsg:i18nd("lliurex-guard","Do you want select alls list to be restore?")
         dialogVisible:guardOptionsStackBridge.showRestoreListsDialog
         dialogWidth:500
         btnAcceptVisible:false
         btnAcceptText:""
         btnDiscardText:i18nd("lliurex-guard","Yes")
-        btnDiscardIcon:"dialog-ok.svg"
+        btnDiscardIcon:"dialog-ok"
         btnDiscardVisible:true
         btnCancelText:i18nd("lliurex-guard","No")
-        btnCancelIcon:"dialog-cancel.svg"
+        btnCancelIcon:"dialog-cancel"
         Connections{
            target:restoreListsDialog
            function onDiscardDialogClicked(){
@@ -367,110 +351,63 @@ Rectangle{
         }
     } 
 
-    ChangesDialog{
-        id:updateDnsDialog
-        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"Lliurex-Guard"+" - "+i18nd("lliurex-guard","Update whitelists dns")
-        dialogMsg:i18nd("lliurex-guard","Do you want to update white list dns?")
-        dialogVisible:guardOptionsStackBridge.showUpdateDnsDialog
-        dialogWidth:500
-        btnAcceptVisible:false
-        btnAcceptText:""
-        btnDiscardText:i18nd("lliurex-guard","Accept")
-        btnDiscardIcon:"dialog-ok.svg"
-        btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard","Cancel")
-        btnCancelIcon:"dialog-cancel.svg"
-        Connections{
-           target:updateDnsDialog
-           function onDiscardDialogClicked(){
-                guardOptionsStackBridge.manageUpdateDnsDialog('Accept')         
-           }
-           function onRejectDialogClicked(){
-                guardOptionsStackBridge.manageUpdateDnsDialog('Cancel')       
-           }
-
-        }
-    }
-
     function getTextMessage(){
-        switch (guardOptionsStackBridge.showMainMessage[1]){
+        switch (guardOptionsStackBridge.showMainMessage.msgCode){
             case -5:
-                var msg=i18nd("lliurex-guard","Error saving the changes of the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error saving the changes of the list:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -9:
-                var msg=i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error changing Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -10:
-                var msg=i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard and the lists have been disabled:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error restarting dnsmasq. Lliurex Guard and the lists have been disabled:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -13:
-                var msg=i18nd("lliurex-guard","Error loading the information from the list:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error loading the information from the list:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -16:
-                var msg=i18nd("lliurex-guard","Error loading file:")
-                " "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error loading file:")
+                " "+guardOptionsStackBridge.showMainMessage.data
             case -19:
-                var msg=i18nd("lliurex-guard","Error removing lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error removing lists:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -20:
-                var msg=i18nd("lliurex-guard","Error activating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error activating lists:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -21:
-                var msg=i18nd("lliurex-guard","Error deactivating lists:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error deactivating lists:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -23:
-                var msg=i18nd("lliurex-guard","Error reading Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error reading Lliurex Guard mode:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -25:
-                var msg=i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","Error reading list headers:")+" "+guardOptionsStackBridge.showMainMessage.data
             case -27:
-                var msg=i18nd("lliurex-guardd","The file loaded is empty or the url than containt do not have the correct format")
-                break;
+                return i18nd("lliurex-guardd","The file loaded is empty or the url than containt do not have the correct format")
             case -30:
-                var msg=i18nd("lliurex-guard","It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
-                break;
+                return i18nd("lliurex-guard","It is not possible to load the selected file.\nIts size exceeds the recommended limit of 28 Mb")
             case -34:
-                var msg=i18nd("lliurex-guard","It is not possible to update white list dns")+" "+guardOptionsStackBridge.showMainMessage[3]
-                break;
+                return i18nd("lliurex-guard","It is not possible to update white list dns")+" "+guardOptionsStackBridge.showMainMessage.data
             case -35:
-                var msg=i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")
-                break;
+                return i18nd("lliurex-guard","The url list is empty. Urls entered with wrong format have been removed")
             case 3:
-                var msg=i18nd("lliurex-guard","List created successfully")
-                break;
+                return i18nd("lliurex-guard","List created successfully")
             case 4:
-                var msg=i18nd("lliurex-guard","List edited successfully")
-                break;
+                return i18nd("lliurex-guard","List edited successfully")
             case 8:
-                var msg=i18nd("lliurex-guard","The change of Lliurex Guard mode has been successfull")
-                break;
+                return i18nd("lliurex-guard","The change of Lliurex Guard mode has been successfull")
             case 18:
-                var msg=i18nd("lliurex-guard","Changes applied successfully")
-                break;
-            case 35:
-                var msg=i18nd("lliurex-guard","The white list dns update was successful")
-                break;
-          default:
-              var msg=""
-              break;
+                return i18nd("lliurex-guard","Changes applied successfully")
+           default:
+              return ""
         }
-        return msg
     } 
 
     function getTypeMessage(){
 
-        switch (guardOptionsStackBridge.showMainMessage[2]){
-            case "Information":
-                return Kirigami.MessageType.Information
-            case "Ok":
+        switch (guardOptionsStackBridge.showMainMessage.type){
+            case 0:
                 return Kirigami.MessageType.Positive
-            case "Error":
+            case 1:
                 return Kirigami.MessageType.Error
-            case "Warning":
+            case 2:
                 return Kirigami.MessageType.Warning
+            case 3:
+            default:
+                return Kirigami.MessageType.Information
+
         }
     }
 

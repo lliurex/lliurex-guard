@@ -379,6 +379,10 @@ class LliurexGuardManagerNatFreeClient:
 
 		try:
 			lines = [
+				"#listen-address = 127.0.0.1",
+				"#interface = lo",
+				"#bind-interfaces",
+				"conf-dir = /var/lib/dnsmasq/config",
 				f"{self.disable_bm_mode}",
 				f"{self.disable_wm_mode}",
 				f"{self.disable_whitelist_filter}"
