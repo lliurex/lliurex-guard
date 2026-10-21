@@ -1,20 +1,23 @@
 #!/bin/sh
 
+set -e
 case "$1" in
-	configure)
-	    systemctl --system daemon-reload > dev/null || true
-	    RC=0
-	    deb-systemd-helper configure lliurex-guard-natfree-client > dev/null || true
-	    deb-systemd-invoke status lliurex-guard-natfree-client.service > dev/null || RC=1
+   configure)
 
-	    if [ "$RC" = "1" ];then
-			deb-systemd-invoke start lliurex-guard-natfree-client.service > dev/null || true
-		fi
+	   systemctl daemon-reload || true
+	   systemctl enable lliurex-guard-natfree-client.service || true
+	   systemctl start lliurex-guard-natfree-client.service || true
 
-		;;
-	*)
-		echo "Unknow action"
-		;;
+   ;;
+
+   abort-upgrade|abort-remove|abort-deconfigure)
+   ;;
+
+   *)
+       exit 1
+   ;;
 esac
 
 #DEBHELPER#
+
+exit 0
