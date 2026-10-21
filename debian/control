@@ -50,7 +50,7 @@ Description: Files to open or install lliurex-guard-standalone from Zero-center
 
 Package: n4d-lliurex-guard
 Architecture: all
-Depends: ${misc:Depends},${python3:Depends},n4d,dnsmasq,n4d-network
+Depends: ${misc:Depends},${python3:Depends},n4d,dnsmasq
 Description: Lliurx Guard plugin
   Plugins supporting lliurex guard functionality
 
