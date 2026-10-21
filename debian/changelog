@@ -1,3 +1,9 @@
+lliurex-guard (5.20.0) jammy; urgency=medium
+
+  * New version for natfree model
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 21 Oct 2026 15:57:27 +0200
+
 lliurex-guard (5.19.4) jammy; urgency=medium
 
   * Fixed perfomance in desktops
