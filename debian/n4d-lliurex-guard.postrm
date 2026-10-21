@@ -21,14 +21,12 @@ set -e
 
 case "$1" in
     purge|remove)
-        firstInitFile=/var/lib/lliurex-guar/first_init
+        firstInitFile=/var/lib/lliurex-guard/first_init
         configFile=/etc/dnsmasq.d/lliurex-guard.conf
         overrideFile=/etc/systemd/system/dnsmasq.service.d/lliurex-guard-override.conf
 
         systemctl daemon-reload || true
-        systemctl stop dnsmasq.service || true
-        systemctl enable dnsmaq.service || true
-
+ 
         if [ -f "$configFile" ];then
             rm -f "$configFile" || true
         fi
