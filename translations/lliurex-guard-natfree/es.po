@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-15 10:13+0200\n"
-"PO-Revision-Date: 2026-10-15 10:14+0200\n"
+"PO-Revision-Date: 2026-10-21 15:18+0200\n"
 "Last-Translator: lliurex <lliurex@gva.es>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: lliurex-guard-natfree/lliurex-guard-natfree:84
 msgid ""
@@ -92,7 +92,7 @@ msgstr "No hay listas configuradas"
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardLists.qml:143
 msgid "No list found"
-msgstr "No se encontrado ninguna lista"
+msgstr "No se ha encontrado ninguna lista"
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:24
 msgid "Current configuration"

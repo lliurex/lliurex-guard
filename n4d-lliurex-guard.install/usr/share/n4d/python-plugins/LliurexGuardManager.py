@@ -1,771 +1,785 @@
- 
+#!/usr/bin/python3 
 import os
+import copy
 import json
 import codecs
+import grp
+import pwd
 import shutil
 import ssl
 import subprocess
 from os import listdir
 from os.path import isfile,isdir,join
+from pathlib import Path
 import n4d.server.core as n4dcore
 import n4d.responses
-
 
 class LliurexGuardManager:
 
 	def __init__(self):
 
 		self.core=n4dcore.Core.get_core()
-		self.default_list_path="/usr/share/lliurex-guard/blacklists"
-		self.mode_file_path="/etc/dnsmasq.d/lliurex-guard.conf"
-		self.conf_dir="/etc/lliurex-guard"
-		self.blacklist_dir=os.path.join(self.conf_dir,"blacklist")
-		self.blacklist_disable_dir=os.path.join(self.conf_dir,"blacklist.d")
+		self.mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard.conf")
+		self.natfree_mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard-natfree.conf")
+		self.conf_dir=Path("/etc/lliurex-guard")
+		self.blacklist_dir=self.conf_dir / "blacklist"
+		self.blacklist_disable_dir=self.conf_dir / "blacklist.d"
+		self.blacklist_redirection="169.254.254.254"
+		self.whitelist_dir=self.conf_dir / "whitelist"
+		self.whitelist_disable_dir=self.conf_dir / "whitelist.d"
+		self.whitelist_redirection="server=/"
+		self.guard_lib_dir=Path("/var/lib/lliurex-guard")
+		self.first_init_path=self.guard_lib_dir / "first_init"
+		self.blacklist_dir=self.conf_dir / "blacklist"
+		self.dnsmasq_lib_dir=Path("/var/lib/dnsmasq/config")
+		self.dnsmasq_override_service=Path("/etc/systemd/system/dnsmasq.service.d/")
+		self.dnsmasq_override_service_conf=self.dnsmasq_override_service / "lliurex-guard-override.conf"		
+		self.natfree_dnsmasq_override_service_conf=self.dnsmasq_override_service / "lliurex-guard-natfree-override.conf"
 		self.set_bm_mode="conf-dir = /etc/lliurex-guard/blacklist"
 		self.disable_bm_mode="#conf-dir = /etc/lliurex-guard/blacklist"
-		self.blacklist_redirection="169.254.254.254"
-		self.whitelist_dir=os.path.join(self.conf_dir,"whitelist")
-		self.whitelist_disable_dir=os.path.join(self.conf_dir,"whitelist.d")
 		self.set_wm_mode="conf-dir = /etc/lliurex-guard/whitelist"
 		self.disable_wm_mode="#conf-dir = /etc/lliurex-guard/whitelist"
-		self.whitelist_redirection="server=/"
 		self.whitelist_filter="address=/#/"+self.blacklist_redirection
 		self.disable_whitelist_filter="#"+self.whitelist_filter
 		self.list_tmpfile=[]
 		self.list_to_active=[]
-		'''
-		server='localhost'
-		context=ssl._create_unverified_context()
-		self.n4d = n4dclient.ServerProxy("https://"+server+":9779",context=context,allow_none=True)
-		'''
-	#def __init__	
+		self.resolvconf_path=Path("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
+		self.network_plugin_path=Path("/usr/share/n4d/python-plugins/NetworkManager")
+	
+	def startup(self,options):
+
+		if self._is_desktop_standalone():
+			self._remove_natfree_config()
+
+	#def startup()
+
+	def read_guardmode(self,checkconfig=False):
+		
+		try:
+			if not self.first_init_path.exists():
+				self._first_init()
+
+			if not self.mode_file_path.exists():
+				self._create_guardmode_conf_file()
+
+			lines=self.mode_file_path.read_text(encoding="utf-8").splitlines()
+			count=sum(1 for line in lines if "#" in line)
+			if count >= 3:
+				self.guardMode="DisableMode"
+			else:
+				active_lines=[line for line in lines if "#" not in line]
+
+				if any("blacklist" in line for line in active_lines):
+					self.guardMode="BlackMode"
+				else:
+					self.guardMode="WhiteMode"
+
+			self._set_variables()
+			result={'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
+			return n4d.responses.build_successful_call_response(result)
+	
+		except Exception as e:
+			print(f"[LliurexGuardManager]: Unable to read Guard Mode: {e}")
+			result={'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
+			return n4d.responses.build_successful_call_response(result)
+	
+	#def read_guard_mode
+
+	def read_guardmode_headers(self):
+
+		list_config = {}
+
+		active_list = self._read_list_headers(self.active_path)
+
+		if not active_list.get('status'):
+			return n4d.responses.build_successful_call_response(active_list)
+
+		disable_list = self._read_list_headers(self.disable_path)
+
+		if not disable_list.get('status'):
+			return n4d.responses.build_successful_call_response(disable_list)
+
+		combined_data = active_list.get('data', []) + disable_list.get('data', [])
+
+		for count, item in enumerate(combined_data, start=1):
+			list_config[str(count)] = item
+
+		result = {
+			'status': True, 
+			'msg': f'Reading {self.guardMode} successfully', 
+			'data': list_config
+		}	
+
+		return n4d.responses.build_successful_call_response(result)
+
+	#def read_guardmode_headers
+
+	def read_guardmode_list(self, listId: str, active: bool):
+
+		path_dir = self.active_path if active else self.disable_path
+		alt_dir = self.disable_path if active else self.active_path
+
+		filename = f"{listId}.list"
+		target_file = path_dir / filename
+
+		try:
+			if not target_file.exists():
+				target_file = alt_dir / filename
+
+			if target_file.exists():
+				content = []
+				count_lines = 0
+
+				lines = target_file.read_text(encoding="utf-8").splitlines()
+
+				for line in lines:
+					line = line.strip()
+					if not line or "NAME" in line or "DESCRIPTION" in line:
+						continue
+
+					if self.redirection in line:
+						if self.guardMode == "BlackMode":
+							if "address=/" in line:
+								domain = line.split("address=/")[1].split(f"/{self.redirection}")[0]
+								content.append(f"{domain}\n")
+								count_lines += 1
+						else:
+							parts = line.split(self.redirection)
+							if len(parts) > 1:
+								domain = parts[1].split("/")[0]
+								tmp_line = f"{domain}\n"
+
+								if tmp_line not in content:
+									content.append(tmp_line)
+									count_lines += 1
+					
+				result = {'status': True, 'msg': "Read content list successfully", 'data': [content, count_lines]}
+				
+			else:
+				result = {'status': False, 'msg': "Unable to read content list. The file does not exist", 'data': "The file does not exist"}
+
+			return n4d.responses.build_successful_call_response(result)
+
+		except Exception as e:
+			print(f"[LliurexGuardManagerClient]: Unable to read content list: {e}")
+			result = {'status': False, 'msg': "Unable to read content list", 'data': str(e)}
+			return n4d.responses.build_successful_call_response(result)
+	
+	#def read_guardmode_list	
+
+	def remove_guardmode_list(self, list_to_manage: list) :
+
+		active_dir = self.active_path
+		disable_dir = self.disable_path
+
+		try:
+			for item in list_to_manage:
+				filename = f"{item}.list"
+				active_file = active_dir / filename
+				disable_file = disable_dir / filename
+
+				if active_file.exists():
+					active_file.unlink()
+				elif disable_file.exists():
+					disable_file.unlink()
+
+			ret = self.change_guardmode(self.guardMode)
+			
+			if not ret.get("status"):
+				return n4d.responses.build_successful_call_response(ret.get("return"))
+
+			result = {'status': True, 'msg': "list_to_manage removed successfully"}
+			return n4d.responses.build_successful_call_response(result)      
+		
+		except Exception as e:
+			print(f"[LliurexGuardManagerClient]: Error removing list_to_manage: {e}")
+			result = {'status': False, 'msg': "Error removing list_to_manage", 'data': str(e)}      
+			return n4d.responses.build_successful_call_response(result)
+
+	#def remove_guardmode_list
+	
+	def activate_guardmode_list(self,list_to_manage:list):
+
+		result=self._move_guardmode_list(list_to_manage,self.active_path,self.disable_path)
+
+		if result.get('status'):
+			result={'status':True,'msg':"list_to_manage activated successfully"}
+			ret=self.change_guardmode(self.guardMode)
+			final_response = result if ret.get("status") else ret.get("return")
+			return n4d.responses.build_successful_call_response(final_response)
+		else:
+			return n4d.responses.build_successful_call_response(result)
+	
+	#def activate_guardmode_list
+	
+	def deactivate_guardmode_list(self, list_to_manage: list):
+
+		result = self._move_guardmode_list(list_to_manage, self.disable_path, self.active_path)
+
+		if result.get('status'):
+			result = {'status': True, 'msg': "list_to_manage deactivated successfully"}
+			ret = self.change_guardmode(self.guardMode)
+			final_response = result if ret.get("status") else ret.get("return")
+			return n4d.responses.build_successful_call_response(final_response)
+		else:
+			return n4d.responses.build_successful_call_response(result)
+
+	#def deactivate_guardmode_list
+
+	def change_guardmode(self,mode_to_set,rescue=False):
+
+		ret = None
+		ret_list = False
+		enable_dnsmasq = False
+		restart_dnsmasq = False
+		base_lines=["listen-address=127.0.0.1","interface=lo","bind-interfaces","conf-dir=/var/lib/dnsmasq/config"]
+
+		ret_config=self._create_guardmode_conf_dir()
+
+		if not ret_config.get("status"):
+			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_config.get("data")}
+			return n4d.responses.build_successful_call_response(result)
+
+		if mode_to_set == "BlackMode":
+			lines = [self.set_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
+			enable_dnsmasq=True
+			restart_dnsmasq=True
+		elif mode_to_set == "WhiteMode":
+			lines = [self.disable_bm_mode, self.set_wm_mode, self.whitelist_filter]
+			enable_dnsmasq=True
+			restart_dnsmasq=True
+		else:
+			lines = [self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
+
+		try:
+			base_lines.extend(lines)
+			self.mode_file_path.write_text("\n".join(str(l) for l in base_lines) + "\n", encoding="utf-8")
+		except OSError as file_error:
+			msg_log=f"Failed to write configuration file: {file_error}"
+			print(f"[LliurexGuardManagerClient]: {msg_log}")
+			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': str(file_error)}
+			return n4d.responses.build_successful_call_response(result)
+	
+		ret_manage = self._manage_dnsmasq_service(enable_dnsmasq)
+			
+		if not ret_manage.get("status"):
+			self._safe_fallback_to_disable()
+			result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_manage}
+			return n4d.responses.build_successful_call_response(result)
+
+		if restart_dnsmasq:
+			ret_restart=self.restart_dnsmasq().get("return")
+			if not ret_restart.get("status"):
+				self._safe_fallback_to_disable()
+				result = {'status': False, 'msg': "Unable to change Guard Mode", 'data': ret_restart}
+				return n4d.responses.build_successful_call_response(result)
+
+		ret=ret_manage
+		result = {'status': True, 'msg': "Changed LliureX Guard Mode successfully", 'data': ret}
+		self.guardMode=mode_to_set
+		return n4d.responses.build_successful_call_response(result)
+
+	#def change_guardmode
+	
+	def restart_dnsmasq(self):
+		
+		error = False
+		data = ""
+		
+		try:
+			subprocess.run(
+				['systemctl', 'restart', 'dnsmasq.service'],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
+		except subprocess.CalledProcessError as e:
+			error = True
+			data = f"Error {e.returncode}: {e.stderr.strip()}"
+		except Exception as e:
+			error = True
+			data = str(e)
+
+		if not error:
+			result = {'status': True, 'msg': "Dnsmasq restarted successfully"}
+			return n4d.responses.build_successful_call_response(result)
+		else:
+			msg="Error restarting Dnsmasq"
+			result = {'status': False, 'msg':msg, 'data': data}
+			return n4d.responses.build_successful_call_response(result)
+
+	#def restart_dnsmasq
+
+	def update_whitelist_dns(self):
+
+		dns_vars = self._get_dns()
+
+		try:
+			if self.whitelist_dir.exists():
+				for file_path in self.whitelist_dir.iterdir():
+					if file_path.is_file():
+						content = set() 
+						format_lines = []
+
+						lines = file_path.read_text(encoding="utf-8").splitlines()
+
+						for line in lines:
+							line = line.strip()
+							if not line:
+								continue
+
+							if "NAME" in line or "DESCRIPTION" in line:
+								format_lines.append(line)
+							else:
+								if self.whitelist_redirection in line:
+									parts = line.split(self.whitelist_redirection)
+									if len(parts) > 1:
+										domain = parts[1].split("/")[0].strip()
+										if domain and domain not in content:
+											content.add(domain)
+											format_lines.append(domain)
+
+						output_lines = []
+						for line in format_lines:
+							if "NAME" in line or "DESCRIPTION" in line:
+								output_lines.append(line)
+							else:
+								for dns in dns_vars:
+									if dns.strip():
+										output_lines.append(f"{self.whitelist_redirection}{line}/{dns.strip()}")
+
+						file_path.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
+				result = {'status': True, 'msg': 'The update of the dns has been carried out successfully', 'data': ""}
+				return n4d.responses.build_successful_call_response(result)
+
+		except Exception as e:
+			msg_log=f"Error Updating white list dns: {e}"
+			print(f"[LliurexGuardManagerClient]: {msg_log}")
+			result = {'status': False, 'msg': 'Error updating white list dns', 'data': str(e)}
+			return n4d.responses.build_successful_call_response(result)
+	
+	#def update_whitelist_dns	
+	
+	def _set_variables(self):
+
+		mapping = {
+			"BlackMode": (self.blacklist_dir, self.blacklist_disable_dir, self.blacklist_redirection),
+			"WhiteMode": (self.whitelist_dir, self.whitelist_disable_dir, self.whitelist_redirection)
+		}
+
+		default_values = (Path(""), Path(""), Path(""))
+
+		self.active_path, self.disable_path, self.redirection = mapping.get(self.guardMode, default_values)
+	
+	#def _set_variables
 
 	def _check_dnsmasq_conf(self):
-		
-		if not os.path.exists('/etc/dnsmasq.conf'):
-			with open('/etc/dnsmasq.conf','w') as fd:
-				pass
 
-		with open("/etc/dnsmasq.conf","r") as fd:
-			lines = fd.readlines()
+		extra_dns_file = self.dnsmasq_lib_dir / "extra-dns"
 
-		if "conf-dir=/etc/dnsmasq.d/" not in lines:
-			with open("/etc/dnsmasq.conf","a") as fd:
-				fd.write("conf-dir=/etc/dnsmasq.d/\n")
-		if "conf-dir=/var/lib/dnsmasq/config" not in lines:
-			with open("/etc/dnsmasq.conf","a") as fd:
-				fd.write("conf-dir=/var/lib/dnsmasq/config\n")
+		try:
+			if not extra_dns_file.exists():
+				desktop_dns = self._get_desktop_dns()
+				dns_lines = [f"server={item}" for item in desktop_dns if item]
+				extra_dns_file.write_text("\n".join(dns_lines) + "\n", encoding="utf-8")
 
+			if not self.mode_file_path.exists():
+				self._create_guardmode_conf_file()
 
-		if not os.path.exists("/var/lib/dnsmasq/config/extra-dns"):
-			with open("/var/lib/dnsmasq/config/extra-dns","w") as fd:
-				desktop_dns=self._get_desktop_dns()
-				for item in desktop_dns:
-					line="server=%s"%item+"\n"
-					fd.write(line)
-				fd.close()		
+		except OSError as e:
+			msg_log=f"Error checking dnsmasq configuration: {e}"
+			print(f"[LliurexGuardManager]: {msg_log}")
 
-		fd.close()		
-
-	#def check_dnsmasq_conf			
+	#def _check_dnsmasq_conf
 
 	def _create_guardmode_conf_file(self):
 
-		f=open(self.mode_file_path,'w')
-		f.write(self.disable_bm_mode+"\n")
-		f.write(self.disable_wm_mode+"\n")
-		f.write(self.disable_whitelist_filter)
-		f.close()
-
-	#def _create_guardmode_conf
-
-	def _create_guardmode_conf_dir(self,mode_to_set):
-
+		try:
+			lines = [
+				"#listen-address = 127.0.0.1",
+				"#interface = lo",
+				"#bind-interfaces",
+				"conf-dir = /var/lib/dnsmasq/config",
+				f"{self.disable_bm_mode}",
+				f"{self.disable_wm_mode}",
+				f"{self.disable_whitelist_filter}"
+			]
+			self.mode_file_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 		
-		if not os.path.exists(self.conf_dir):
-			os.mkdir(self.conf_dir)
+		except OSError as e:
+			msg_log=f"Error writing configuration file: {e}"
+			print(f"[LliurexGuardManager]: {msg_log}")
 
-		if mode_to_set =="BlackMode":
-			if not os.path.exists(self.blacklist_dir):
-				os.mkdir(self.blacklist_dir)
+	#def _create_guardmode_conf_file:
 
-			if not os.path.exists(self.blacklist_disable_dir):
-				os.mkdir(self.blacklist_disable_dir)
-				if os.path.exists(self.default_list_path):
-					os.system("cp -R "+self.default_list_path+"/* "+self.blacklist_disable_dir)
+	def _create_guardmode_conf_dir(self):
 
-		elif mode_to_set=="WhiteMode":			
-			if not os.path.exists(self.whitelist_dir):
-				os.mkdir(self.whitelist_dir)
+		directories = [
+			self.conf_dir,
+			self.blacklist_dir,
+			self.blacklist_disable_dir,
+			self.whitelist_dir,
+			self.whitelist_disable_dir,
+		]
 
-			if not os.path.exists(self.whitelist_disable_dir):
-				os.mkdir(self.whitelist_disable_dir)		
-			
-	#def _create_guardmode_conf	
+		try:
+			for directory in directories:
+				directory.mkdir(parents=True, exist_ok=True)
 
-	def _detect_flavour(self):
-		
-		self.is_server=False
+			return {"status":True,"data":""}
+		except OSError as e:
+			print(f"[LliurexGuardManager]: Error creating guardmode configuration directories: {e}")
+			return {"status":False,"data":e}
 
-		cmd='lliurex-version -v'
-		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-		result=p.communicate()[0]
-
-		if type(result) is bytes:
-			result=result.decode()
-		
-		flavours = [ x.strip() for x in result.split(',') ]
-
-		for item in flavours:
-			if 'server' in item:
-				self.is_server=True
-				break
-	
-	#def _detect_flavour	
+	#def _create_guardmode_conf_dir
 
 	def _get_dns(self):
 
-		#self._detect_flavour()
 		dns_vars=[]
-		is_server=False
 
-		if self.is_server:
-			#Old n4d: dns_vars=self.n4d.get_variable("","VariablesManager","DNS_EXTERNAL")
-			dns_vars=self.core.get_variable("DNS_EXTERNAL").get('return',None)
-
-		else:
-			dns_vars=self._get_desktop_dns()
+		dns_vars=self._get_desktop_dns()
 		
 		return dns_vars
 
 	#def _get_dns	
 
 	def _first_init(self):
+	
+		try:
+			self.guard_lib_dir.mkdir(parents=True, exist_ok=True)
+			self.dnsmasq_lib_dir.mkdir(parents=True, exist_ok=True)
+		except OSError as e:
+			print(f"[LliurexGuardManager]: Error creating directories: {e}")
+			return
 
-		if not os.path.exists("/var/lib/lliurex-guard"):
-			os.makedirs("/var/lib/lliurex-guard")
+		self._check_dnsmasq_conf()
 
-		if not self.is_server:
-			if not os.path.exists("/var/lib/dnsmasq"):
-				os.makedirs("/var/lib/dnsmasq")
+		try:
+			self.first_init_path.touch(exist_ok=True)
+		except OSError as e:
+			print(f"[LliurexGuardManager]: Error creating init file: {e}")
 
-			if not os.path.exists("/var/lib/dnsmasq/config"):
-				os.makedirs("/var/lib/dnsmasq/config")
-
-			self._check_dnsmasq_conf()
-			
-		fd = open("/var/lib/lliurex-guard/first_init","w")
-		fd.close()
-
-	#def first_init
-
+	#def _first_init
 
 	def _get_desktop_dns(self):
 
-		desktop_dns=[]
-		cmd="nmcli device show | grep DNS | awk '{print$2}'"
-		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-		output=p.communicate()[0]
+		desktop_dns = []
 
-		if type(output) is bytes:
-			output=output.decode()
-
-		output=output.split("\n")
-
-		for item in output:	
-			if item!='':
-				desktop_dns.append(item)
-
-		return desktop_dns		
-
-	#def _get_desktop_dns	
-
-
-	def read_guardmode(self,checkconfig=False):
-		
 		try:
+			result = subprocess.run(
+				['nmcli', '-g', 'IP4.DNS,IP6.DNS', 'device', 'show'],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True, 
+				check=True
+			)
+
+			for line in result.stdout.splitlines():
+				clean_line = line.strip()
+				if clean_line:
+					desktop_dns = [ip.strip() for ip in clean_line.split('|')]
+		except (subprocess.CalledProcessError, FileNotFoundError) as e:
+			msg_log=f"Error getting desktop DNS: {e}"
+			print(f"[LliurexGuardManager]: {msg_log}")
+
+		return desktop_dns
+
+	#def _get_desktop_dns 	
+
+	def _manage_dnsmasq_service(self, enable_service: bool):
+
+		action = "enable" if enable_service else "disable"
+
+		if not enable_service:
+			error_stop, data_stop = self._stop_dnsmasq_service()
+			if error_stop:
+				msg_log=f"Error stopping Dnsmasq. Details: {data_stop}"
+				print(f"[LliurexGuardManagerClient]: {msg_log}")
+				return {'status': False, 'msg': "Error stopping Dnsmasq", 'data': data_stop}
+		try:
+			subprocess.run(
+				['systemctl', action, 'dnsmasq.service'],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
+
+			self._override_dnsmasq_service(enable_service)
+			self._manage_resolvconf(enable_service)
+			msg = f"Dnsmasq {action} successfully"
+			return {'status': True, 'msg': msg}
 			
-			if checkconfig:
-				self._detect_flavour()
-				if not os.path.exists("/var/lib/lliurex-guard/first_init"):
-					self._first_init()
-
-				if not os.path.exists(self.mode_file_path):
-					self._create_guardmode_conf_file()
-	
-			f=open(self.mode_file_path,'r')
-			lines=f.readlines()
-			count=0
-			for line in lines:
-				if "#" in line:
-					count+=1
-				else:
-					if "blacklist" in line:
-						guardMode="BlackMode"
-					else:
-						guardMode="WhiteMode"
-				
-				
-			if count==3:
-				self.guardMode="DisableMode"
-			else:
-				self.guardMode=guardMode
-
-			f.close()
-			if checkconfig:
-				self._set_variables()
-
-			#Old n4d:return {'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
-			result={'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
-			return n4d.responses.build_successful_call_response(result)
-		
+		except subprocess.CalledProcessError as e:
+			error_msg = f"Error: Dnsmasq {action} failed"
+			details = f"Error {e.returncode}: {e.stderr.strip()}"
+			print(f"[LliurexGuardManagerClient]: {error_msg}. Details: {details}")
+			return {'status': False, 'msg': error_msg, 'data': details}
 		except Exception as e:
-			#Old n4d: return {'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
-			result={'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
-			return n4d.responses.build_successful_call_response(result)
-	
+			error_msg = f"Error: Dnsmasq {action} failed. Details:{e}"
+			print(f"[LliurexGuardManagerClient]: {error_msg}")
+			return {'status': False, 'msg': error_msg, 'data': str(e)}
 
-	#def read_guard_mode
-	
-	def _set_variables(self):
-
-		if self.guardMode=="BlackMode":
-			self.active_path=self.blacklist_dir
-			self.disable_path=self.blacklist_disable_dir
-			self.redirection=self.blacklist_redirection
-		elif self.guardMode=="WhiteMode":
-			self.active_path=self.whitelist_dir
-			self.disable_path=self.whitelist_disable_dir
-			self.redirection=self.whitelist_redirection
-			self.dns_vars=self._get_dns()
-
-	#def _set_variables		
-	
-	def change_guardmode(self,mode_to_set,rescue=False):
-
-		self._detect_flavour()
-		ret={}
-		
-		try:
-			f=open(self.mode_file_path,'w')
-
-			if mode_to_set=="BlackMode":
-				f.write(self.set_bm_mode+"\n")
-				f.write(self.disable_wm_mode+"\n")
-				f.write(self.disable_whitelist_filter)
-			elif mode_to_set=="WhiteMode":
-				f.write(self.disable_bm_mode+"\n")
-				f.write(self.set_wm_mode+"\n")
-				f.write(self.whitelist_filter)
-			elif mode_to_set=="DisableMode":
-				f.write(self.disable_bm_mode+"\n")
-				f.write(self.disable_wm_mode+"\n")
-				f.write(self.disable_whitelist_filter)	
-				
-			
-			f.close()
-			self._create_guardmode_conf_dir(mode_to_set)
-			
-			if not self.is_server:
-				if mode_to_set !="DisableMode":
-					ret=self._manage_dnsmasq_service(True)
-				else:
-					ret=self._manage_dnsmasq_service(False)
-			else:		
-				if rescue:
-					restart=self.restart_dnsmasq(True)
-			#Old n4d:return {'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data':""}
-			result={'status':True,'msg':"Changed LliureX Guard Mode sucessfully",'data': ret}
-			return n4d.responses.build_successful_call_response(result)
-	
-		except Exception as e:
-			#Old n4d:return {'status':False,'msg':"Unable to change Guard Mode",'data':str(e)}	
-			result={'status':False,'msg':"Unable to change Guard Mode",'data':str(e)}	
-			return n4d.responses.build_successful_call_response(result)	
-
-	#def change_guard_mode
-	
-	def restart_dnsmasq(self,nonretry=False):			
-
-		cmd="systemctl restart dnsmasq.service 1>/dev/null"
-		error=False
-		data=""
-		try:
-			restart=os.system(cmd)
-			if restart !=0:
-				error=True
-				data=str(restart)
-				
-		except Exception as e:
-			error=True
-			data=str(e)
-
-		if not error:			
-			#Old n4d:return {'status':True,'msg':"Dnsmaq restart successfully"}
-			result={'status':True,'msg':"Dnsmaq restart successfully"}
-			return n4d.responses.build_successful_call_response(result)
-		else:
-			if not nonretry:
-				self.deactivate_guardmode_list(self.list_to_active)
-				self.change_guardmode("DisableMode",True)
-			#Old n4d_return {'status':False,'msg':"Error restarting Dnsmaq",'data':data}
-			result={'status':False,'msg':"Error restarting Dnsmaq",'data':data}
-			return n4d.responses.build_successful_call_response(result)
-
-	#def __restart_dnsmasq				
-	
-
-	def read_guardmode_headers(self):
-		
-		list_config={}
-		result=True
-		data=[]
-		count=1
-		error=False
-
-		active_list=self._read_list_headers(self.active_path)
-
-		if active_list['status']:
-			disable_list=self._read_list_headers(self.disable_path)
-			if not disable_list['status']:
-				error=True
-				result=disable_list
-		else:
-			error=True
-			result=active_list		
-	
-		if not error:		
-			data=active_list['data']+disable_list['data']
-			
-			for item in data:
-				list_config[str(count)]=item
-				count+=1
-
-			#Old n4d: return {'status':True,'msg':'Reading %s sucessfully'%self.guardMode,'data':list_config}	
-			result={'status':True,'msg':'Reading %s sucessfully'%self.guardMode,'data':list_config}	
-		'''
-		else:
-			return result
-		'''		
-		return n4d.responses.build_successful_call_response(result)	
-	
-
-	#def read_guardmode_list
-	
-	def _read_list_headers(self,folder):
-
-		files_headers=[]
-
-		try:
-			for item in listdir(folder):
-				t=join(folder,item)
-				if isfile(t) and item.endswith('.list'):
-					f=codecs.open(t,'r')
-					tmp={}
-					tmp["id"]=item.split(".")[0]
-					tmp["active"]=True
-					match=0
-					lines=f.readlines()
-					for line in lines:
-						if "NAME" in line:
-							tmp["name"]=line.split(":")[1].split("\n")[0]
-							match+=1
-						if "DESCRIPTION" in line:
-							tmp["description"]=line.split(":")[1].split("\n")[0]
-							match+=1
-
-						if match==2:
-							if self.guardMode=="BlackMode":
-								tmp["lines"]=len(lines)-2
-
-							else:
-								num_lines=(len(lines)-2)/2
-								tmp["lines"]=int(num_lines)
-							break	
-
-
-					f.close()
-					lines=None
-					if folder==self.blacklist_disable_dir:
-						tmp["active"]=False
-					elif folder==self.whitelist_disable_dir:
-						tmp["active"]=False
-
-					files_headers.append(tmp)
-			
-			return {'status':True,'msg':"Lists readed successfully",'data':files_headers}
-
-		except Exception as e:			
-			return {'status':False,'msg':"Unable to readed lists",'data':str(e)}
-
-	#def _read_list_headers
-				
-	def read_guardmode_list(self,listId,active):
-
-		if active:
-			path=self.active_path
-			alternative_path=self.disable_path
-				
-		else:
-			path=self.disable_path	
-			alternative_path=self.active_path
-				
-		try:
-			existsfile=False
-			file=os.path.join(path,listId+".list")
-			content=[]
-			count_lines=0
-			if os.path.exists(file):
-				#f=codecs.open(file,'r',encoding="utf-8")
-				f=open(file,'r')
-				existsfile=True
-			else:	
-				file=os.path.join(alternative_path,listId+".list")
-				if os.path.exists(file):
-					f=open(file,'r')
-					existsfile=True
-
-			if existsfile:		
-				lines=f.readlines()
-				for line in lines:
-					if "NAME" not in line:
-						if "DESCRIPTION" not in line:
-							if self.guardMode=="BlackMode":
-								if self.redirection in line:
-									line=line.split("/%s"%self.redirection)[0].split("address=/")[1]
-									content.append(line+"\n")	
-									count_lines+=1
-							else:
-								if self.redirection in line:
-									line=line.split(self.redirection)[1]
-									line=line.split("/")[0]
-									tmp_line=line+"\n"
-									if tmp_line not in content:
-										content.append(line+"\n")	
-										count_lines+=1
-										
-							
-				f.close()
-				lines=None
-				
-				#Old n4d:return {'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
-				result={'status':True,'msg':"Read content list successfully",'data':[content,count_lines]}	
-
-			else:
-				#Old n4d: return {'status':False,'msg':"Unable to read content list.The file does not exist",'data':"The file does not exist"}
-				result={'status':False,'msg':"Unable to read content list.The file does not exist",'data':"The file does not exist"}
-
-			return n4d.responses.build_successful_call_response(result)	
-		
-		except Exception as e:
-			#Old n4d: return {'status':False,'msg':"Unable to read content list",'data':str(e)}
-			result={'status':False,'msg':"Unable to read content list",'data':str(e)}
-			return n4d.responses.build_successful_call_response(result)
-					
-
-	#def read_guardmode_list	
-
-
-	def remove_guardmode_list(self,lists):
-
-		try:
-			for item in lists:
-					file=item+".list"
-					if os.path.exists(os.path.join(self.active_path,file)):
-						os.remove(os.path.join(self.active_path,file))
-					else:
-						if os.path.exists(os.path.join(self.disable_path,file)):
-							os.remove(os.path.join(self.disable_path,file))	
-							
-			#Old n4d:return {'status':True,'msg':"Listed removed sucessfully"}		
-			result={'status':True,'msg':"Listed removed sucessfully"}		
-			return n4d.responses.build_successful_call_response(result)		
-
-		except Exception as e:
-			#Old n4d: return {'status':False,'msg':"Error removing lists",'data':str(e)}		
-			result={'status':False,'msg':"Error removing lists",'data':str(e)}		
-			return n4d.responses.build_successful_call_response(result)		
-							
-
-	#def remove_guardmode_list
-	
-	def activate_guardmode_list(self,lists):
-
-		self.list_to_active=lists
-		result=self._move_guardmode_list(self.list_to_active,self.active_path,self.disable_path)
-
-		if result['status']:
-			#Old n4d: return {'status':True,'msg':"Lists activated successfully"}
-			result={'status':True,'msg':"Lists activated successfully"}
-			return n4d.responses.build_successful_call_response(result)
-			
-		else:
-			return n4d.responses.build_successful_call_response(result)
-	
-	#def activate_guardmode_list
-	
-	def deactivate_guardmode_list(self,lists):
-
-		result=self._move_guardmode_list(lists,self.disable_path,self.active_path)
-		
-		if result['status']:
-			#Old n4d: return {'status':True,'msg':"Lists deactivated successfully"}
-			result:{'status':True,'msg':"Lists deactivated successfully"}
-			return n4d.responses.build_successful_call_response(result)
-		
-		else:
-			return n4d.responses.build_successful_call_response(result)
-
-	#def deactivate_guardmode_list	
-
-	def _move_guardmode_list(self,lists,dest_path,orig_path):
-
-		
-		try:
-			for item in lists:
-				if item["tmpfile"]!="":
-					result_format=self._format_guardmode_list(item)
-					if result_format['status']:
-						dest_file=os.path.join(dest_path,item["id"]+".list")
-						shutil.copy2(item["tmpfile"],dest_file)
-						os.system("chmod 644 "+dest_file)
-						self.list_tmpfile.append(item["tmpfile"])
-						if os.path.exists(os.path.join(orig_path,item["id"]+".list")):
-							os.remove(os.path.join(orig_path,item["id"]+".list"))
-					else:
-						return result_format	
-					
-				else:
-					if os.path.exists(os.path.join(orig_path,item["id"]+".list")):
-						shutil.copy2(os.path.join(orig_path,item["id"]+".list"),os.path.join(dest_path,item["id"]+".list"))			
-						os.remove(os.path.join(orig_path,item["id"]+".list"))
-			
-			return {'status':True,'msg':""}
-			
-		except Exception as e: 				
-			return {'status':False,'msg':"Error copyng list ",'data':str(e)}
-
-	#def _move_guardmode_list	
-
-	def _format_guardmode_list(self,item):
-
-		
-		try:
-			if os.path.exists(item["tmpfile"]):
-				f=codecs.open(item["tmpfile"],'r')
-				lines=f.readlines()
-				f.close()
-				original_file_perms=self._get_original_file_perms(item["tmpfile"])
-				os.system('chown root:root '+item['tmpfile'])
-				f=open(item["tmpfile"],'w')
-
-				header_name="#NAME:"+item["name"]+"\n"
-				f.write(header_name)
-				header_desc="#DESCRIPTION:"+item["description"]+"\n"
-				f.write(header_desc)
-				for line in lines:
-					if line !="":
-						if self.redirection in line:
-								f.write(line)
-						else:
-							if "https" in line:
-								line=line.replace("https://","")
-							else:
-								line=line.replace("http://","")	
-							
-							if len(line.split("/"))==1:
-							
-								if self.guardMode=="BlackMode":
-									line=line.strip()
-									tmp_line="address=/%s/%s\n"%(line,self.redirection)
-									f.write(tmp_line)
-								else:
-									for dns in self.dns_vars:
-										tmp_line=self.redirection+line.split("\n")[0]+"/"+dns
-										f.write(tmp_line+"\n")	
-				
-				f.close()
-				try:
-					cmd='chown %s:%s %s'%(original_file_perms[0],original_file_perms[1],item["tmpfile"])
-					os.system(cmd)
-				except Exception as e:
-					print(str(e))
-					pass
-				lines=None
-				
-			return {'status':True,'msg':'List formated successfully'}
-		
-		except Exception as e:
-			return {'status':False,'msg':'Error formatting the list','data':str(e)}						
-		
-
-	#def _format_guarmode_list		
-			
-	def remove_tmp_file(self):
-
-		
-		for item in self.list_tmpfile:
-			if os.path.exists(item):
-				os.remove(item)
-
-		self.list_tmpfile=[]
-		return n4d.responses.build_successful_call_response()
-
-	#def _remove_tmp_file			
-
-	def update_whitelist_dns(self):
-
-		self._detect_flavour()
-		dns_vars = self._get_dns()
-		folders_to_update=[self.whitelist_dir,self.whitelist_disable_dir]
-
-		try:
-			for folder in folders_to_update:
-				for item in listdir(folder):
-					t=join(folder,item)
-					if isfile(t):
-						content=[]
-						format_lines=[]
-						f=codecs.open(t,'r')
-						lines=f.readlines()
-						f.close()
-						for line in lines:
-							if line!="":
-								if "NAME" in line:
-									format_lines.append(line)
-									
-								elif "DESCRIPTION" in line:
-									format_lines.append(line)
-								else:
-									if self.whitelist_redirection in line:
-										line=line.split(self.whitelist_redirection)[1]
-										line=line.split("/")[0]
-										tmp_line=line+"\n"
-										if tmp_line not in content:
-											content.append(line+"\n")
-											format_lines.append(line+"\n")
-
-						f=open(t,'w')
-						for line in format_lines:
-							if "NAME" in line:
-								f.write(line)
-							elif "DESCRIPTION" in line:
-								f.write(line)
-							else:
-								for dns in dns_vars:
-									tmp_line=self.whitelist_redirection+line.split("\n")[0]+"/"+dns
-									f.write(tmp_line+"\n")	
-						f.close()
-									 					
-			#Old n4d: return {'status':True,'msg':'The update of the dns has been carried out successfully','data':""}
-			result={'status':True,'msg':'The update of the dns has been carried out successfully','data':""}
-			return n4d.responses.build_successful_call_response(result)
-
-		except Exception as e:
-			#Old n4d: return {'status':False,'msg':'Error updating white list dns','data':str(e)}							
-			result={'status':False,'msg':'Error updating white list dns','data':str(e)}							
-			return n4d.responses.build_successful_call_response(result)							
-
-	#def update_whitelist_dns
-
-	def _get_original_file_perms(self,file):
-
-		perms_file=[]
-		cmd='ls -l %s'%(file)
-		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-		result=p.communicate()[0]
-
-		if type(result) is bytes:
-			result=result.decode()
-
-		result=result.split(' ')
-		try:
-			perms_file.append(result[2])
-			perms_file.append(result[3])
-		except:
-			pass
-
-		return perms_file
-
-	#def _get_original_file_perms
-	
-	def _manage_dnsmasq_service(self,enable_service):
-		
-		error=False
-		data=""
-		
-		if not self.is_server:
-			if enable_service:
-				action="enable"
-				cmd="systemctl enable dnsmasq.service 1>/dev/null"
-			else:
-				action="disable"
-				ret=self._stop_dnsmasq_service()
-				if not ret[0]:
-					cmd="systemctl disable dnsmasq.service 1>/dev/null"
-				else:
-					result={'status':False,'msg':"Error disabling Dnsmaq",'data':ret[1]}
-					return result
-
-			try:
-				ret=os.system(cmd)
-				if ret !=0:
-					error=True
-					data=str(ret)
-				else:
-					self._manage_resolvconf(enable_service)
-						
-			except Exception as e:
-				error=True
-				data=str(e)
-				
-			if not error:			
-				msg="Dnsmasq %s successfully"%action
-				result={'status':True,'msg':msg}
-				return result
-			else:
-				msg="Error: Dnsmasq %s failed"%action
-				result={'status':False,'msg':msg,'data':data}
-				return result
-				
-		return {'status':True,'msg':"Nothing to do"}
-
-	
 	#def manage_dnsmasq_service
-	
+
+	def _override_dnsmasq_service(self,enable_service=True):
+
+		reload_daemon=False
+
+		if enable_service:
+			if not self.dnsmasq_override_service_conf.exists():
+				conf = '[Service]\nEnvironment="DNSMASQ_EXCEPT=lo"\nEnvironment="IGNORE_RESOLVCONF=yes"'
+				self.dnsmasq_override_service_conf.parent.mkdir(parents=True, exist_ok=True)
+				self.dnsmasq_override_service_conf.write_text(conf,encoding='utf-8')
+				reload_daemon=True
+		
+		if reload_daemon:
+			subprocess.run(['systemctl', 'daemon-reload'], check=True)
+
+	#def _override_dnsmasq_service
+
 	def _stop_dnsmasq_service(self):
-		
-		error=False
-		data=""
-		
-		cmd="systemctl stop dnsmasq.service 1>/dev/null"
+
+		error = False
+		data = ""
+
 		try:
-			ret=os.system(cmd)
-			if ret!=0:
-				error=True
-				data=str(ret)
-				
+			is_active=(
+				subprocess.run(["systemctl","is-active","dnsmasq"],
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE,
+					text=True,
+				).returncode
+				==0
+			)
+			if is_active:
+				result = subprocess.run(
+					['systemctl', 'stop', 'dnsmasq.service'],
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE,
+					text=True,
+					check=True
+				)
+		except subprocess.CalledProcessError as e:
+			error = True
+			data = f"Error {e.returncode}: {e.stderr.strip()}"
 		except Exception as e:
-			error=True
-			data=str(e)
-			
-		return [error,data]
+			error = True
+			data = str(e)
+
+		return [error, data]
 	
 	#def stop_dnsmasq_service
-	
-	def _manage_resolvconf(self,active):
-		
+
+	def _manage_resolvconf(self, active: bool):
+
 		if active:
-			if not os.path.exists("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
-				os.system('systemctl stop systemd-resolved')
-				self.core.get_plugin('NetworkManager').systemd_resolv_conf()
-				# Restart service to fix bug on /etc/resolv.conf search field
-				os.system('systemctl restart systemd-resolved')
+			if not self.resolvconf_path.exists():
+				subprocess.run(['systemctl', 'stop', 'systemd-resolved'], check=True)
+				if self.network_plugin_path.exists():
+					self.core.get_plugin('NetworkManager').systemd_resolv_conf()
+				else:
+					conf = "[Resolve]\nDNS=127.0.0.1\nDNSStubListener=no\n"
+					self.resolvconf_path.parent.mkdir(parents=True, exist_ok=True)
+					self.resolvconf_path.write_text(conf,encoding='utf-8')
+
+				subprocess.run(['systemctl', 'restart', 'systemd-resolved'], check=True)
 		else:
-			if os.path.exists("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf"):
-				os.remove("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
-				os.system('systemctl restart systemd-resolved')
-				
-	#def _manage_resolvconf
-				
+			if self.resolvconf_path.exists():
+				try:
+					self.resolvconf_path.unlink()
+				except OSError:
+					pass
+
+				subprocess.run(['systemctl', 'restart', 'systemd-resolved'], check=True)
+
+	#def _manage_resolvconf	
+
+	def _safe_fallback_to_disable(self):
+
+		try:
+			lines = ["#listen-address = 127.0.0.1","#interface = lo","#bind-interfaces","conf-dir = /var/lib/dnsmasq/config",self.disable_bm_mode, self.disable_wm_mode, self.disable_whitelist_filter]
+			self.mode_file_path.write_text("\n".join(str(l) for l in lines) + "\n", encoding="utf-8")
+			self.guardmode="DisableMode"
+			self._manage_dnsmasq_service(False)
+		except Exception as e:
+			msg_log=f"Critial error during _safe_fallback_to_disable. Error:{e}"
+			print(f"[LliurexGuardManager]: {msg_log}")
+
+	#def _safe_fallback_to_disable			
+	
+	def _read_list_headers(self, folder):
+
+		files_headers = []
+
+		try:
+			if folder.exists():
+				for file_path in folder.iterdir():
+					if file_path.is_file() and file_path.suffix == '.list':
+						tmp = {
+							"id": file_path.stem,
+							"active": folder not in (self.blacklist_disable_dir, self.whitelist_disable_dir),
+							"name": "",
+							"description": "",
+							"lines": 0
+						}
+
+						lines = file_path.read_text(encoding="utf-8").splitlines()
+						match_count = 0
+
+						for line in lines:
+							line = line.strip()
+							if "NAME" in line and ":" in line:
+								tmp["name"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							elif "DESCRIPTION" in line and ":" in line:
+								tmp["description"] = line.split(":", 1)[1].strip()
+								match_count += 1
+
+							if match_count == 2:
+								tmp["lines"] = max(0, len(lines) - 2)
+								break
+						files_headers.append(tmp)
+			return {'status': True, 'msg': "list_to_manage read successfully", 'data': files_headers}
+
+		except Exception as e: 
+			print(f"[LliurexGuardManager]: Error reading list_to_manage: {e}")
+			return {'status': False, 'msg': "Unable to read list_to_manage", 'data': str(e)}
+
+  	#def _read_list_headers
+	
+	def _move_guardmode_list(self, list_to_manage, dest_path, orig_path):
 		
+		dest_dir = dest_path
+		orig_dir = orig_path
+
+		try:
+			for item in list_to_manage:
+				item_id = item.get("id")
+				tmp_file_str = item.get("tmpfile", "")
+
+				dest_file = dest_dir / f"{item_id}.list"
+				orig_file = orig_dir / f"{item_id}.list"
+
+				if tmp_file_str != "":
+					tmp_file = Path(tmp_file_str)
+
+					result_format = self._format_guardmode_list(item)
+
+					if result_format.get('status'):
+						shutil.copy2(tmp_file, dest_file)
+						dest_file.chmod(0o644)
+						self.list_tmpfile.append(tmp_file_str)
+
+						if orig_file.exists():
+							orig_file.unlink()
+					else:
+						return result_format    
+				else:
+					if orig_file.exists():
+						shutil.copy2(orig_file, dest_file)			
+						orig_file.unlink()
+
+			return {'status': True, 'msg': ""}
+
+		except Exception as e:
+			print(f"[LliurexGuardManager]: Error copying list: {e}")
+			return {'status': False, 'msg': "Error copying list", 'data': str(e)}
+	
+	#def _move_guardmode_list	
+
+	def _format_guardmode_list(self, item: dict):
+
+		try:
+			tmp_file = Path(item["tmpfile"])
+			if tmp_file.exists():
+				lines = tmp_file.read_text(encoding="utf-8").splitlines()
+				stat_info = tmp_file.stat()
+				orig_uid = stat_info.st_uid
+				orig_gid = stat_info.st_gid
+				try:
+					os.chown(tmp_file, 0, 0)
+				except OSError as e:
+					print(f"[LliurexGuardManager]: Warning, could not chown to root: {e}")
+
+				output_lines = [
+					f"#NAME:{item['name']}",
+					f"#DESCRIPTION:{item['description']}"
+					]
+
+				for line in lines:
+					line = line.strip()
+					if not line:
+						continue
+
+					if self.redirection in line:
+						output_lines.append(line)
+					else:
+						if "https" in line:
+							line = line.replace("https://", "")
+						else:
+							line = line.replace("http://", "")
+
+						if len(line.split("/")) == 1:
+							if self.guardMode == "BlackMode":
+								output_lines.append(f"address=/{line}/{self.redirection}")
+							else:
+								output_lines.append(f"{self.redirection}{line}")
+				tmp_file.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
+				try:
+					os.chown(tmp_file, orig_uid, orig_gid)
+				except OSError as e:
+					print(f"[LliurexGuardManager]: Error restoring original permissions: {e}")
+
+			return {'status': True, 'msg': 'List formatted successfully'}
+
+		except Exception as e:
+			print(f"[LliurexGuardManager]: Error formatting the list: {e}")
+			return {'status': False, 'msg': 'Error formatting the list', 'data': str(e)}
+	
+	#def _format_guardmode_list
+
+	def _is_desktop_standalone(self):
+
+		normalizedFlavours=["adi","pro","alu"]
+
+		try:
+			result = subprocess.run(
+				['lliurex-version', '-v'],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
+
+			flavours = [x.strip() for x in result.stdout.split(',') if x.strip()]
+
+			return all(p not in i for i in flavours for p in normalizedFlavours)
+		
+		except (subprocess.CalledProcessError, FileNotFoundError) as e:
+			msg_log="Error checking LliureX version: {e}"
+			print(f"[LliurexGuardManager]: {msg_log}")
+			return False
+
+	#def _is_desktop_standalone
+
+	def _remove_natfree_config(self):
+
+		
+		if self.natfree_mode_file_path.exists():
+			try:
+				self.natfree_mode_file_path.unlink()
+			except OSError:
+				pass
+		
+		if self.natfree_dnsmasq_override_service_conf.exists():
+			try:
+				self.natfree_dnsmasq_override_service_conf.unlink()
+				subprocess.run(['systemctl', 'daemon-reload'])
+			except OSError:
+				pass
+
+	#def _remove_natfree_config	
+			
+#class LliurexGuardManager

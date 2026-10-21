@@ -1,100 +1,117 @@
-import org.kde.plasma.components as Components
 import QtQuick
 import QtQuick.Controls
 import QtQml.Models
+import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
 
-Components.ItemDelegate{
 
+ItemDelegate{
     id: listUrlItem
     property int urlId
     property string url
 
     enabled:true
-    height:40
+    height:45
+    width: listUrlItem.ListView.view?listUrlItem.ListView.width-10:0
+    hoverEnabled:true
 
-    Rectangle {
-        height:visible?35:0
-        width:parent.width
-        color:"transparent"
-        border.color: "transparent"
-        Item{
-            id: menuItem
-            height:visible?35:0
-            width:listUrlItem.width-manageUrlBtn.width
+    leftPadding:10
+    rightPadding:10
 
-            MouseArea {
-                id: mouseAreaOption
-                anchors.fill: parent
-                hoverEnabled:true
-                propagateComposedEvents:true
-
-                onEntered: {
-                    if (!optionsUrlMenu.activeFocus){
-                        urlList.currentIndex=filterModel.visibleElements.indexOf(index)
-                    }
-                }
+    onHoveredChanged:{
+        if (listUrlItem.ListView.view){
+            if (hovered && !optionsUrlMenu.opened){
+                listUrlItem.ListView.view.currentIndex=index
             }
+        }else if (!hovered && !optionsUrlMenu.opened && listUrlItem.ListView.view.currentIndex===index){
+            listUrlItem.ListView.view.currentIndex=-1
+        }
+    }
 
-            Text{
-                id:urlText
-                text:url
-                font.pointSize: 10
-                width:{
-                    if (listUrlItem.ListView.isCurrentItem){
-                        parent.width-(manageUrlBtn.width+20)
-                    }else{
-                        parent.width-20
-                    }
-                }
-                anchors.verticalCenter:parent.verticalCenter
-                leftPadding:10
-
-                elide:Text.ElideMiddle
-
+    background: Rectangle {
+        x:5
+        y:5
+        width:parent.width-5
+        height:parent.height-5
+        color:{
+           if (listUrlItem.hovered || optionsUrlMenu.opened){
+                Qt.alpha(Kirigami.Theme.highlightColor,0.15)
+            }else{
+                "transparent"
             }
+        }
+
+        radius:6
+        border.width:1
+        border.color:{
+            if (listUrlItem.hovered || optionsUrlMenu.opened){
+                Kirigami.Theme.highlightColor
+            }else{            
+                "transparent"
+            }
+        }
+    }
+
+    contentItem:RowLayout {
+        id: menuItem
+        spacing:20
             
-            Button{
-                id:manageUrlBtn
-                display:AbstractButton.IconOnly
-                icon.name:"configure.svg"
-                anchors.leftMargin:15
-                anchors.left:urlText.right
-                anchors.verticalCenter:parent.verticalCenter
-                visible:listUrlItem.ListView.isCurrentItem
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
-                ToolTip.text:i18nd("lliurex-guard","Click to manage this url")
-                onClicked:{
-                    optionsUrlMenu.open();
-                    listStackBridge.cancelUrlEdition()
-                    manageEntryRow(false)
+        Text{
+            id:urlText
+            text:url
+            font.pointSize: 10
+            Layout.fillWidth:true
+            Layout.alignment:Qt.AlignVCenter
+            elide:Text.ElideMiddle
+
+        }
+            
+        Button{
+            id:manageUrlBtn
+            display:AbstractButton.IconOnly
+            icon.name:"configure"
+            Layout.alignment: Qt.AlignVCenter
+            visible:listUrlItem.hovered || optionsUrlMenu.opened
+            ToolTip.delay: 1000
+            ToolTip.timeout: 3000
+            ToolTip.visible: hovered
+            ToolTip.text:i18nd("lliurex-guard","Click to manage this url")
+            
+            onClicked:{
+                optionsUrlMenu.open();
+                listStackBridge.cancelUrlEdition()
+                manageEntryRow(false)
+            }
+
+            Connections{
+                target:urlList
+                function onCurrentIndexChanged(){
+                    if (!listUrlItem.ListView.isCurrentItem && optionsUrlMenu.opened){
+                        optionsUrlMenu.close()
+                    }
                 }
-                onVisibleChanged:{
-                    optionsUrlMenu.close()
+            }
+
+            Menu{
+                id:optionsUrlMenu
+                y: manageUrlBtn.height
+                x:-(optionsUrlMenu.width-manageUrlBtn.width/2)
+
+               MenuItem{
+                    icon.name:"document-edit"
+                    text:i18nd("lliurex-guard","Edit url")
+                    onClicked:{
+                        listStackBridge.manageEditUrlBtn({"urlIndex":index,"urlValue":urlText.text})
+                        manageEntryRow(true)
+                        urlEntry.forceActiveFocus()
+                        urlEntry.text=urlText.text
+                    }
                 }
 
-                Menu{
-                    id:optionsUrlMenu
-                    y: manageUrlBtn.height
-                    x:-(optionsUrlMenu.width-manageUrlBtn.width/2)
-
-                   MenuItem{
-                        icon.name:"document-edit.svg"
-                        text:i18nd("lliurex-guard","Edit url")
-                        onClicked:{
-                            listStackBridge.manageEditUrlBtn([index,urlText.text])
-                            manageEntryRow(true)
-                            urlEntry.forceActiveFocus()
-                            urlEntry.text=urlText.text
-                        }
-                    }
-                    MenuItem{
-                        icon.name:"delete.svg"
-                        text:i18nd("lliurex-guard","Delete the url")
-                        onClicked:listStackBridge.removeUrl(index)
-          
-                    }
+                MenuItem{
+                    icon.name:"delete"
+                    text:i18nd("lliurex-guard","Delete the url")
+                    onClicked:listStackBridge.removeUrl(index)
                 }
           
             }

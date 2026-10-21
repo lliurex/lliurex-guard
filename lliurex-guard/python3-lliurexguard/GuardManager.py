@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject, GLib
 import os
 import json
 import codecs
@@ -18,6 +15,7 @@ import syslog
 import urllib.request
 from os import listdir
 from os.path import isfile,isdir,join
+from pathlib import Path
 from jsondiff import diff
 import n4d.client
 import copy
@@ -53,13 +51,17 @@ class GuardManager(object):
 	READ_GUARDMODE_HEADERS_SUCCESSFUL=24
 	READ_FILE_SUCCESSFUL=35
 
+	KIRIGAMI_MSG_OK=0
+	KIRIGAMI_MSG_ERROR=1
+	KIRIGAMI_MSG_WARNING=2
+	KIRIGAMI_MSG_INFO=3
 
-	def __init__(self,server=None):
+	def __init__(self):
 
 		super(GuardManager, self).__init__()
 
 		self.dbg=0
-		self.userValidated=False
+		self.userValidated=True
 		self.limitLines=2500
 		self.limitFileSize=28000000
 		self.garbageFiles=[]
@@ -69,76 +71,18 @@ class GuardManager(object):
 		self.listsConfigOrig={}
 		self.listsConfigData=[]
 		self.urlConfigData=[]
-		self.detectFlavour()
-		self._getSystemLocale()
 		self.initValues()
-
 	
 	#def __init__	
 			
-	def detectFlavour(self):
-		
-		self.is_server=""
-		self.is_client=""
-		self.is_desktop=""
-
-		cmd='lliurex-version -v'
-		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-		result=p.communicate()[0]
-
-		if type(result) is bytes:
-			result=result.decode()
-		flavours = [ x.strip() for x in result.split(',') ]
-
-		for item in flavours:
-			if 'server' in item:
-				self.is_server=True
-				self.is_desktop=False
-				self.server_ip="server"
-				break
-			elif 'client' in item:
-				self.is_client=True
-				self.is_desktop=False
-				self.server_ip="server"
-				break
-			elif 'desktop' in item:
-				self.is_desktop=True
-				self.server_ip="localhost"	
-
-	#def detect_flavour
-
-	def _getSystemLocale(self):
-
-		language=os.environ["LANGUAGE"]
-
-		if language!="":
-			tmpLang=language.split(":")
-			self.systemLocale=tmpLang[0]
-		else:
-			self.systemLocale=os.environ["LANG"]
-
-	#def _getSystemLocale	
-	
-	def createN4dClient(self,ticket,passwd):
+	def createN4dClient(self,ticket):
 
 		ticket=ticket.replace('##U+0020##',' ')
-		self.credentials.append(ticket.split(' ')[2])
-		self.credentials.append(passwd)
+		tk=n4d.client.Ticket(ticket)
+		self.client=n4d.client.Client(ticket=tk,timeout=120)
 
-		self.tk=n4d.client.Ticket(ticket)
-		self.client=n4d.client.Client(ticket=self.tk)
-
-		self.localClient=n4d.client.Client("https://localhost:9779",self.credentials[0],self.credentials[1])
-		local_t=self.localClient.get_ticket()
-		if local_t.valid():
-			self.localClient=n4d.client.Client(ticket=local_t)
-			self.userValidated=True
-		else:
-			self.userValidated=False
-
-		msgLog='Session user: %s Lliurex-Guard user: %s'%(os.environ["USER"],self.credentials[0])
-		self.writeLog(msgLog)
-
+		msgLog=f'Session user: {os.environ["USER"]}'
+		self._writeLog(msgLog)
 
 	#def create_n4dClient
 
@@ -154,61 +98,68 @@ class GuardManager(object):
 		self.listToLoad=[]
 		self.listName=""
 		self.listDescription=""
-		self.currentListConfig={}
-		self.currentListConfig["id"]=""
-		self.currentListConfig["name"]=""
-		self.currentListConfig["description"]=""
+		self.currentListConfig={
+			"id":"",
+			"name":"",
+			"description":""
+		}
 		self.urlConfigData=[]
 		
-	#def initValues		
+	#def initValues
 
 	def readGuardmode(self):
-			
-		readGuardmode=self.client.LliurexGuardManager.read_guardmode(True)
-		msg="Read LliureX Guard Mode: "
-		self._debug(msg,readGuardmode)
-		msgLog=msg+str(readGuardmode)
-		self.writeLog(msgLog)
-		if readGuardmode['status']:
-			self.guardMode=readGuardmode['data']
-			return {'status':True,'code':GuardManager.READ_GUARDMODE_SUCCESSFUL,'data':readGuardmode['data']}
+
+		response = self.client.LliurexGuardManager.read_guardmode()
+		
+		msg = "Read LliureX Guard Mode: "
+		self._debug(msg, response)
+		self._writeLog(f"{msg}{response}")
+		
+		if isinstance(response, dict) and response.get('status'):
+			self.guardMode = response.get('data')
+			return {
+				'status': True,
+				'code': GuardManager.READ_GUARDMODE_SUCCESSFUL,
+				'data': self.guardMode,
+				'type': GuardManager.KIRIGAMI_MSG_OK
+			}
 		else:
-			return {'status':False,'code':GuardManager.READ_GUARDMODE_ERROR,'data':readGuardmode['data']}
-
-	#def read_guardmode
-
+			errorData = response.get('data') if isinstance(response, dict) else self.guardMode
+			return {
+				'status': False,
+				'code': GuardManager.READ_GUARDMODE_ERROR,
+				'data': errorData,
+				'type': GuardManager.KIRIGAMI_MSG_ERROR
+			}
+	
+	#def readGuardmode
+	
 	def changeGuardmode(self,mode):
 
-		changeGuardmode=self.client.LliurexGuardManager.change_guardmode(mode)
-		msg="LliureX Guard Mode changed to %s"%mode
-		self._debug(msg,changeGuardmode)
-		msgLog=msg+str(changeGuardmode)
-		self.writeLog(msgLog)
+		response=self.client.LliurexGuardManager.change_guardmode(mode)
 		
-		if changeGuardmode['status']:
-			msg="LliureX Guard Mode changed. Dnsmasq restarted "
-			forceRestartDnsmasq=False
+		msg=f"LliureX Guard Mode changed to {mode}"
+		self._debug(msg,response)
+		msgLog=f"{msg}{response}"
+		self._writeLog(msgLog)
+
+		if isinstance(response, dict) and response.get('status'):
 			self.listsConfig={}
 			self.listsConfigOrig={}
 			self.listsConfigData=[]
-
-			if mode !="DisableMode" :
-				forceRestartDnsmasq=True
-			else:
-				if self.is_server:
-					forceRestartDnsmasq=True
-			
-			if forceRestartDnsmasq:
-				restartDnsmasq=self.restartDnsmasq(msg)
-				if restartDnsmasq['status']:
-					return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
-				else:
-					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restartDnsmasq['data']}
-			else:
-				return {'status':True,'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL}
-			
+			return {
+				'status':True,
+				'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL,
+				'type':GuardManager.KIRIGAMI_MSG_OK
+			}
 		else:
-			return {'status':False,'code':GuardManager.CHANGE_GUARDMODE_ERROR,'data':change_guardmode['data']}		
+			errorData=response.get('data') if isinstance(response, dict) else response
+			return {
+				'status':False,
+				'code':GuardManager.CHANGE_GUARDMODE_ERROR,
+				'data':response.get('data'),
+				'type':GuardManager.KIRIGAMI_MSG_ERROR
+			}		
 				
 	#def changeGuardmode 		
 
@@ -218,44 +169,67 @@ class GuardManager(object):
 		self.listsConfigOrig={}
 		self.listsConfigData=[]
 
-		readGuardmodeHeaders=self.client.LliurexGuardManager.read_guardmode_headers()
+		response=self.client.LliurexGuardManager.read_guardmode_headers()
+		
 		msg="LliureX Guard mode lists readed "
-		self._debug(msg,readGuardmodeHeaders)
-		msgLog=msg+str(readGuardmodeHeaders)
-		self.writeLog(msgLog)
-		if readGuardmodeHeaders['status']:
-			self.listsConfig=readGuardmodeHeaders['data']
-			for item in self.listsConfig:
-				#tmp_list[item]['edited']=False
-				self.listsConfig[item]['remove']=False
-				self.listsConfig[item]["replaced_to"]=""
-				self.listsConfig[item]["tmpfile"]=""
+		self._debug(msg,response)
+		msgLog=f"{msg}{response}"
+		self._writeLog(msgLog)
+		
+		if isinstance(response, dict) and response.get('status'):
+			self.listsConfig=response.get('data')
 
+			if isinstance(self.listsConfig, dict):
+				for item in self.listsConfig:
+					if isinstance(self.listsConfig[item], dict):
+						self.listsConfig[item]['remove'] = False
+						self.listsConfig[item]["replaced_to"] = ""
+						self.listsConfig[item]["tmpfile"] = ""			
+	
 			self.listsConfigOrig=copy.deepcopy(self.listsConfig)
 			self._getListsConfig()
 
-			return {'status':True,'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,'data':""}	
+			return {
+				'status':True,
+				'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,
+				'data':"",
+				'type':GuardManager.KIRIGAMI_MSG_OK
+			}	
 
 		else:
-			return {'status':False,'code':GuardManager.READ_GUARDMODE_HEADERS_ERROR,'data':str(readGuardmodeHeaders['data'])}
+			errorData=response.get('data') if isinstance(response, dict) else response
+			return {
+				'status':False,
+				'code':GuardManager.READ_GUARDMODE_HEADERS_ERROR,
+				'data':errorData,
+				'type':GuardManager.KIRIGAMI_MSG_ERROR
+			}
 		
 	#def readGuardmodeHeaders
 
 	def _getListsConfig(self):
 
-		orderList=self._getOrderList()
-		self.listsConfigData=[]
-		
+		orderList = self._getOrderList()
+		self.listsConfigData = []
+
+		if not isinstance(orderList, (list, tuple)) or not isinstance(self.listsConfig, dict):
+			return
+
 		for item in orderList:
-			tmp={}
-			tmp["order"]=item
-			tmp["id"]=self.listsConfig[item]["id"]
-			tmp["name"]=self.listsConfig[item]["name"]
-			tmp["entries"]=self.listsConfig[item]["lines"]
-			tmp["description"]=self.listsConfig[item]["description"]
-			tmp["activated"]=self.listsConfig[item]["active"]
-			tmp["remove"]=self.listsConfig[item]["remove"]
-			tmp["metaInfo"]=tmp["name"]+tmp["description"]
+			configItem = self.listsConfig.get(item)
+			if not isinstance(configItem, dict):
+				continue
+
+			tmp = {
+				"order":item,
+				"id": configItem.get("id", ""),
+				"name": configItem.get("name", ""),
+				"entries": configItem.get("lines", 0),
+				"description": configItem.get("description", ""),
+				"activated": configItem.get("active", False),
+				"remove":configItem.get("remove", False),
+				"metaInfo":f'{configItem.get("name", "")}{configItem.get("description", "")}'
+			}
 
 			self.listsConfigData.append(tmp)
 
@@ -264,734 +238,722 @@ class GuardManager(object):
 	def loadListConfig(self,listToLoad):
 
 		self.listToLoad=str(listToLoad)
-		self.currentListConfig=self.listsConfig[self.listToLoad]
-		self.listName=self.currentListConfig["name"]
-		self.listDescription=self.currentListConfig["description"]
+		self.currentListConfig=self.listsConfig.get(self.listToLoad)
+		self.listName=self.currentListConfig.get("name")
+		self.listDescription=self.currentListConfig.get("description")
 
 		return self._readGuardModeList()
 
 	#def loadListConfig
 
 	def _readGuardModeList(self):
-			
-		isTmpFile=False
-		status=True
-		tmpFile=""
-		content=None
-		result=[]
-		lines=[]
-		errorInfo=[]
-		countLines=0
-		listId=self.currentListConfig["id"]
-		active=self.currentListConfig["active"]
 
-		if self.currentListConfig["tmpfile"]!="":
-			readTmpFile=self.readLocalFile(self.currentListConfig["tmpfile"],False)
-			msg="List %s. Readed local file (%s)"%(listId,self.currentListConfig["tmpfile"])
-			self._debug(msg,readTmpFile)
+		isTmpFile = False
+		status = True
+		tmpFile = ""
+		content = None
+		result = ""
+		errorInfo = ""
+		countLines = 0
 
-			if readTmpFile['status']:
-				content=readTmpFile['data'][0]
-				countLines=readTmpFile['data'][1]
-				isTmpFile=True
+		listId = self.currentListConfig.get("id", "")
+		active = self.currentListConfig.get("active", False)
+		currentTmpfile = self.currentListConfig.get("tmpfile", "")
 
+		if currentTmpfile != "":
+			readTmpFile = self._readLocalFile(currentTmpfile, False)
+			msg = f"List {listId}. Readed local file ({currentTmpfile})"
+			self._debug(msg, readTmpFile)
+
+			if isinstance(readTmpFile, dict) and readTmpFile.get('status'):
+				content = readTmpFile.get('data').get("content")
+				countLines = readTmpFile.get('data').get("countLines")
+				isTmpFile = True
 			else:
-				status=False
-				errorInfo=readTmpFile['data']
+				status = False
+				errorInfo = readTmpFile.get("errorInfo") if isinstance(readTmpFile, dict) else readTmpFile
 		else:
-			readGuardmodeList=self.client.LliurexGuardManager.read_guardmode_list(listId,active)
-			msg="List %s. Readed file"%listId
-			self._debug(msg,readGuardmodeList)
+			readGuardmodeList = self.client.LliurexGuardManager.read_guardmode_list(listId, active)
+			msg = f"List {listId}. Readed file"
+			self._debug(msg, readGuardmodeList)
 
-			if readGuardmodeList['status']:
-				content=readGuardmodeList['data'][0]
-				countLines=readGuardmodeList['data'][1]
+			if isinstance(readGuardmodeList, dict) and readGuardmodeList.get('status'):
+				content = readGuardmodeList['data'][0]
+				countLines = readGuardmodeList['data'][1]
 			else:
-				status=False
-				errorInfo=readGuardmodeList['data']
+				status = False
+				errorInfo = readGuardmodeList.get('data') if isinstance(readGuardmodeList, dict) else readGuardmodeList
 
-			readGuardmodeList=None	
 		if status:
-			code=GuardManager.READ_LIST_INFO_SUCCESSFUL
+			msgCode = GuardManager.READ_LIST_INFO_SUCCESSFUL
+			msgType = GuardManager.KIRIGAMI_MSG_OK
 
-			if countLines>self.limitLines:
+			if countLines > self.limitLines:
 				if not isTmpFile:
-					tmpFile=self._createTmpFile(listId)
-					f=open(tmpFile,'w')
-					tmpContent="".join(content)
-					f.write(tmpContent)
-					f.close()
-					tmpContent=None
-					self.garbageFiles.append(tmpFile)
+					tmpFile = self._createTmpFile(listId)
+					with open(tmpFile, 'w', encoding='utf-8') as f:
+						tmpContent = "".join(content)
+						f.write(tmpContent)
+						self.garbageFiles.append(tmpFile)
 				else:
-					tmpFile=readTmpFile['data'][2]	
-				content=None
+					tmpFile = readTmpFile.get('data').get("tmpFile") if isinstance(readTmpFile, dict) else ""
+				contet = None
 				readTmpFile=None
 			else:
 				self._getUrlConfig(content)
-
-			result=tmpFile
-			msgLog=msg + " successfully"
-		else:
-			code=GuardManager.READ_LIST_INFO_ERROR
-			result=errorInfo
-			msgLog=msg+ "with errors. Error details: "+str(errorInfo)
-		
-		self.writeLog(msgLog)
-		return {'status':status,'code':code,'data':result}
-
-	#def readGuardmodeList	
 			
-	def readLocalFile(self,file,createTmpfile):
+			msgLog = f"{msg} successfully"
+			msgData={"tmpFile":tmpFile}
+		else:
+			msgCode = GuardManager.READ_LIST_INFO_ERROR
+			msgType = GuardManager.KIRIGAMI_MSG_ERROR
+			msgData = {}
+			msgLog = f"{msg} with errors. Error details: {errorInfo}"
 
-		content=[]
-		countLines=0
-		tmpFile=""
+		self._writeLog(msgLog)
+		return {
+			'status': status, 
+			'code': msgCode, 
+			'data': msgData,
+			'type': msgType,
+			"errorInfo":errorInfo
+			}
+
+	# def _readGuardModeList
+
+	def _readLocalFile(self, filePath, createTmpfile):
+
+		content = []
+		countLines = 0
+
+		p = Path(filePath)
+
 		try:
-			if os.path.exists(file):
+			if p.exists():
 				if createTmpfile:
-					if os.path.getsize(file)>self.limitFileSize:
-						return {'status':False,'code':GuardManager.LOAD_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}	
-				f=open(file,'r')
-				lines=f.readlines()
+					if p.stat().st_size > self.limitFileSize:
+						return {
+							'status': False,
+							'code': GuardManager.LOAD_FILE_SIZE_OFF_LIMITS_ERROR,
+							'data': {},
+							'type':GuardManager.KIRIGAMI_MSG_ERROR
+						}
+
+				lines = p.read_text(encoding='utf-8').splitlines(keepends=True)
+
 				for line in lines:
-					if "NAME" not in line:
-						if "DESCRIPTION" not in line:
-							if line.strip()!="":
-								line=self.formatLine(line)
-								if line!="":
-									content.append(line)	
-									countLines+=1
-				f.close()
-				lines=None
-				tmpFile=file
-				
+					if "NAME" not in line and "DESCRIPTION" not in line:
+						if line.strip() != "":
+							line = self.formatLine(line)
+							if line != "":
+								content.append(f"{line}\n")	
+								countLines += 1
+
+				lines = None
+				tmpFile = str(p)
+
 				if createTmpfile:
-					if countLines==0:
-						return {'status':False,'code':GuardManager.EMPTY_FILE_ERROR,'data':''}
+					if countLines == 0:
+						return {
+							'status': False, 
+							'code': GuardManager.EMPTY_FILE_ERROR,
+							'data': {},
+							'type': GuardManager.KIRIGAMI_MSG_ERROR,
+							"errorInfo":"Empty File"
+						}
 					else:	
-						tmpFile=self._createTmpFile(os.path.basename(file))
-						f=open(tmpFile,'w')
-						f.write("".join(content))
-						f.close()
-						if countLines>self.limitLines:
-							content=None
+						tmpPath = Path(self._createTmpFile(p.name))
+						tmpPath.write_text("".join(content), encoding='utf-8')
+						tmpFile = str(tmpPath)
+
+						if countLines > self.limitLines:
+							content = None
 
 				self.garbageFiles.append(tmpFile)		
 				
-				return {'status':True,'code':GuardManager.LOAD_FILE_SUCCESSFUL,'data':[content,countLines,tmpFile]}
+				return {
+					'status': True,
+					'code': GuardManager.LOAD_FILE_SUCCESSFUL,
+					'data': {
+						'content':content, 
+						'countLines':countLines,
+						'tmpFile':tmpFile
+					},
+					'type': GuardManager.KIRIGAMI_MSG_OK
+					}
 			else:
-				return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}	
+				return {
+					'status': False,
+					'code': GuardManager.LOADING_FILE_ERROR,
+					'data': {},
+					'type': GuardManager.KIRIGAMI_MSG_ERROR,
+					'errorInfo':'File does not exist'
+
+				}
 
 		except Exception as e:
-			return {'status':False,'code':GuardManager.LOADING_FILE_ERROR,'data':str(e)}
+			return {
+				'status': False,
+				'code': GuardManager.LOADING_FILE_ERROR,
+				'data': {},
+				'type': GuardManager.KIRIGAMI_MSG_ERROR,
+				'errorInfo':str(e)
+			}
 
-	#def readLocalFile
+	#def _readLocalFile
 
-	def loadFile(self,fileToLoad):
+	def loadFile(self, fileToLoad):
 
-		data=""
-		limitLines=False
-		ret=self.readLocalFile(fileToLoad,True)
+		limitLines = False
+		ret = self._readLocalFile(fileToLoad, True)
 
-		if ret["status"]:
-			if ret["data"][0]!=None:
-				self._getUrlConfig(ret["data"][0])
+		if ret.get("status"):
+			content= ret.get("data").get("content")
+			tmpFile = ret.get("data").get("tmpFile")
+
+			if content is not None:
+				self._getUrlConfig(content)
 			else:
-				limitLines=True
-			data=[limitLines,ret["data"][2]]
-		else:
-			data=ret["data"]
+				limitLines = True
 
-		return {'status':ret['status'],'code':ret['code'],'data':data}
+			data = {
+				'limitLines': limitLines,
+				'tmpFile': tmpFile,
+			}
+		else:
+			data = {
+				'limitLines': False,
+				'tmpFile': tmpFile,
+			}
+
+		return {
+			'status': ret.get('status'), 
+			'code': ret.get('code'), 
+			'data': data,
+			"errorInfo":ret.get("errorInfo", "")
+		}
 			
 	#def loadFile
 
-	def changeListsStatus(self,allLists,active,listToEdit):
+	def changeListsStatus(self, allLists, active, listToEdit):
 
 		if allLists:
 			for item in self.listsConfig:
-				if not self.listsConfig[item]["remove"]:
-					self.listsConfig[item]["active"]=active
-		else:
-			self.listsConfig[str(listToEdit)]["active"]=active
+				if isinstance(self.listsConfig[item], dict) and not self.listsConfig[item].get("remove", False):
+					self.listsConfig[item]["active"] = active
 
-		self._updateListsConfigData("activated",active,listToEdit)
+		else:
+			key = str(listToEdit)
+			if key in self.listsConfig and isinstance(self.listsConfig[key], dict):
+				self.listsConfig[key]["active"] = active
+			else:
+				self._debug(f"Warning: Attempted to change status of non-existing list ID: {key}")
+				return 
+
+		self._updateListsConfigData("activated", active, listToEdit)
 	
 	#def changeListsStatus
 
-	def removeLists(self,allLists,listToRemove):
+	def removeLists(self, allLists, listToRemove):
 
 		if allLists:
 			for item in self.listsConfig:
-				self.listsConfig[item]["remove"]=True
+				if isinstance(self.listsConfig[item], dict):
+					self.listsConfig[item]["remove"] = True
 		else:
-			self.listsConfig[str(listToRemove)]["remove"]=True
+			key = str(listToRemove)
+			if key in self.listsConfig and isinstance(self.listsConfig[key], dict):
+				self.listsConfig[key]["remove"] = True
+			else:
+				self._debug(f"Warning: Attempted to remove non-existing list ID: {key}")
+				return
 
-		self._updateListsConfigData("remove",True,listToRemove)
-	
+		self._updateListsConfigData("remove", True, listToRemove)
+
 	#def removeLists
 
-	def restoreList(self,allLists,listToRestore):
+	def restoreList(self, allLists, listToRestore):
 
 		if allLists:
 			for item in self.listsConfig:
-				self.listsConfig[item]["remove"]=False
+				if isinstance(self.listsConfig[item], dict):
+					self.listsConfig[item]["remove"] = False
 		else:
-			self.listsConfig[str(listToRestore)]["remove"]=False
+			key = str(listToRestore)
+			if key in self.listsConfig and isinstance(self.listsConfig[key], dict):
+				self.listsConfig[key]["remove"] = False
+			else:
+				self._debug(f"Warning: Attempted to restore non-existing list ID: {key}")
+				return
 
-		self._updateListsConfigData("remove",False,listToRestore)
+		self._updateListsConfigData("remove", False, listToRestore)
 
 	#def restoreList
 
-	def _updateListsConfigData(self,param,value,listToEdit):
-		
-		if listToEdit!=None:
+	def _updateListsConfigData(self, param, value, listToEdit):
+
+		if listToEdit is not None:
+			target_order = str(listToEdit)
 			for item in self.listsConfigData:
-				if item["order"]==str(listToEdit):
-					if item[param]!=value:
-						item[param]=value
-					break
+				if item.get("order") == target_order:
+					if item.get(param) != value:
+						item[param] = value
+						break
 		else:
 			for item in self.listsConfigData:
-				if item[param]!=value:
-					if param!="remove":
-						if not item["remove"]:
-							item[param]=value
-					else:
-						item[param]=value
+				if param in item and item[param] != value:
+					if param == "remove" or not item.get("remove", False):
+						item[param] = value
 
-	#def _updateListsConfigData		
+	#def _updateListsConfigData
 
-	def _getUrlConfig(self,content):
+	def _getUrlConfig(self, content):
 
-		self.urlConfigData=[]
-		count=0
-		for item in content:
-			count+=1
-			tmp={}
-			tmp["urlId"]=count
-			tmp["url"]=item.strip()
-			self.urlConfigData.append(tmp)
+		self.urlConfigData = []
 
+		if not content:
+			return
+
+		for count, item in enumerate(content, start=1):
+			if isinstance(item, str):
+				cleanedUrl = item.strip()
+				if cleanedUrl == "":
+					continue
+
+				tmp = {
+					"urlId": count,
+					"url": cleanedUrl
+				}
+
+				self.urlConfigData.append(tmp)
 
 	#def _getUrlConfig
 
-	def saveConf(self,listInfo,edit,fileToSave=None):
+	def saveConf(self, listInfo, edit, fileToSave=None):
 
-		result={}
-		ret=self._createFileToSave(listInfo["id"],fileToSave)
+		result = {}
 
-		if ret["status"]:
+		list_id = listInfo.get("id", "")
+		ret = self._createFileToSave(list_id, fileToSave)
+
+		if ret.get("status"):
 			if edit:
-				order=str(self.listToLoad)
-				msgCode=GuardManager.LIST_EDITED_SUCCESSFUL
-				if self.listsConfig[order]["id"]!=listInfo["id"]:
-					self.listsConfig[order]["replaced_to"]=self.listsConfig[order]["id"]
+				order = str(getattr(self, 'listToLoad', ''))
+				if order not in self.listsConfig:
+					return {
+						'status': False,
+						'code': GuardManager.READ_GUARDMODE_ERROR,
+						'data': f'Order key {order} not found in configuration',
+						'type': GuardManager.KIRIGAMI_MSG_ERROR
+					}
+				msgCode = GuardManager.LIST_EDITED_SUCCESSFUL
+				if self.listsConfig[order].get("id") != list_id:
+					self.listsConfig[order]["replaced_to"] = self.listsConfig[order].get("id", "")
 			else:
-				order=str(len(self.listsConfig)+1)
-				msgCode=GuardManager.LIST_CREATED_SUCCESSFUL
-				self.listsConfig[order]={}
-				self.listsConfig[order]["active"]=True
-				self.listsConfig[order]["remove"]=False
-				self.listsConfig[order]["replaced_to"]=""
+				try:
+					existing_keys = [int(k) for k in self.listsConfig.keys() if k.isdigit()]
+					next_order = max(existing_keys) + 1 if existing_keys else 1
+				except Exception:
+					next_order = len(self.listsConfig) + 1
 
-			self.listsConfig[order]["id"]=listInfo["id"]
-			self.listsConfig[order]["name"]=listInfo["name"]
-			self.listsConfig[order]["description"]=listInfo["description"]
-			self.listsConfig[order]["lines"]=ret["lines"]
-			self.listsConfig[order]["tmpfile"]=ret["tmpfile"]
-			self.listsConfig[order]["edited"]=True
+				order = str(next_order)
+				msgCode = GuardManager.LIST_CREATED_SUCCESSFUL
+
+				self.listsConfig[order] = {
+					"active": True,
+					"remove": False,
+					"replaced_to": ""
+				}
+
+			msgType = GuardManager.KIRIGAMI_MSG_OK
+			self.listsConfig[order]["id"] = list_id
+			self.listsConfig[order]["name"] = listInfo.get("name", "")
+			self.listsConfig[order]["description"] = listInfo.get("description", "")
+			self.listsConfig[order]["lines"] = ret.get("lines", 0)
+			self.listsConfig[order]["tmpfile"] = ret.get("tmpfile", "")
+			self.listsConfig[order]["edited"] = True
 
 			self._getListsConfig()
-
 		else:
-			msgCode=ret["code"]
-		
-		result["status"]=ret["status"]
-		result["code"]=msgCode
-		result["data"]=ret["data"]
+			msgCode = ret.get("code")
+			msgType = GuardManager.KIRIGAMI_MSG_ERROR
+
+		result["status"] = ret.get("status", False)
+		result["code"] = msgCode
+		result["data"] = ret.get("data", "")
+		result["type"]=msgType
 
 		return result
 
-	#def saveConf		
+	#def saveConf
 
-	def _createFileToSave(self,listId,fileToSave=None):
+	def _createFileToSave(self, listId, fileToSave=None):
 
-		error=False
-		result={}
-		countLines=0
-		urlToRemove=[]
+		result = {}
+		countLines = 0
 
 		try:
-			if fileToSave==None:
-				tmpList=self._createTmpFile(listId)
-				self.garbageFiles.append(tmpList)
+			if fileToSave is None:
+				tmpPath = Path(self._createTmpFile(listId))
+				self.garbageFiles.append(str(tmpPath))
 			else:
-				tmpList=fileToSave
+				tmpPath = Path(fileToSave)
 
-			if fileToSave!=None:
-				tmpContent=[]
-				f=open(tmpList,'r')
-				lines=f.readlines()
-				f.close()
-				f=open(tmpList,'w')
-				for line in lines:
-					if line!="":
-						line=self.formatLine(line)
-						if line!="":
-							f.write(line)
-							countLines+=1
-		
-				f.close()		
-				
+			if fileToSave is not None:
+				if tmpPath.exists():
+					lines = tmpPath.read_text(encoding='utf-8').splitlines()
+					formatContent = []
+
+					for line in lines:
+						if line.strip() != "":
+							cleanedLine = self.formatLine(line)
+							if cleanedLine != "":
+								formatContent.append(cleanedLine + "\n")
+								countLines += 1
+
+					tmpPath.write_text("".join(formatContent), encoding='utf-8')
+				else:
+					raise FileNotFoundError(f"File to save not found: {fileToSave}")
 			else:
-				formatContent=[]	
+				formatContent = []
+				validUrls = []
+
 				for item in self.urlConfigData:
-					if item["url"]!="":
-						line=self.formatLine(item["url"])
-						if line!="":
-							item["url"]=line
-							formatContent.append(line+"\n") 
-							countLines+=1	
-						else:
-							urlToRemove.append(item)
-				
-				for item in urlToRemove:
-					if item in self.urlConfigData:
-						self.urlConfigData.remove(item)
+					urlStr = item.get("url", "")
+					if urlStr != "":
+						cleanedLine = self.formatLine(urlStr)
+						if cleanedLine != "":
+							item["url"] = cleanedLine
+							formatContent.append(cleanedLine + "\n")
+							countLines += 1
+							validUrls.append(item)
 
-				f=open(tmpList,"w")
-				f.write("".join(formatContent))
-				f.close()
+				self.urlConfigData = validUrls
 
-			content=None
-			formatContent=None
-			urltoRemove=[]
-			if countLines>0:
-				result["status"]=True
+				tmpPath.write_text("".join(formatContent), encoding='utf-8')
+
+			if countLines > 0:
+				result["status"] = True
+				result["code"] = GuardManager.LOAD_FILE_SUCCESSFUL
 			else:
-				result["status"]=False
-				result["code"]=GuardManager.EMPTY_LIST_ERROR
-			result["tmpfile"]=tmpList
-			result["lines"]=countLines
-			result["data"]=""
-			
+				result["status"] = False
+				result["code"] = GuardManager.EMPTY_LIST_ERROR
+
+			result["tmpfile"] = str(tmpPath)
+			result["lines"] = countLines
+			result["data"] = ""
+
 		except Exception as e:
-			result['status']=False
-			result['code']=GuardManager.SAVING_FILE_ERROR
-			result['data']=str(e)
-		
-		msg="List %s. Saved changes "%listId
-		self._debug(msg,result)
-		msgLog=msg+" "+str(result)	
-		self.writeLog(msgLog)
+			result['status'] = False
+			result['code'] = GuardManager.SAVING_FILE_ERROR
+			result['data'] = str(e)
+
+		msg = f"List {listId}. Saved changes"
+		self._debug(msg, result)
+		self._writeLog(f"{msg} {result}")
 
 		return result
 		
-	#def _createFileToSave		
+	#def _createFileToSave
 
-	def checkData(self,data,edit,loadedFile):
+	def checkData(self, data, edit, loadedFile):
 
-		if data[1]=="":
-			return {"result":False,"code":GuardManager.MISSING_LIST_NAME_ERROR,"data":""}
+		if str(data.get("name")).strip() == "":
+			return {"status": False, "code": GuardManager.MISSING_LIST_NAME_ERROR, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
-		else:
-			checkDuplicates=True
-			if edit:
-				if data[0]==self.currentListConfig["id"]:
-					checkDuplicates=False
+		checkDuplicates = True
+		if edit:
+			if data.get("listId") == self.currentListConfig.get("id"):
+				checkDuplicates = False
 
-			if checkDuplicates:		
-				for item in self.listsConfig:
-					if self.listsConfig[item]["id"]==data[0]:
-						return {"result":False,"code":GuardManager.LIST_NAME_DUPLICATE,"data":""}
+		if checkDuplicates:		
+			for item in self.listsConfig:
+				if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data.get("listId"):
+					return {"status": False, "code": GuardManager.LIST_NAME_DUPLICATE, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
-			if loadedFile !=None:
-				if os.path.getsize(loadedFile)>self.limitFileSize:
-					return {'result':False,'code':GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR,'data':''}
-				else:
-					with open(loadedFile,'r') as fd:
-						content=fd.read().strip()
-						if not content:
-							return {'result':False,'code':GuardManager.EMPTY_FILE_ERROR,'data':''}
-						else:
-							content=""			
+		if loadedFile is not None:
+			p = Path(loadedFile)
+			if p.exists():
+				if p.stat().st_size > self.limitFileSize:
+					return {'status': False, 'code': GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR, 'data': '',"type":GuardManager.KIRIGAMI_MSG_ERROR}
+
+				if p.stat().st_size == 0:
+					return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
+
+				with p.open('r', encoding='utf-8') as fd:
+					first_char = fd.read(1)
+					if not first_char.strip():
+						return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
 			else:
-				if data[2]==0:
-					return {'result':False,'code':GuardManager.EMPTY_LIST_ERROR,'data':''}			
+				return {'status': False, 'code': GuardManager.LOADING_FILE_ERROR, 'data': 'File does not exist',"type": GuardManager.KIRIGAMI_MSG_ERROR}
+		else:
+			if data.get("content") == 0:
+				return {'status': False, 'code': GuardManager.EMPTY_LIST_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}			
 
-		return {"result":True,"code":GuardManager.ALL_CORRECT_CODE}			
+		return {"status": True, "code": GuardManager.ALL_CORRECT_CODE, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
 			 			
 	#def checkData
 	
-	def getListId(self,name):
+	def getListId(self, name):
 
-		listId= ''.join((c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn'))
-		listId=listId.lower().replace(" ","_")
-		listId=re.sub(r'[^\w\s-]', '', listId).strip()
-		listId=re.sub(r'[-\s]+', '-', listId)
+		if not isinstance(name, str):
+			return ""
 
-		return listId
+		listId = ''.join((c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn'))
+		listId = listId.lower()
+		listId = re.sub(r'[^\w\s-]', '', listId)
+		listId = listId.replace(" ", "_")
+		listId = re.sub(r'_{2,}', '_', listId)
+		listId = re.sub(r'-{2,}', '-', listId)
+		
+		return listId.strip('_ -')
 
 	#def getListId
 
-	def _getOrderList(self,info=None):
+	def _getOrderList(self, info=None):
 
-		tmp=[]
-		orderList=[]
+		sourceKeys = info if info is not None else self.listsConfig.keys()
 
-		if info==None:
-			if len(self.listsConfig)>0:
-				for item in self.listsConfig:
-					name=self.listsConfig[item]["name"].lower()
-					x=()
-					x=item,name
-					tmp.append(x)
-		else:
-			for item in info:
-				name=self.listsConfig[item]["name"].lower()
-				x=()
-				x=item,name
-				tmp.append(x)
-			
-		tmp.sort(key=lambda list:list[1])
-		for	item in tmp:
-			orderList.append(item[0])
+		if not sourceKeys or not isinstance(self.listsConfig, dict):
+			return []
 
-		return orderList
+		validItems = []
 
-	#def _getOrderList		
+		for item in sourceKeys:
+			configItem = self.listsConfig.get(item)
+			if isinstance(configItem, dict):
+				name = configItem.get("name", "").lower()
+				validItems.append((item, name))
 
+		validItems.sort(key=lambda x: x[1])
+
+		return [item[0] for item in validItems]
+
+	#def _getOrderList
 
 	def applyChanges(self):
 
-		listToRemove=[]
-		listToActive=[]
-		listToDeactive=[]
-		self.tmpFileList=[]
-		error=False
-		code=""
-		data=""
+		listToRemove = []
+		listToActive = []
+		listToDeactive = []
+		self.tmpFileList = []
+		error = False
+		code = GuardManager.CHANGES_APPLIED_SUCCESSFUL
+		data = ""
+		msgType= GuardManager.KIRIGAMI_MSG_OK
 
-		if len(self.listsConfigOrig)==0:
-			changes=self.listsConfig.keys()
-		else:	
-			changes=diff(self.listsConfigOrig,self.listsConfig).keys()
+		if len(self.listsConfigOrig) == 0:
+			changes = self.listsConfig.keys()
+		else:
+			changes = diff(self.listsConfigOrig, self.listsConfig).keys()
 
-		if len(changes)>0:
+		if len(changes) > 0:
 			for item in self.listsConfig:
-				if item in changes:	
-					if self.listsConfig[item]["remove"]:
-						listToRemove.append(self.listsConfig[item]["id"])
+				if item in changes and isinstance(self.listsConfig[item], dict):	
+					if self.listsConfig[item].get("remove", False):
+						listToRemove.append(self.listsConfig[item].get("id"))
 						continue
 
-							
-					if self.listsConfig[item]["active"]:
-						if self.listsConfig[item]["tmpfile"]!="":
-							if self.is_client:
-								send=self.sendTmpFileToServer(self.listsConfig[item]["tmpfile"])
-									
+					if self.listsConfig[item].get("active", False):
 						listToActive.append(self.listsConfig[item])
-									
-									
-					if not self.listsConfig[item]["active"]:
-						if self.listsConfig[item]["tmpfile"]!="":
-							if self.is_client:
-								send=self.sendTmpFileToServer(self.listsConfig[item]["tmpfile"])
-								
+					else:
 						listToDeactive.append(self.listsConfig[item])
 
-					if self.listsConfig[item]["replaced_to"]!="":
-						origName=self.listsConfig[item]["replaced_to"]
-						listToRemove.append(origName)
-			
-			if len(listToRemove)>0:
-				resultRemove=self.client.LliurexGuardManager.remove_guardmode_list(listToRemove)	
-				msg="Applied Changes.Removed list "
-				self._debug(msg,resultRemove)
-				msgLog=msg+str(resultRemove)+". List removed: "+str(listToRemove)
-				self.writeLog(msgLog)
-				if not resultRemove['status']:
-					error=True
-					code=GuardManager.REMOVING_LIST_ERROR
-					data=resultRemove['data']
+					replaced_to = self.listsConfig[item].get("replaced_to", "")
+					if replaced_to != "":
+						listToRemove.append(replaced_to)
 
-			if not error:
-				if len(listToActive)>0:
-						resultActive=self.client.LliurexGuardManager.activate_guardmode_list(listToActive)	
-						msg="Applied Changes.Actived list "
-						self._debug(msg,resultActive)
-						msgLog=msg+str(resultActive)+". List actived: "+str(listToActive)
-						self.writeLog(msgLog)
+			if len(listToRemove) > 0:
+				resultRemove = self.client.LliurexGuardManager.remove_guardmode_list(listToRemove)
+				self._debug("Applied Changes. Removed list ", resultRemove)
+				self._writeLog(f"Applied Changes. Removed list {resultRemove}. List removed: {listToRemove}")
 
-						if not resultActive['status']:
-							error=True
-							code=GuardManager.ACTIVATING_LIST_ERROR
-							data=resultActive['data']
+				if not resultRemove.get('status', False):
+					error = True
+					code = GuardManager.REMOVING_LIST_ERROR
+					data = resultRemove.get('data', '')
+					type= GuardManager.KIRIGAMI_MSG_ERROR
 
-				if not error:
-					if len(listToDeactive)>0:
-						resultDeactive=self.client.LliurexGuardManager.deactivate_guardmode_list(listToDeactive)	
-						msg="Applied Changes.Deactived lists "
-						self._debug(msg,resultDeactive)
-						msgLog=msg+str(resultDeactive)+". List deactived: "+str(listToDeactive)
-						self.writeLog(msgLog)
-						if not resultDeactive['status']:
-							error=True
-							code=GuardManager.DEACTIVATING_LIST_ERROR
-							data=resultDeactive['data']
+			if not error and len(listToActive) > 0:
+				resultActive = self.client.LliurexGuardManager.activate_guardmode_list(listToActive)
+				self._debug("Applied Changes. Actived list ", resultActive)
+				self._writeLog(f"Applied Changes. Actived list {resultActive}. List actived: {listToActive}")
 
-			if not error:
-				msg="Lliurex Guard applied changes. Dnsmasq restart"
-				restartDnsmasq=self.restartDnsmasq(msg)
-				if restartDnsmasq['status']:
-					return {'status':True,'code':GuardManager.CHANGES_APPLIED_SUCCESSFUL}
-				else:
-					return {'status':False,'code':GuardManager.RESTARTING_DNSMASQ_ERROR,'data':restartDnsmasq['data']}
-			else:
-				return {'status':False,'code':code,'data':data}									
+				if not resultActive.get('status', False):
+					error = True
+					code = GuardManager.ACTIVATING_LIST_ERROR
+					data = resultActive.get('data', '')
+					msgType = GuardManager.KIRIGAMI_MSG_ERROR
+
+			if not error and len(listToDeactive) > 0:
+				resultDeactive = self.client.LliurexGuardManager.deactivate_guardmode_list(listToDeactive)
+				self._debug("Applied Changes. Deactived lists ", resultDeactive)
+				self._writeLog(f"Applied Changes. Deactived lists {resultDeactive}. List deactived: {listToDeactive}")
+
+				if not resultDeactive.get('status', False):
+					error = True
+					code = GuardManager.DEACTIVATING_LIST_ERROR
+					data = resultDeactive.get('data', '')
+					msgType = KIRIGAMI_MSG_ERROR
+
+
+			return {'status': not error, 'code': code, 'data': data, 'type': msgType}									
 
 		else:
-			return {'status':True,'code':GuardManager.ALL_CORRECT_CODE}						
+			return {'status': True, 'code': GuardManager.ALL_CORRECT_CODE, 'data': '', 'type': msgType}
 
 	#def applyChanges
 
-	def restartDnsmasq(self,msg):
+	def _createTmpFile(self, listId):
 
-		restartDnsmasq=self.client.LliurexGuardManager.restart_dnsmasq()
-		self.connection=False
-		self.timeout=120
-		self.count=0
+		fd, tmpPathStr = tempfile.mkstemp(suffix=f"_{listId}")
 
-		while not self.connection:
-			time.sleep(1)
-			try:
-				if self.is_server or self.is_client:
-					res=urllib.request.urlopen("http://%s"%self.server_ip)
-				self.connection=True
-			except Exception as e:
-				if self.count<self.timeout:
-					self.count+=1
-				else:
-					msgLog="Lliurex Guard checking connection with server. Time Out. Error:%s"%str(e)
-					self.writeLog(msgLog)
-					self.connection=True
+		os.close(fd)
 
-		#self.set_server(self.server_ip)	
-		self.client=n4d.client.Client(ticket=self.tk)
-		self._debug(msg,restartDnsmasq)
-		msgLog=msg+str(restartDnsmasq)
-		self.writeLog(msgLog)
-		
-		return restartDnsmasq				
+		return tmpPathStr
 
-	#def restartDnsmasq()	
-
-	def sendTmpFileToServer(self,tmp_file):
-
-		send_tmpfile=self.localClient.ScpManager.send_file(self.credentials[0],self.credentials[1],"server",tmp_file,"/tmp")
-		msgLog="Send tmp file %s to server"%tmp_file+ " "+str(send_tmpfile)	
-		self.writeLog(msgLog)
-		
-		return send_tmpfile
-
-	#def sendTmpFileToServer		
-
-	def _createTmpFile(self,listId):
+	#def _createTmpFile
 	
-		tmpFile=tempfile.mkstemp("_"+listId)
-		tmpFile=tmpFile[1]
-		
-		return tmpFile
-
-	#def _createTmpFile	
-
 	def removeTmpFile(self):
 
 		for item in self.garbageFiles:
-			if os.path.exists(item):
-				os.remove(item)
+			if not item:
+				continue
+
+			p = Path(item)
+			try:
+				if p.is_file():
+					p.unlink()
+			except Exception as e:
+				self._debug(f"Warning: Could not remove temporary file {item}: {e}")
 		
-		self.garbageFiles=[]	
-
-		self.client.LliurexGuardManager.remove_tmp_file()			
-
-		
-	#def removeTmpFile	
-
-	def writeLog(self,msg):
+	#def removeTmpFile
+	
+	def _writeLog(self,msg):
 	
 		syslog.openlog("LLIUREX-GUARD")
 		syslog.syslog(msg)	
 
-	#def writeLog	
+	#def _writeLog	
 
-	def formatLine(self,line):
+	def formatLine(self, line):
 
-		sanitizeItems=["--",".-","-.","0.",".0",'0-',"-0",]
+		if not isinstance(line, str):
+			return ""
 
-		if line!="":
-			firstchar=line[0]
-			
-			if firstchar in [".","_","-","+","*","$"," ","&","!","¡","#","%","?","¿"]:
-				line=line[1:]
-			
-			if "https" in line:
-				line=line.replace("https://","")
-			else:
-				line=line.replace("http://","")
+		line = line.strip()
+		if not line:
+			return ""
 
-			if len(line.strip().split("/"))>1:
-				line=""
+		forbiddenStarts = {".", "_", "-", "+", "*", "$", " ", "&", "!", "¡", "#", "%", "?", "¿"}
+		if line[0] in forbiddenStarts:
+			line = line[1:].strip()
+			if not line:
+				return ""
 
-			if line !="":
-				rejectLine=False
-				for item in sanitizeItems:
-					if item in line:
-						rejectLine=True
-						break
+		if line.startswith("https://"):
+			line = line[8:]
+		elif line.startswith("http://"):
+			line = line[7:]
 
-				if rejectLine:
-					line=""
+		if "/" in line:
+			return ""
+
+		sanitizeItems = ["--", ".-", "-.", "0.", ".0", "0-", "-0"]
+		for item in sanitizeItems:
+			if item in line:
+				return ""
 
 		return line
 
 	#def formatLine
 
-	def updateListDns(self):
-
-		status=True
-		errorInfo=[]
-		code=""
-		for item in self.listsConfig:
-			readGuardmodeList=self.client.LliurexGuardManager.read_guardmode_list(self.listsConfig[item]["id"],self.listsConfig[item]['active'])
-			if readGuardmodeList['status']:
-				content=readGuardmodeList['data'][0]
-				countLines=readGuardmodeList['data'][1]
-				tmpFile=self._createTmpFile(self.listsConfig[item]["id"])
-				f=open(tmpFile,'w')
-				tmpContent="".join(content)
-				f.write(tmpContent)
-				f.close()
-				tmpContent=None
-				self.garbageFiles.append(tmpFile)
-				self.listsConfig[item]["tmpfile"]=tmpFile
-
-			else:
-				status=False
-				code=GuardManager.READ_FILE_ERROR
-				errorInfo=readGuardmodeList['data']
-				break
-
-		if status:
-			code=GuardManager.READ_FILE_SUCCESSFUL
-			result=""
-		else:
-			result=errorInfo
-
-		return {'status':status,'code':code,'data':result}
-		
-	#def updateListDns
-
 	def checkGlobalOptionStatus(self):
 
-		if len(self.listsConfig)>0 and self.guardMode!="DisableMode":
-			return True
-		else:
-			return False
-			
+		return bool(self.listsConfig) and getattr(self, 'guardMode', '') != "DisableMode"
+
 	#def checkGlobalOptionStatus
-
-	def checkUpdateDnsOptionStatus(self):
-
-		if self.guardMode=="WhiteMode" and self.is_desktop:
-			return True
-		else:
-			return False
-
-	#def checkUpdateDnsOptionStatus	
 
 	def checkChangeStatusListsOption(self):
 
-		allActivated=False
-		allDeactivated=False
-		allRemoved=False
-		enableStatusFilter=True
-		countActivated=0
-		countDeactivated=0
-		countRemoved=0
-		result=[]
-		if len(self.listsConfig)>0:
-			for item in self.listsConfig:
-				if self.listsConfig[item]['active']:
-					countActivated+=1
-				else:
-					countDeactivated+=1
-				if self.listsConfig[item]["remove"]:
-					countRemoved+=1
+		allActivated = False
+		allDeactivated = False
+		enableStatusFilter = True
 
-			if countActivated==0:
-				allDeactivated=True
-				enableStatusFilter=False
+		totalLists = len(self.listsConfig)
+		
+		if totalLists == 0:
+			return {
+				"allActivated":False, 
+				"allDesactivated":False, 
+				"enableStatusFilter":False
+			}
 
-			if countDeactivated==0:
-				allActivated=True
-				enableStatusFilter=False
+		countActivated = sum(1 for item in self.listsConfig.values() if isinstance(item, dict) and item.get('active'))
+		countDeactivated = totalLists - countActivated
+		countRemoved = sum(1 for item in self.listsConfig.values() if isinstance(item, dict) and item.get('remove'))
 
-			if countRemoved==len(self.listsConfig):
-				allActivated=True
-				allDeactivated=True
+		if countActivated == 0:
+			allDeactivated = True
+			enableStatusFilter = False
 
-		else:
-			enableStatusFilter=False
-			
-		result=[allActivated,allDeactivated,enableStatusFilter]
+		if countDeactivated == 0:
+			allActivated = True
+			enableStatusFilter = False
 
-		return result
+		if countRemoved == totalLists:
+			allActivated = False
+			allDeactivated = False
+			enableStatusFilter = False
+
+		return {
+			"allActivated":allActivated, 
+			"allDeactivated": allDeactivated, 
+			"enableStatusFilter":enableStatusFilter
+		}
 
 	#def checkChangeStatusListsOption
 
 	def checkRemoveListsOption(self):
 
-		for item in self.listsConfig:
-			if not self.listsConfig[item]["remove"]:
-				return True
-		
-		return False
+		return any(
+			isinstance(item, dict) and not item.get("remove", False) 
+			for item in self.listsConfig.values()
+		)
 
 	#def checkRemoveListsOption
 
 	def checkRestoreListsOption(self):
 
-		for item in self.listsConfig:
-			if self.listsConfig[item]["remove"]:
-				return True
-
-		return False
+		return any(
+			isinstance(item, dict) and item.get("remove", False) 
+			for item in self.listsConfig.values()
+		)
 
 	#def checkRestoreListOption
 
-	def getLastChangeInFile(self,fileToCheck):
+	def getLastChangeInFile(self, fileToCheck):
 
-		lastChange=""
+		if not fileToCheck:
+			return None
+
 		try:
-			if os.path.exists(fileToCheck):
-				lastChange=os.path.getmtime(fileToCheck)
-		except:
-			pass
+			p = Path(fileToCheck)
+			if p.is_file():
+				return p.stat().st_mtime
+		except OSError as e:
+			self._debug(f"Warning: Could not get modification time for {fileToCheck}: {e}")
 
-		return lastChange
+		return None
 
 	#def getLastChangeInFile
 
-	def checkUrlDuplicates(self,urlToCheck,listOfUrl):
+	def checkUrlDuplicates(self, urlToCheck, listOfUrl):
 
-		for item in listOfUrl:
-			if item["url"]==urlToCheck:
-				return True
-
-		return False
+		return any(
+			isinstance(item, dict) and item.get("url") == urlToCheck 
+			for item in listOfUrl
+		)
 
 	#def checkUrlDuplicates
 
@@ -1007,6 +969,18 @@ class GuardManager(object):
 			return tmpId[0]
 		else:
 			return 0
+
+	#def getLastUrlId
+
+	def getLastUrlId(self):
+
+		if not self.urlConfigData or not isinstance(self.urlConfigData, list):
+			return 0
+
+		return max(
+			(item.get("urlId", 0) for item in self.urlConfigData if isinstance(item, dict)), 
+			default=0
+		)
 
 	#def getLastUrlId
 

@@ -208,7 +208,6 @@ Rectangle{
             default:
                return ""
         }
-        return msg    
 
     }
 

@@ -1,9 +1,9 @@
-import org.kde.plasma.components as PC
-import org.kde.kirigami as Kirigami
 import QtQuick
 import QtQuick.Controls
 import QtQml.Models
 import QtQuick.Layouts
+import org.kde.plasma.components as PC
+import org.kde.kirigami as Kirigami
 
 
 Rectangle {
@@ -11,22 +11,22 @@ Rectangle {
     property alias listsCount:guardLists.count
     color:"transparent"
 
-    GridLayout{
-        id:mainGrid
-        rows:2
-        flow: GridLayout.TopToBottom
-        rowSpacing:10
-        anchors.left:parent.left
+    ColumnLayout{
         anchors.fill:parent
+        spacing:10
 
         RowLayout{
+            id:filterRow
+            Layout.fillWidth:true
             Layout.alignment:Qt.AlignRight
             spacing:10
+            enabled:true
+
             Button{
                 id:statusFilterBtn
                 display:AbstractButton.IconOnly
-                icon.name:"view-filter.svg"
-                enabled:guardOptionsStackBridge.enableListsStatusOptions[2]
+                icon.name:"view-filter"
+                enabled:guardOptionsStackBridge.enableListsStatusOptions.enableStatusFilter
                 ToolTip.delay: 1000
                 ToolTip.timeout: 3000
                 ToolTip.visible: hovered
@@ -39,45 +39,29 @@ Rectangle {
                     x:-(optionsMenu.width-statusFilterBtn.width/2)
 
                     MenuItem{
-                        icon.name:"security-high.svg"
+                        icon.name:"security-high"
                         text:i18nd("lliurex-guard","Show activated lists ")
-                        enabled:{
-                            if (guardOptionsStackBridge.filterStatusValue!="active"){
-                                true
-                            }else{
-                                false
-                            }
-                        }
+                        enabled:guardOptionsStackBridge.filterStatusValue!="active"?true:false
                         onClicked:guardOptionsStackBridge.manageStatusFilter("active")
                     }
 
                     MenuItem{
-                        icon.name:"lliurex-guard-disable-mode.svg"
+                        icon.name:"lliurex-guard-disable-mode"
                         text:i18nd("lliurex-guard","Show disabled lists")
-                        enabled:{
-                            if (guardOptionsStackBridge.filterStatusValue!="disable"){
-                                true
-                            }else{
-                                false
-                            }
-                        }
+                        enabled:guardOptionsStackBridge.filterStatusValue!="disable"?true:false
                         onClicked:guardOptionsStackBridge.manageStatusFilter("disable")
                     }
+
                     MenuItem{
-                        icon.name:"kt-remove-filters.svg"
+                        icon.name:"kt-remove-filters"
                         text:i18nd("lliurex-guard","Remove filter")
-                        enabled:{
-                            if (guardOptionsStackBridge.filterStatusValue!="all"){
-                                true
-                            }else{
-                                false
-                            }
-                        }
+                        enabled:guardOptionsStackBridge.filterStatusValue!="all"?true:false
                         onClicked:guardOptionsStackBridge.manageStatusFilter("all")
                     }
                 }
                 
             }
+
             PC.TextField{
                 id:listSearchEntry
                 font.pointSize:10
@@ -106,31 +90,28 @@ Rectangle {
 
 
             PC.ScrollView{
-                implicitWidth:parent.width
-                implicitHeight:parent.height
-                anchors.leftMargin:10
+                anchors.fill:parent
 
                 ListView{
                     id: guardLists
-                    anchors.fill:parent
-                    height: parent.height
-                    enabled:true
-                    currentIndex:-1
-                    clip: true
-                    focus:true
-                    boundsBehavior: Flickable.StopAtBounds
-                    highlight: Rectangle { color: "#add8e6"; opacity:0.8;border.color:"#53a1c9" }
-                    highlightMoveDuration: 0
-                    highlightResizeDuration: 0
+
+                    Timer {
+                        id: searchTimer
+                        interval: 150
+                        repeat: false
+                        onTriggered: filterModel.update()
+                    }
+
                     model:FilterDelegateModel{
                         id:filterModel
                         model:listsModel
                         role:"metaInfo"
                         search:listSearchEntry.text.trim()
-                        statusFilter:guardOptionsStackBridge.filterStatusValue
+                        statusFilter:guardOptionsStackBridge.filterStatusValue 
+                        externalTimer: searchTimer
 
                         delegate: ListDelegateItem{
-                            width:listsTable.width
+                            width:listsTable.width-18
                             listOrder:model.order
                             listId:model.id
                             listName:model.name
@@ -142,12 +123,25 @@ Rectangle {
                            
                         }
                     }
+
+                    currentIndex:-1
+                    enabled:true
+                    clip: true
+                    focus:true
+                    boundsBehavior: Flickable.StopAtBounds
+                    highlightFollowsCurrentItem:true
+                    highlightMoveDuration: 0
+                    highlightResizeDuration: 0
+     
                     Kirigami.PlaceholderMessage { 
                         id: emptyHint
                         anchors.centerIn: parent
                         width: parent.width - (Kirigami.Units.largeSpacing * 4)
                         visible: guardLists.count==0?true:false
-                        text: i18nd("lliurex-guard","No list is configured")
+                        text: listSearchEntry.text.length==0
+                              ?i18nd("lliurex-guard","No list is configured")
+                              :i18nd("lliurex-guard","No list found")
+                        icon.name:"lliurex-guard"
                     }
                 } 
              }
