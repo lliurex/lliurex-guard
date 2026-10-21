@@ -18,6 +18,7 @@ class LliurexGuardManager:
 		self.core=n4dcore.Core.get_core()
 		self.default_list_path="/usr/share/lliurex-guard/blacklists"
 		self.mode_file_path="/etc/dnsmasq.d/lliurex-guard.conf"
+		self.natfree_mode_file_path="/etc/dnsmasq.d/lliurex-guard-natfree.conf"
 		self.conf_dir="/etc/lliurex-guard"
 		self.blacklist_dir=os.path.join(self.conf_dir,"blacklist")
 		self.blacklist_disable_dir=os.path.join(self.conf_dir,"blacklist.d")
@@ -38,7 +39,14 @@ class LliurexGuardManager:
 		context=ssl._create_unverified_context()
 		self.n4d = n4dclient.ServerProxy("https://"+server+":9779",context=context,allow_none=True)
 		'''
-	#def __init__	
+	#def __init__
+
+	def startup(self,options):
+
+		if self._is_non_standarize_classroom():
+			self._remove_natfree_config()
+
+	#def startup()
 
 	def _check_dnsmasq_conf(self):
 		
@@ -767,5 +775,40 @@ class LliurexGuardManager:
 				os.system('systemctl restart systemd-resolved')
 				
 	#def _manage_resolvconf
+
+	def _is_non_standarize_classroom(self):
+
+		normalizedFlavours=["adi","pro","alu"]
+
+		try:
+			result = subprocess.run(
+				['lliurex-version', '-v'],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
+
+			flavours = [x.strip() for x in result.stdout.split(',') if x.strip()]
+
+			return all(p not in i for i in flavours for p in normalizedFlavours)
+		
+		except (subprocess.CalledProcessError, FileNotFoundError) as e:
+			msg_log="Error checking LliureX version: {e}"
+			print(f"[LliurexGuardManager]: {msg_log}")
+			return False
+
+	#def _is_desktop_standalone
+
+	def _remove_natfree_config(self):
+
+		if os.path.exists(self.natfree_mode_file_path):
+			try:
+				os.remove(self.natfree_mode_file_path)
+			except OSError:
+				pass
+	
+	#def _remove_natfree_config	
+			
 				
 		
