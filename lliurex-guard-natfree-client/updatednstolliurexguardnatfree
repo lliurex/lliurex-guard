@@ -19,7 +19,7 @@ except Exception:
 
 if pout:
     flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
-    runScript=any(p in i for i in flavoursInstalled for p in normalizedFlavours):
+    runScript=any(p in i for i in flavoursInstalled for p in normalizedFlavours)
 
 if not runScript:
     sys.exit(0)
