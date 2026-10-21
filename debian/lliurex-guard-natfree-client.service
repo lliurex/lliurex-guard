@@ -1,7 +1,8 @@
 [Unit]
 Description=Service for shutdown lliurex-guard when sutting down or restart the system
 DefaultDependencies=no
-Before=shutdown.target reboot.target halt.target n4d.service dnsmasq.service
+After=n4d.service
+Before=shutdown.target reboot.target halt.target
 
 [Service]
 Type=oneshot
