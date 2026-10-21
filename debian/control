@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Equipo LliureX <lliurex@gva.es>
 Uploaders: Equipo LliureX <lliurex@gva.es>
-Build-Depends: llxsrchelper,debhelper (>= 10),dh-python, python3-poinstaller,python3-setuptools,python3-all,zero-dev
+Build-Depends: llxsrchelper,debhelper (>= 10),dh-python, python3-poinstaller,python3-setuptools,python3-all,zero-dev,sytemd,pybuild-plugin-pyproject
 Standards-Version: 4.1.2
 
 Package: lliurex-guard
