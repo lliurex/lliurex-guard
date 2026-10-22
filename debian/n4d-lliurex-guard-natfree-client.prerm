@@ -18,19 +18,14 @@ set -e
 
 case "$1" in
     remove|deconfigure)
-        firstInitFile=/var/lib/lliurex-guar-natfree/first_init
+        firstInitFile=/var/lib/lliurex-guard-natfree/first_init
         configFile=/etc/dnsmasq.d/lliurex-guard-natfree.conf
-        overrideFile=/etc/systemd/system/dnsmasq.service.d/lliurex-guard-natfree-override.conf
 
         systemctl stop lliurex-guard-natfree-client || true
         systemctl disable lliurex-guard-natfree-client || true
 
         if [ -f "$configFile" ];then
             rm -f "$configFile" || true
-        fi
-
-        if [ -f "$overrideFile" ];then
-            rm -f "$overrideFile" || true
         fi
 
        if [ -f "$firstInitFile" ];then
