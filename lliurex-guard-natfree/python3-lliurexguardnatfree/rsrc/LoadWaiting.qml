@@ -49,7 +49,7 @@ Rectangle{
 
             Text {
                 id: loadText
-                text: i18nd("lliurex-guard-natfree-natfree", "Loading. Wait a moment...")
+                text: i18nd("lliurex-guard-natfree", "Loading. Wait a moment...")
                 font.pointSize: 10
                 color: palette.windowText
                 Layout.alignment: Qt.AlignHCenter
