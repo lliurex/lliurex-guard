@@ -25,17 +25,18 @@ case "$1" in
         configFile=/etc/dnsmasq.d/lliurex-guard.conf
         overrideFile=/etc/systemd/system/dnsmasq.service.d/lliurex-guard-override.conf
 
-        systemctl daemon-reload || true
- 
-        if [ -f "$configFile" ];then
-            rm -f "$configFile" || true
-        fi
+        systemctl stop dnsmasq.service || true
+        systemctl disable dnsmasq.service || true
 
         if [ -f "$overrideFile" ];then
             rm -f "$overrideFile" || true
         fi
 
-       if [ -f "$firstInitFile" ];then
+        if [ -f "$configFile" ];then
+            rm -f "$configFile" || true
+        fi
+
+        if [ -f "$firstInitFile" ];then
             rm -f "$firstInitFile" || true
         fi
     ;;

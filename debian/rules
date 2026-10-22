@@ -25,3 +25,7 @@ export PYBUILD_DESTDIR_python3=debian/output
 
 
 override_dh_auto_test:
+
+override_dh_systemd_start:
+
+override_dh_installinit:
