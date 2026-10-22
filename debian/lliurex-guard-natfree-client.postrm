@@ -23,14 +23,18 @@ set -e
 
 #DEBHELPER#
 
-
 case "$1" in
     purge|remove)
-        configFile=/etc/dnsmasq.d/lliurex-guard-natfree.conf
 
-        if [ -f "$configFile" ];then
-            rm -f "$configFile" || true
-        fi    ;;
+        if [ "$1" = remove ] && [ -d /run/systemd/system ] ; then
+            systemctl --system daemon-reload >/dev/null || true
+        fi
+        confFile=/etc/dnsmasq.d/lliurex-guard-natfree.conf
+
+        if [ -f "$confFile" ];then
+            rm -f "$confFile" || true
+        fi
+    ;;
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappea)
 

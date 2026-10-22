@@ -29,3 +29,7 @@ override_dh_auto_install:
 	python3 setup.py clean --all
 	python3 setup-natfree.py install --install-layout=deb --root $(CURDIR)/debian/lliurex-guard-natfree --prefix=/usr
 	python3 setup-natfree.py clean --all
+
+override_dh_systemd_start:
+
+override_dh_installinit:
