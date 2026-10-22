@@ -22,7 +22,6 @@ case "$1" in
         configFile=/etc/dnsmasq.d/lliurex-guard-natfree.conf
 
         systemctl stop lliurex-guard-natfree-client || true
-        systemctl disable lliurex-guard-natfree-client || true
 
         if [ -f "$configFile" ];then
             rm -f "$configFile" || true
