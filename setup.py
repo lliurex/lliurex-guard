@@ -26,7 +26,7 @@ import os
 
 if __name__ == '__main__':
 	
-	pinstaller = poinstaller.PoInstaller('translations','lliurex-guard','')
+	pinstaller = poinstaller.PoInstaller('translations/lliurex-guard','lliurex-guard','')
 	pinstaller.build()
 	polist = pinstaller.setup_install()
 
