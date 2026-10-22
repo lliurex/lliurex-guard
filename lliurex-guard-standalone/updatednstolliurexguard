@@ -36,10 +36,10 @@ for x in [ z.decode('utf-8') for z in p.stdout.readlines()]:
         continue
     dns.append(aux_dns)
 
-if len(dns) <= 0 :
+if not dns:
     sys.exit(0)
-elif len(dns) ==1 :
-    dns=dns[0].split()
+
+dns=[ip for item in dns for ip in item.split()]
 
 extradns = Path('/var/lib/dnsmasq/config/extra-dns')
 
