@@ -5,6 +5,7 @@ from PySide6.QtCore import QUrl, QObject, Slot, Signal,Property
 import os
 import subprocess
 import sys
+import shutil
 from pathlib import Path
 
 import gettext
