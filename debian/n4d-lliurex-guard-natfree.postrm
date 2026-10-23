@@ -22,9 +22,14 @@ set -e
 case "$1" in
     purge|remove)
         varFile=/var/lib/n4d/variables/LLIUREXGUARD_NATFREE
+        configDir=/etc/lliurex-guard-natfree
 
         if [ -f "$varFile" ];then
             rm -f "$varFile" || true
+        fi
+
+        if [ -d "$configDir" ];then
+            rm -rf "$configDir" || true
         fi
     ;;
 

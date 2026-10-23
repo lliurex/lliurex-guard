@@ -1,5 +1,5 @@
 #!/bin/sh
-# prerm script for lliurex-guard-natfree-client
+# prerm script for n4d-lliurex-guard-natfree-client
 # see: dh_installdeb(1)
 
 set -e
