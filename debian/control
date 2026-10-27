@@ -12,19 +12,6 @@ Depends: n4d,n4d-lliurex-base,python3-n4d-client,python3-jsondiff,lliurex-guard-
 Description: Contains lliurex-guard
  This package contains the : lliurex-guard gui
 
-Package: lliurex-guard-natfree
-Architecture: all
-Depends: n4d,n4d-lliurex-base,n4d-lliurex-guard-natfree,python3-n4d-client,python3-jsondiff,n4d-qt-agent,python3-pyside2.qtqml, python3-pyside2.qtwidgets, python3-pyside2.qtquick,python3-pyside2.qtgui,python3-pyside2.qtquickwidgets
-Description: Contains lliurex-guard
- This package contains the : lliurex-guard gui
-
-Package: lliurex-guard-natfree-client
-Architecture: all
-Depends: ${misc:Depends},${python3:Depends},n4d-lliurex-guard-natfree-client
-Description: Metapackage and fix scripts to lliurex-guard on desktop lab-alu and wifi-alu flavours
- This install scripts to update lliurex-guard-natfree whitelist and update dns list of
- dnsmasq
-
 Package: lliurex-guard-standalone
 Architecture: all
 Depends: ${misc:Depends},${python3:Depends},n4d-lliurex-guard, lliurex-guard
@@ -54,14 +41,3 @@ Depends: ${misc:Depends},${python3:Depends},n4d,dnsmasq,n4d-network
 Description: Lliurx Guard plugin
   Plugins supporting lliurex guard functionality
 
-Package: n4d-lliurex-guard-natfree
-Architecture: all
-Depends: ${misc:Depends},${python3:Depends},n4d
-Description: Lliurx Guard plugin
-  Plugins supporting lliurex guard functionality
-
-Package: n4d-lliurex-guard-natfree-client
-Architecture: all
-Depends: ${misc:Depends},${python3:Depends},n4d,dnsmasq
-Description: Lliurx Guard plugin
-  Plugins supporting lliurex guard functionality

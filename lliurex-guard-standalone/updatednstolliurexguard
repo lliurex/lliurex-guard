@@ -5,6 +5,7 @@ import netifaces
 import sys
 from pathlib import Path
 
+'''
 normalizedFlavours=["adi","pro","alu"]
 flavoursInstalled=[]
         
@@ -20,6 +21,7 @@ if pout:
     flavoursInstalled = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
     if any(p in i for i in flavoursInstalled for p in normalizedFlavours):
         sys.exit(0)
+'''
 try:
     interface_by_default = netifaces.gateways()['default'][2][1]
 except:
