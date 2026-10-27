@@ -1,8 +1,8 @@
-lliurex-guard (5.19.5) jammy; urgency=medium
+lliurex-guard (5.20.5) jammy; urgency=medium
 
-  * Fixed bug when get desktops dns
+  * Fixed bug when get dns in desktops
   
- -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 27 Oct 2026 14:41:37 +0100
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 21 Oct 2026 15:57:27 +0200
 
 lliurex-guard (5.19.4) jammy; urgency=medium
 
