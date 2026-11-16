@@ -17,7 +17,7 @@ class Tunnel(QObject):
 
 		QObject.__init__(self)
 		self.clearCache()
-		self.canRun()
+		#self.canRun()
 		self.isStandAlone()
 
 	#def __init	

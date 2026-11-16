@@ -1,3 +1,9 @@
+lliurex-guard (5.20.6.1) jammy; urgency=medium
+
+  * Removed unused function in this version
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com> Mon, 16 Nov 2026 12:19:51 +0100
+
 lliurex-guard (5.20.5) jammy; urgency=medium
 
   * Fixed bug when get dns in desktops
