@@ -426,7 +426,7 @@ class Bridge(QObject):
 			listsEntries=self.guardManager.listsConfigData
 			for item in listsEntries:
 				if item["id"]!="":
-					self._listsModel.appendRow(item["order"],item["id"],item["name"],item["entries"],item["description"],item["activated"],item["remove"],item["metaInfo"])
+					self._listsModel.appendRow(item["order"],item["id"],item["name"],item["entries"],item["description"],item["activated"],item["remove"],item["metaInfo"],item["canBeEdited"])
 		
 	#def _updateListsModel
 

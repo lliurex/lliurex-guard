@@ -120,6 +120,7 @@ Rectangle {
                             listActivated:model.activated
                             listRemove:model.remove
                             metaInfo:model.metaInfo
+                            canBeEdited:model.canBeEdited
                            
                         }
                     }

@@ -13,6 +13,7 @@ class ListsModel(QtCore.QAbstractListModel):
 	ActivatedRole=QtCore.Qt.UserRole+1005
 	RemoveRole=QtCore.Qt.UserRole+1006
 	MetaInfoRole=QtCore.Qt.UserRole+1007
+	CanBeEditedRole = QtCore.Qt.UserRole+1008
 	
 	def __init__(self,parent=None):
 		
@@ -49,6 +50,8 @@ class ListsModel(QtCore.QAbstractListModel):
 				return item["remove"]
 			elif role == ListsModel.MetaInfoRole:
 				return item["metaInfo"]
+			elif role == ListsModel.CanBeEditedRole:
+				return item["canBeEdited"]
 			
 
 	#def data
@@ -64,11 +67,13 @@ class ListsModel(QtCore.QAbstractListModel):
 		roles[ListsModel.ActivatedRole] = b"activated"
 		roles[ListsModel.RemoveRole] = b"remove"
 		roles[ListsModel.MetaInfoRole]=b"metaInfo"
+		roles[ListsModel.CanBeEditedRole]=b"canBeEdited"
+		
 		return roles
 
 	#def roleNames
 
-	def appendRow(self,od,i,na,en,des,ac,re,mt):
+	def appendRow(self,od,i,na,en,des,ac,re,mt,ce):
 		
 		tmpId=[]
 		for item in self._entries:
@@ -76,7 +81,7 @@ class ListsModel(QtCore.QAbstractListModel):
 		tmpN=na.strip()
 		if i not in tmpId and na !="" and len(tmpN)>0:
 			self.beginInsertRows(QtCore.QModelIndex(), self.rowCount(),self.rowCount())
-			self._entries.append(dict(order=od,id=i,name=na,entries=en,description=des,activated=ac,remove=re,metaInfo=mt))
+			self._entries.append(dict(order=od,id=i,name=na,entries=en,description=des,activated=ac,remove=re,metaInfo=mt,canBeEdited=ce))
 			self.endInsertRows()
 
 	#def appendRow

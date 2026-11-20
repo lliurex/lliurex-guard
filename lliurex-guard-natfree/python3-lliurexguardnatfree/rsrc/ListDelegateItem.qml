@@ -15,6 +15,7 @@ ItemDelegate{
     property bool listActivated
     property bool listRemove
     property string metaInfo
+    property bool canBeEdited
 
     enabled:true
     height:80
@@ -165,6 +166,7 @@ ItemDelegate{
                 MenuItem{
                     icon.name:listRemove?"restoration":"delete"
                     text:listRemove?i18nd("lliurex-guard-natfree","Restore the list"):i18nd("lliurex-guard-natfree","Delete the list")
+                    visible: canBeEdited
                     onClicked:listRemove?guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder}):guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
                 }
             }
