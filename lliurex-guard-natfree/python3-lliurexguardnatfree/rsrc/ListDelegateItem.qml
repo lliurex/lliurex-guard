@@ -14,8 +14,8 @@ ItemDelegate{
     property string listDescription
     property bool listActivated
     property bool listRemove
+    property bool readOnly
     property string metaInfo
-    property bool canBeEdited
 
     enabled:true
     height:80
@@ -157,8 +157,12 @@ ItemDelegate{
                 }
 
                 MenuItem{
-                    icon.name:"document-edit.svg"
-                    text:i18nd("lliurex-guard-natfree","Edit list")
+                    icon.name: readOnly
+                                ?"document-preview-archive"
+                                :"document-edit"
+                    text:readOnly
+                            ?i18nd("lliurex-guard-natfree","Check list")
+                            :i18nd("lliurex-guard-natfree","Edit list")
                     enabled:listRemove?false:true
                     onClicked:listStackBridge.loadList(listOrder)
                 }
@@ -166,7 +170,7 @@ ItemDelegate{
                 MenuItem{
                     icon.name:listRemove?"restoration":"delete"
                     text:listRemove?i18nd("lliurex-guard-natfree","Restore the list"):i18nd("lliurex-guard-natfree","Delete the list")
-                    visible: canBeEdited
+                    visible: !readOnly
                     onClicked:listRemove?guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder}):guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
                 }
             }

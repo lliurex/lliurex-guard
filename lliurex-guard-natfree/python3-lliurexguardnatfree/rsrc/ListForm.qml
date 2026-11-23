@@ -10,7 +10,7 @@ Rectangle{
 
     Timer{
         id:debounceTimer
-        interval:500
+        interval:100
         repeat:false
         property var callback
         onTriggered: if (callback) callback()
@@ -57,6 +57,7 @@ Rectangle{
                 text:listStackBridge.listName
                 horizontalAlignment:TextInput.AlignLeft
                 Layout.preferredWidth:400
+                readOnly: listStackBridge.readOnly ? true : false
                 onTextChanged: {
                     if (activeFocus){
                         debounceTimer.callback= ()=>listStackBridge.updateListName(nameEntry.text)
@@ -76,6 +77,7 @@ Rectangle{
                 text:listStackBridge.listDescription
                 horizontalAlignment:TextInput.AlignLeft
                 Layout.preferredWidth:400
+                readOnly: listStackBridge.readOnly ? true : false
 
                 onTextChanged: {
                     if (activeFocus){
@@ -206,6 +208,8 @@ Rectangle{
                return i18nd("lliurex-guard-natfree","Url with incorrect format have not been added to the list")
             case -38:
                return i18nd("lliurex-guard-natfree","The url entered is not in the correct format")
+            case -39:
+               return i18nd("lliurex-guard-natfree","List check failed. Please try again")               
             case 6:
                return i18nd("lliurex-guard-natfree","Waiting while viewing / editing the list. To continue close the file")
             default:

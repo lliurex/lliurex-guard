@@ -22,39 +22,40 @@ import copy
 
 class GuardManager(object):
 
-	MISSING_LIST_NAME_ERROR=-1
-	LIST_NAME_DUPLICATE=-2
-	SAVING_FILE_ERROR=-5
-	CHANGE_GUARDMODE_ERROR=-9
-	RESTARTING_DNSMASQ_ERROR=-10
-	READ_LIST_INFO_ERROR=-13
-	LOADING_FILE_ERROR=-16
-	REMOVING_LIST_ERROR=-19
-	ACTIVATING_LIST_ERROR=-20
-	DEACTIVATING_LIST_ERROR=-21
-	READ_GUARDMODE_ERROR=-23
-	READ_GUARDMODE_HEADERS_ERROR=-25
-	EMPTY_FILE_ERROR=-27
-	LOAD_FILE_SIZE_OFF_LIMITS_ERROR=-30
-	EDIT_FILE_SIZE_OFF_LIMITS_ERROR=-31
-	READ_FILE_ERROR=-34
-	EMPTY_LIST_ERROR=-35
+	MISSING_LIST_NAME_ERROR = -1
+	LIST_NAME_DUPLICATE = -2
+	SAVING_FILE_ERROR = -5
+	CHANGE_GUARDMODE_ERROR = -9
+	RESTARTING_DNSMASQ_ERROR = -10
+	READ_LIST_INFO_ERROR = -13
+	LOADING_FILE_ERROR = -16
+	REMOVING_LIST_ERROR = -19
+	ACTIVATING_LIST_ERROR = -20
+	DEACTIVATING_LIST_ERROR = -21
+	READ_GUARDMODE_ERROR = -23
+	READ_GUARDMODE_HEADERS_ERROR = -25
+	EMPTY_FILE_ERROR = -27
+	LOAD_FILE_SIZE_OFF_LIMITS_ERROR = -30
+	EDIT_FILE_SIZE_OFF_LIMITS_ERROR = -31
+	READ_FILE_ERROR = -34
+	EMPTY_LIST_ERROR = -35
+	ERROR_CHECKING_LIST = -39
 
-	ALL_CORRECT_CODE=0
-	LIST_CREATED_SUCCESSFUL=3
-	LIST_EDITED_SUCCESSFUL=4
-	CHANGE_GUARDMODE_SUCCESSFUL=8
-	READ_LIST_INFO_SUCCESSFUL=12
-	LOAD_FILE_SUCCESSFUL=15
-	CHANGES_APPLIED_SUCCESSFUL=18
-	READ_GUARDMODE_SUCCESSFUL=22
-	READ_GUARDMODE_HEADERS_SUCCESSFUL=24
-	READ_FILE_SUCCESSFUL=35
+	ALL_CORRECT_CODE = 0
+	LIST_CREATED_SUCCESSFUL = 3
+	LIST_EDITED_SUCCESSFUL = 4
+	CHANGE_GUARDMODE_SUCCESSFUL = 8
+	READ_LIST_INFO_SUCCESSFUL = 12
+	LOAD_FILE_SUCCESSFUL = 15
+	CHANGES_APPLIED_SUCCESSFUL = 18
+	READ_GUARDMODE_SUCCESSFUL = 22
+	READ_GUARDMODE_HEADERS_SUCCESSFUL = 24
+	READ_FILE_SUCCESSFUL = 35
 
-	KIRIGAMI_MSG_OK=0
-	KIRIGAMI_MSG_ERROR=1
-	KIRIGAMI_MSG_WARNING=2
-	KIRIGAMI_MSG_INFO=3
+	KIRIGAMI_MSG_OK = 0
+	KIRIGAMI_MSG_ERROR = 1
+	KIRIGAMI_MSG_WARNING = 2
+	KIRIGAMI_MSG_INFO = 3
 
 	def __init__(self):
 
@@ -72,6 +73,7 @@ class GuardManager(object):
 		self.listsConfigData = []
 		self.urlConfigData = []
 		self._detectFlavour()
+		self._detectLang()
 		self.initValues()
 	
 	#def __init__	
@@ -94,6 +96,26 @@ class GuardManager(object):
 				break
 	
 	#def detect_flavour
+
+	def _detectLang(self):
+
+		self.sessiongLang="default"
+
+		tmpLang = os.environ.get("LANGUAGE","default")
+
+		if tmpLang != "":
+			tmpLang = tmpLang.split(":")
+
+		if tmpLang:
+			self.sessiongLang = tmpLang[0]
+		else:
+			currentLang = os.environ.get("LANG","default")
+			if 'ca' in currentLang:
+				self.sessiongLang = "ca@valencia"
+			else:
+				self.sessiongLang = "es"
+
+	#def _detectLang
 	
 	def createN4dClient(self,ticket):
 
@@ -105,6 +127,12 @@ class GuardManager(object):
 		self._writeLog(msgLog)
 
 	#def create_n4dClient
+
+	def updateWhiteList(self):
+
+		self.client.LliurexGuardManagerNatFree.update_default_whitelists()
+
+	#def updateWhiteList
 
 	def _debug(self,function,msg):
 
@@ -118,10 +146,11 @@ class GuardManager(object):
 		self.listToLoad = []
 		self.listName = ""
 		self.listDescription = ""
+		self.readOnly = False
 		self.currentListConfig = {
 			"id":"",
-			"name":"",
-			"description":""
+			"name":{},
+			"description":{},
 		}
 		self.urlConfigData=[]
 		
@@ -206,9 +235,9 @@ class GuardManager(object):
 						self.listsConfig[item]['remove'] = False
 						self.listsConfig[item]["replaced_to"] = ""
 						self.listsConfig[item]["tmpfile"] = ""
-						self.listsConfig[item]["canBeEdited"] = True if not itemId.startswith("default") else False			
 	
 			self.listsConfigOrig=copy.deepcopy(self.listsConfig)
+
 			self._getListsConfig()
 
 			return {
@@ -242,16 +271,19 @@ class GuardManager(object):
 			if not isinstance(configItem, dict):
 				continue
 
+			name = configItem.get("name")
+			description = configItem.get("description")
+
 			tmp = {
 				"order": item,
 				"id": configItem.get("id", ""),
-				"name": configItem.get("name", ""),
+				"name": name.get(self.sessiongLang,name.get("default")),
 				"entries": configItem.get("lines", 0),
-				"description": configItem.get("description", ""),
+				"description": description.get(self.sessiongLang,description.get("default")),
 				"activated": configItem.get("active", False),
 				"remove": configItem.get("remove", False),
-				"canBeEdited": configItem.get("canBeEdited",True),
-				"metaInfo": f'{configItem.get("name", "")}{configItem.get("description", "")}'
+				"readOnly": configItem.get("readOnly",False),
+				"metaInfo": f'{name.get(self.sessiongLang,name.get("default"))}{description.get(self.sessiongLang,description.get("default"))}'
 			}
 
 			self.listsConfigData.append(tmp)
@@ -262,8 +294,11 @@ class GuardManager(object):
 
 		self.listToLoad = str(listToLoad)
 		self.currentListConfig = self.listsConfig.get(self.listToLoad)
-		self.listName = self.currentListConfig.get("name")
-		self.listDescription = self.currentListConfig.get("description")
+		name = self.currentListConfig.get("name")
+		description = self.currentListConfig.get("description")
+		self.listName = name.get(self.sessiongLang,name.get("default"))
+		self.listDescription = description.get(self.sessiongLang,description.get("default"))
+		self.readOnly = self.currentListConfig.get("readOnly")
 
 		return self._readGuardModeList()
 
@@ -482,12 +517,12 @@ class GuardManager(object):
 		if allLists:
 			for item in self.listsConfig:
 				if isinstance(self.listsConfig[item], dict):
-					if self.listsConfig[item].get("canBeEdited"):
+					if not self.listsConfig[item].get("readOnly"):
 						self.listsConfig[item]["remove"] = True
 		else:
 			key = str(listToRemove)
 			if key in self.listsConfig and isinstance(self.listsConfig[key], dict):
-				if self.listsConfig[key].get("canBeEdited"):
+				if not self.listsConfig[key].get("readOnly"):
 					self.listsConfig[key]["remove"] = True
 			else:
 				self._debug(f"Warning: Attempted to remove non-existing list ID: {key}")
@@ -527,7 +562,7 @@ class GuardManager(object):
 		else:
 			for item in self.listsConfigData:
 				if param in item and item[param] != value:
-					if item["canBeEdited"]:
+					if not item.get("readOnly"):
 						if param == "remove" or not item.get("remove", False):
 							item[param] = value
 					else:
@@ -601,7 +636,7 @@ class GuardManager(object):
 			self.listsConfig[order]["lines"] = ret.get("lines", 0)
 			self.listsConfig[order]["tmpfile"] = ret.get("tmpfile", "")
 			self.listsConfig[order]["edited"] = True
-			self.listsConfig[order]["canBeEdited"] = listInfo.get("canBeEdited")
+			self.listsConfig[order]["readOnly"] = True if list_id.startswith('llxdefault_') else False
 
 			self._getListsConfig()
 		else:
@@ -688,40 +723,45 @@ class GuardManager(object):
 
 	def checkData(self, data, edit, loadedFile):
 
-		if str(data.get("name")).strip() == "":
-			return {"status": False, "code": GuardManager.MISSING_LIST_NAME_ERROR, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
+		try:
+			if str(data.get("name")).strip() == "":
+				return {"status": False, "code": GuardManager.MISSING_LIST_NAME_ERROR, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
-		checkDuplicates = True
-		if edit:
-			if data.get("listId") == self.currentListConfig.get("id"):
-				checkDuplicates = False
+			checkDuplicates = True
+			if edit:
+				if data.get("listId") == self.currentListConfig.get("id"):
+					checkDuplicates = False
 
-		if checkDuplicates:		
-			for item in self.listsConfig:
-				if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data.get("listId"):
-					return {"status": False, "code": GuardManager.LIST_NAME_DUPLICATE, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
+			if checkDuplicates:		
+				for item in self.listsConfig:
+					if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data.get("listId"):
+						return {"status": False, "code": GuardManager.LIST_NAME_DUPLICATE, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
-		if loadedFile is not None:
-			p = Path(loadedFile)
-			if p.exists():
-				if p.stat().st_size > self.limitFileSize:
-					return {'status': False, 'code': GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR, 'data': '',"type":GuardManager.KIRIGAMI_MSG_ERROR}
+			if loadedFile is not None:
+				p = Path(loadedFile)
+				if p.exists():
+					if p.stat().st_size > self.limitFileSize:
+						return {'status': False, 'code': GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR, 'data': '',"type":GuardManager.KIRIGAMI_MSG_ERROR}
 
-				if p.stat().st_size == 0:
-					return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
-
-				with p.open('r', encoding='utf-8') as fd:
-					first_char = fd.read(1)
-					if not first_char.strip():
+					if p.stat().st_size == 0:
 						return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
-			else:
-				return {'status': False, 'code': GuardManager.LOADING_FILE_ERROR, 'data': 'File does not exist',"type": GuardManager.KIRIGAMI_MSG_ERROR}
-		else:
-			if data.get("content") == 0:
-				return {'status': False, 'code': GuardManager.EMPTY_LIST_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}			
 
-		return {"status": True, "code": GuardManager.ALL_CORRECT_CODE, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
-			 			
+					with p.open('r', encoding='utf-8') as fd:
+						first_char = fd.read(1)
+						if not first_char.strip():
+							return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
+				else:
+					return {'status': False, 'code': GuardManager.LOADING_FILE_ERROR, 'data': 'File does not exist',"type": GuardManager.KIRIGAMI_MSG_ERROR}
+			else:
+				if data.get("content") == 0:
+					return {'status': False, 'code': GuardManager.EMPTY_LIST_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}			
+
+			return {"status": True, "code": GuardManager.ALL_CORRECT_CODE, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
+				 			
+		except Exception as e:
+			return {"status": False, "code": GuardManager.ERROR_CHECKING_LIST, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
+
+
 	#def checkData
 	
 	def getListId(self, name):
@@ -752,7 +792,8 @@ class GuardManager(object):
 		for item in sourceKeys:
 			configItem = self.listsConfig.get(item)
 			if isinstance(configItem, dict):
-				name = configItem.get("name", "").lower()
+				name = configItem.get("name", "")
+				name = name.get(self.sessiongLang,name.get("default")).lower()
 				validItems.append((item, name))
 
 		validItems.sort(key=lambda x: x[1])
@@ -780,7 +821,7 @@ class GuardManager(object):
 		if len(changes) > 0:
 			for item in self.listsConfig:
 				if item in changes and isinstance(self.listsConfig[item], dict):	
-					if self.listsConfig[item].get("remove", False) and self.listsConfig[item].get("canBeEdited"):
+					if self.listsConfig[item].get("remove", False) and not self.listsConfig[item].get("readOnly"):
 						listToRemove.append(self.listsConfig[item].get("id"))
 						continue
 
@@ -941,7 +982,7 @@ class GuardManager(object):
 	def checkRemoveListsOption(self):
 
 		return any(
-			isinstance(item, dict) and not item.get("remove", False) 
+			isinstance(item, dict) and not item.get("remove", False) and not item.get("readOnly",False) 
 			for item in self.listsConfig.values()
 		)
 

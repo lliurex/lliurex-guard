@@ -74,7 +74,7 @@ ItemDelegate{
             display:AbstractButton.IconOnly
             icon.name:"configure"
             Layout.alignment: Qt.AlignVCenter
-            visible:listUrlItem.hovered || optionsUrlMenu.opened
+            visible: !listStackBridge.readOnly && (listUrlItem.hovered || optionsUrlMenu.opened)
             ToolTip.delay: 1000
             ToolTip.timeout: 3000
             ToolTip.visible: hovered

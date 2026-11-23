@@ -119,8 +119,8 @@ Rectangle {
                             listDescription:model.description
                             listActivated:model.activated
                             listRemove:model.remove
+                            readOnly:model.readOnly
                             metaInfo:model.metaInfo
-                            canBeEdited:model.canBeEdited
                            
                         }
                     }

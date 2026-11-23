@@ -95,9 +95,11 @@ class LliurexGuardManagerNatFree:
 
 		try:
 			self.shared_folder.mkdir(parents=False, exist_ok=True)
+			index_file = self.shared_folder / "index.html"
+			index_file.touch()
 
 			for file in self.shared_folder.iterdir():
-				if file.is_file():
+				if file.is_file() and file.name != "index.html":
 					file.unlink()
 
 			if mode_to_set in ("BlackMode", "WhiteMode"):
@@ -214,7 +216,7 @@ class LliurexGuardManagerNatFree:
 		try:
 			for item in list_to_manage:
 				filename = f"{item}.list"
-				if filename.starswith("default_"):
+				if filename.startswith("llxdefault_"):
 					continue
 
 				active_file = active_dir / filename
@@ -267,6 +269,13 @@ class LliurexGuardManagerNatFree:
 			return n4d.responses.build_successful_call_response(result)
 
 	#def deactivate_guardmode_list
+
+	def update_default_whitelists (self):
+
+		self._sync_default_whitelist()
+		return n4d.responses.build_successful_call_response()
+
+	#def update_default_whitelists
 	
 	def _initialize_variable(self):
 		
@@ -292,6 +301,10 @@ class LliurexGuardManagerNatFree:
 			for directory in directories:
 				directory.mkdir(parents=True, exist_ok=True)
 
+			if self.shared_folder.exists():
+				index_file = self.shared_folder / "index.html"
+				index_file.touch()
+
 			return True 
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating guardmode configuration directories: {e}")
@@ -304,22 +317,43 @@ class LliurexGuardManagerNatFree:
 		if not self.default_whithelist_dir.is_dir():
 			return
 
+		valid_files = set()
+		target_dirs = (
+			self.whitelist_dir,
+			self.whitelist_disable_dir,
+			self.shared_folder
+		)
+
 		for list_file in self.default_whithelist_dir.iterdir():
+
 			if not list_file.is_file():
 				continue
-			
+
 			file_name = list_file.name
+			valid_files.add(file_name)
+
 			active_whitelist = self.whitelist_dir / file_name
-			disable_whitelist = self.whitelist_disable_dir / file_name
 			shared_list = self.shared_folder / file_name
 
 			if active_whitelist.exists():
-				shutil.copy2(list_file,active_whitelist)
-				if self.shared_folder.is_dir():
-					if self.shared_list.exists:
-						shutil.copy2(list_file,shared_list)
+				shutil.copy2(list_file, active_whitelist)
+				if self.shared_folder.is_dir() and shared_list.exists():
+					shutil.copy2(list_file, shared_list)
 			else:
-				shutil.copy2(list_file, disable_whitelist)
+				shutil.copy2(list_file, self.whitelist_disable_dir / file_name)
+
+		for directory in target_dirs:
+			if not directory.is_dir():
+				continue
+
+			for target_file in directory.iterdir():
+				if (
+					target_file.is_file()
+					and target_file.name.startswith("llxdefault_")
+					and target_file.name not in valid_files
+				):
+					target_file.unlink()
+
 
 	#def _sync_default_whitelist
 
@@ -354,9 +388,10 @@ class LliurexGuardManagerNatFree:
 						tmp = {
 							"id": file_path.stem,
 							"active": folder not in (self.blacklist_disable_dir, self.whitelist_disable_dir),
-							"name": "",
-							"description": "",
-							"lines": 0
+							"name": {},
+							"description": {},
+							"lines": 0,
+							"readOnly": True if file_path.stem.startswith("llxdefault_") else False	
 						}
 
 						lines = file_path.read_text(encoding="utf-8").splitlines()
@@ -364,17 +399,31 @@ class LliurexGuardManagerNatFree:
 
 						for line in lines:
 							line = line.strip()
-							if "NAME" in line and ":" in line:
-								tmp["name"] = line.split(":", 1)[1].strip()
+							if "NAME[es]:" in line:
+								tmp["name"]["es"] = line.split(":", 1)[1].strip()
 								match_count += 1
-							elif "DESCRIPTION" in line and ":" in line:
-								tmp["description"] = line.split(":", 1)[1].strip()
+							elif "NAME[ca@valencia]:" in line:
+								tmp["name"]["ca@valencia"] = line.split(":", 1)[1].strip()
 								match_count += 1
-
-							if match_count == 2:
-								tmp["lines"] = max(0, len(lines) - 2)
+							elif "NAME:" in line:
+								tmp["name"]["default"] = line.split(":", 1)[1].strip()
+								match_count += 1								
+							elif "DESCRIPTION[es]:" in line:
+								tmp["description"]["es"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							elif "DESCRIPTION[ca@valencia]:" in line:
+								tmp["description"]["ca@valencia"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							elif "DESCRIPTION:" in line:
+								tmp["description"]["default"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							else:
 								break
+							if match_count >= 2:
+								tmp["lines"] = max(0, len(lines) - match_count)
+						
 						files_headers.append(tmp)
+			
 			return {'status': True, 'msg': "list_to_manage read successfully", 'data': files_headers}
 
 		except Exception as e: 
@@ -438,8 +487,8 @@ class LliurexGuardManagerNatFree:
 					print(f"[LliurexGuardManagerNatFree]: Warning, could not chown to root: {e}")
 
 				output_lines = [
-					f"#NAME:{item['name']}",
-					f"#DESCRIPTION:{item['description']}"
+					f"#NAME:{item.get('name').get('default')}",
+					f"#DESCRIPTION:{item.get('description').get('default')}"
 					]
 
 				for line in lines:
