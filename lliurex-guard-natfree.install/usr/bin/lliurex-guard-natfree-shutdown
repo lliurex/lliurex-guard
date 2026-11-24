@@ -1,0 +1,159 @@
+#! /usr/bin/python3
+import os
+import subprocess
+import n4d.client
+import syslog
+import signal
+import dbus
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
+
+class LliurexGuardNatFreeShutdown():
+
+	def __init__(self):
+
+		self._can_run()
+		self._create_n4d_client()
+		DBusGMainLoop(set_as_default=True)
+		self.loop = GLib.MainLoop()
+		self.executed_end = False
+		self._setup_signals()
+		self._setup_dbus_listeners()
+		self.on_session_start()
+		self.loop.run()
+
+	#def __init
+
+	def _can_run(self):
+		
+		normalized_flavours = ("adi","pro")
+		cmd = ["lliurex-version", "-v"]
+		run_script = False
+
+		try:
+			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='ignore')
+			pout = result.stdout
+		except Exception as e:
+			pout=""
+
+		if pout:
+			flavours_Installed = [x.strip() for x in pout.split(',') if x.strip() and x.strip()!="edu"]
+			run_script = any(p in i for i in flavours_Installed for p in normalized_flavours)
+
+		if not run_script:
+			syslog.openlog("LLIUREX-GUARD-NATFREE")
+			syslog.syslog(f"LliurexGuardNatFreeShutdown. Cannot be run")				
+			sys.exit(0)
+
+	#def _can_run
+
+	def _create_n4d_client(self):
+
+		try:
+			user = os.getenv("USER")
+
+			tmp_client = n4d.client.Client("https://127.0.0.1:9779",user,"")
+			n4d_ticket = tmp_client.create_ticket()
+
+			self.n4d_client = n4d.client.Client(ticket=n4d_ticket)
+		
+		except Exception as e:
+			syslog.openlog("LLIUREX-GUARD-NATFREE")
+			syslog.syslog(f"LliurexGuardNatFreeShutdown. Unable to create n4d client: {e}")
+			sys.exit(0)				
+
+	#def _create_n4d_client
+
+	def _setup_signals(self):
+
+		GLib.unix_signal_add(GLib.PRIORITY_HIGH, signal.SIGTERM, self.on_session_end, "SIGTERM")
+		GLib.unix_signal_add(GLib.PRIORITY_HIGH, signal.SIGHUP, self.on_session_end, "SIGHUP")
+		GLib.unix_signal_add(GLib.PRIORITY_HIGH, signal.SIGINT, self.on_session_end, "SIGINT")
+
+	 #def _setup_signals
+
+	def _setup_dbus_listeners(self):
+
+		try:
+			sys_bus = dbus.SystemBus()
+			sys_bus.add_signal_receiver(
+				self.on_prepare_for_shutdown,
+				signal_name="PrepareForShutdown",
+				dbus_interface="org.freedesktop.login1.Manager"
+			)
+
+			ses_bus = dbus.SessionBus()
+			ses_bus.add_signal_receiver(
+				self.on_plasma_logout,
+				signal_name="aboutToQuit",
+				dbus_interface="org.kde.KSMServerInterface"
+			)
+		except Exception as e:
+			syslog.openlog("LLIUREX-GUARD-NATFREE")
+			syslog.syslog(f"LliurexGuardNatFreeShutdown. Error connection to DBus: {e}")
+
+	#def setup_dbus_listeners
+
+	def on_prepare_for_shutdown(self, active):
+
+		if active:
+			self.on_session_end("DBus-PrepareForShutdown")
+
+	#def on_prepare_for_shutdown
+
+	def on_plasma_logout(self, *args):
+
+		self.on_session_end("DBus-PlasmaLogout")
+
+	#def on_plasma_logout
+
+	def on_session_start(self):
+
+		syslog.openlog("LLIUREX-GUARD-NATFREE")
+		syslog.syslog(f"LliurexGuardNatFreeShutdown. Disable LliureX-Guard on startup")	
+		
+		self._shutdown_lliurex_guard_natfree()
+
+	#def auto_start_action
+
+	def on_session_end (self,source="unknown"):
+
+		if self.executed_end:
+			return False
+
+		syslog.openlog("LLIUREX-GUARD-NATFREE")
+		syslog.syslog(f"LliurexGuardNatFreeShutdown. Disable LliureX-Guard on logout")	
+		
+		self.executed_end = True
+		self._shutdown_lliurex_guard_natfree()
+
+		if self.loop.is_runniing():
+			self.loop.quit()
+
+		return False
+
+	#def shutdown_action
+
+	def _shutdown_lliurex_guard_natfree(self):
+	
+		try:
+			ret_mode = self.n4d_client.LliurexGuardManagerNatFree.read_guardmode()
+			syslog.openlog("LLIUREX-GUARD-NATFREE")
+			syslog.syslog(f"LliurexGuardNatFreeShutdown. Disable LliureX-Guard. Mode: {ret_mode}")	
+
+			if ret_mode.get('status') and ret_mode.get('data') != 'DisableMode':
+				result = self.n4d_client.LliurexGuardManagerNatFree.change_guardmode("DisableMode")
+				syslog.openlog("LLIUREX-GUARD-NATFREE")
+				syslog.syslog(f"LliurexGuardNatFreeShutdown. Disable LliureX-Guard: {result}")	
+		except Exception as e:
+			syslog.openlog("LLIUREX-GUARD-NATFREE")
+			syslog.syslog(f"LliurexGuardNatFreeShutdown. Disable LliureX-Guard error: {e}")	
+			pass
+
+    #def shutdown_lliurex_guard_natfree
+
+#class LliurexGuardNatFreeShutdown
+
+if __name__=="__main__":
+
+	lgn=LliurexGuardNatFreeShutdown()
