@@ -4,9 +4,9 @@ import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
 
 ApplicationWindow {
-
+    id: mainWindow
     property bool closing: false
-    id:mainWindow
+
     visible: true
     title: "LliureX-Guard-Natfree"
     property int margin: 1
@@ -44,15 +44,15 @@ ApplicationWindow {
         id: mainLayout
         anchors.fill: parent
 
-        Rectangle{
+        Rectangle {
             color: "#000000"
             Layout.fillWidth: true
             Layout.preferredHeight: 120
 
-            Image{
-                id:banner
+            Image {
+                id: banner
                 source: "lliurex-guard_banner.png"
-                asynchronous:true
+                asynchronous: false
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
             }
@@ -62,13 +62,12 @@ ApplicationWindow {
             id: mainView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight:550
+            Layout.minimumHeight: 550
 
-
-            property int currentIndex:mainStackBridge.currentStack
-            initialItem:loadView
-            onCurrentIndexChanged:{
-                switch (currentIndex){
+            property int currentIndex: mainStackBridge.currentStack
+            initialItem: loadView
+            onCurrentIndexChanged: {
+                switch (currentIndex) {
                     case 0:
                         mainView.replace(loadView)
                         break;
@@ -89,8 +88,9 @@ ApplicationWindow {
                     duration: 60
                 }
             }
+            
             replaceExit: Transition {
-                NumberAnimation { 
+                NumberAnimation {
                     property: "opacity"
                     from: 1
                     to: 0
@@ -98,31 +98,31 @@ ApplicationWindow {
                 }
             }
 
-           Component{
-               id:loadView
-               LoadWaiting{
-                   id:loadWaiting
-               }
-           }
-           Component{
-               id:menuView
-               MainOptions{
-                   id:mainOptions
-               }
-           }
-           Component{
-               id:listView
-               ListOptions{
-                   id:listOptions
-               }
-           }
+            Component {
+                id: loadView
+                LoadWaiting {
+                    id: loadWaiting
+                }
+            }
+
+            Component {
+                id: menuView
+                MainOptions {
+                    id: mainOptions
+                }
+
+            }
+
+            Component {
+                id: listView
+                ListOptions {
+                    id: listOptions
+                }
+            }
         }
-
     }
 
-    CustomPopUp{
-        id:waitingPopUp
+    CustomPopUp {
+        id: waitingPopUp
     }
-
 }
-

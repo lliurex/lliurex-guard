@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 13:11+0200\n"
+"POT-Creation-Date: 2026-11-24 09:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,11 +80,11 @@ msgstr ""
 msgid "Search..."
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardLists.qml:142
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardLists.qml:143
 msgid "No list is configured"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardLists.qml:143
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardLists.qml:144
 msgid "No list found"
 msgstr ""
 
@@ -150,7 +150,7 @@ msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:216
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:286
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:163
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:167
 msgid "Apply"
 msgstr ""
 
@@ -184,8 +184,8 @@ msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:263
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:290
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:145
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:167
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:149
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:171
 msgid "Cancel"
 msgstr ""
 
@@ -200,7 +200,7 @@ msgid ""
 msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:287
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:164
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:168
 msgid "Discard"
 msgstr ""
 
@@ -218,13 +218,13 @@ msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:317
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:342
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:227
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:232
 msgid "Yes"
 msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:320
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/GuardManager.qml:345
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:230
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:235
 msgid "No"
 msgstr ""
 
@@ -320,7 +320,7 @@ msgid "The white list dns update was successful"
 msgstr ""
 
 #: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:26
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:90
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:94
 msgid "Relationship of urls and domains:"
 msgstr ""
 
@@ -348,41 +348,46 @@ msgstr ""
 msgid "Add url"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:201
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:202
 msgid "Remove list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:221
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:160
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:29
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:226
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:165
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:31
 msgid "Edit list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:222
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListContent.qml:227
 msgid "Do you want delete all urls from the list?"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:109
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:110
 msgid "entries"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:134
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:135
 msgid "Click to manage this list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:153
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:154
 msgid "Disable list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:153
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:154
 msgid "Enable list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:167
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:164
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:30
+msgid "Check list"
+msgstr ""
+
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:172
 msgid "Restore the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:167
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListDelegateItem.qml:172
 msgid "Delete the list"
 msgstr ""
 
@@ -398,76 +403,80 @@ msgstr ""
 msgid "Delete the url"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:51
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:53
 msgid "Name:"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:70
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:73
 msgid "Description: "
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:100
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:104
 msgid "Clic to see/edit the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:132
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:136
 msgid "Save"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:158
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:162
 msgid "List edition"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:160
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:164
 msgid ""
 "The are pending changes to save.\n"
 "Do you want save the changes or discard them?"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:190
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:194
 msgid "You must indicate a name for the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:192
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:196
 msgid "The name of the list is duplicate"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:194
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:198
 msgid "The loaded file is empty"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:196
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:200
 msgid ""
 "It is not possible to edit the list.\n"
 "The file size exceeds the recommended limit of 28 Mb"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:198
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:202
 msgid "Duplicate url have not been added to the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:200
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:204
 msgid "The url entered already exists in the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:202
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:206
 msgid "The url list is empty"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:204
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:208
 msgid ""
 "Duplicate url and url with incorrect format have not been added to the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:206
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:210
 msgid "Url with incorrect format have not been added to the list"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:208
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:212
 msgid "The url entered is not in the correct format"
 msgstr ""
 
-#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:210
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:214
+msgid "List check failed. Please try again"
+msgstr ""
+
+#: lliurex-guard-natfree/python3-lliurexguardnatfree/rsrc/ListForm.qml:216
 msgid "Waiting while viewing / editing the list. To continue close the file"
 msgstr ""
 

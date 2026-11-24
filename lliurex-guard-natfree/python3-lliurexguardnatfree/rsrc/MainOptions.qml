@@ -2,56 +2,56 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-
-RowLayout{
+RowLayout {
     id: mainGrid
-    spacing:10
+    spacing: 10
 
-    Rectangle{
-        width:130
-        Layout.fillHeight:true
+    Rectangle {
+        width: 130
+        Layout.fillHeight: true
         border.color: "#d3d3d3"
 
-        ColumnLayout{
+        ColumnLayout {
             id: menuGrid
-            Layout.fillWidth:true
-            Layout.fillHeight:true
-            spacing:0
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 0
 
             MenuOptionBtn {
-                id:listItem
-                Layout.fillWidth:true
-                optionText:i18nd("lliurex-guard-natfree","Configuration")
-                optionIcon:"status/22/security-high.svg"
-                onMenuOptionClicked:mainStackBridge.moveToMainOptions(0)
+                id: listItem
+                Layout.fillWidth: true
+                optionText: i18nd("lliurex-guard-natfree","Configuration")
+                optionIcon: "status/22/security-high.svg"
+                onMenuOptionClicked: mainStackBridge.moveToMainOptions(0)
             }
 
             MenuOptionBtn {
-                id:helpItem
-                Layout.fillWidth:true
-                optionText:i18nd("lliurex-guard-natfree","Help")
-                optionIcon:"actions/22/help-contents.svg"
-                onMenuOptionClicked:mainStackBridge.openHelp();
+                id: helpItem
+                Layout.fillWidth: true
+                optionText: i18nd("lliurex-guard-natfree","Help")
+                optionIcon: "actions/22/help-contents.svg"
+                onMenuOptionClicked: mainStackBridge.openHelp();
             }
         }
     }
 
     StackView {
         id: optionsView
-        Layout.fillWidth:true
-        Layout.fillHeight:true
+        Layout.fillWidth: true
+        Layout.fillHeight: true
 
-        property int currentIndex:mainStackBridge.mainCurrentOption
-      
-        initialItem:guardView
+        property int currentIndex: mainStackBridge.mainCurrentOption
 
-        onCurrentIndexChanged:{
-            switch(currentIndex){
+        initialItem: guardView
+
+        onCurrentIndexChanged: {
+            switch(currentIndex) {
                 case 0:
                     optionsView.replace(guardView)
                     break;
             }
-         }
+        }
+
         replaceEnter: Transition {
             NumberAnimation {
                 property: "opacity"
@@ -60,6 +60,7 @@ RowLayout{
                 duration: 60
             }
         }
+
         replaceExit: Transition {
             NumberAnimation {
                 property: "opacity"
@@ -69,13 +70,11 @@ RowLayout{
             }
         }
 
-        Component{
-            id:guardView
-            GuardManager{
-                id:guardManager
+        Component {
+            id: guardView
+            GuardManager {
+                id: guardManager
             }
         }
-     
     }
 }
-

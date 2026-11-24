@@ -185,7 +185,8 @@ Rectangle {
                     icon.name:"list-add"
                     text:i18nd("lliurex-guard-natfree","Add url")
                     
-                    enabled:true
+                    enabled: listStackBridge.readOnly ? false : true
+
                     onClicked:{
                         manageEntryRow(true)
                         urlEntry.forceActiveFocus()
@@ -200,6 +201,10 @@ Rectangle {
                     icon.name:"delete"
                     text:i18nd("lliurex-guard-natfree","Remove list")
                     enabled:{
+                        if (listStackBridge.readOnly){
+                            return false
+                        }
+
                         if ((listCount>0)&&(!entryRow.visible)){
                             true
                         }else{

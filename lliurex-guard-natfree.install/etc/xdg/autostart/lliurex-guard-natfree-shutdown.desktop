@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Disable lliurex-guard-natfree
+Exec=/usr/bin/lliurex-guard-natfree-shutdown
+Hidden=false
+NoDisplay=true

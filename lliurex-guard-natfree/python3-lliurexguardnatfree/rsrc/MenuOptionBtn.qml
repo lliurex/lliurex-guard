@@ -32,7 +32,6 @@ Item {
 
                 sourceSize.width: 24
                 sourceSize.height: 24
-
                 fillMode: Image.PreserveAspectFit
                 visible: menuItem.optionIcon !== ""
             }
@@ -41,7 +40,7 @@ Item {
                 text: control.text
                 font: control.font
                 color: !control.enabled ? "grey":
-                       control.down?"white":"black"
+                        control.down ? "white " : "black"
                 elide: Text.ElideRight
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true

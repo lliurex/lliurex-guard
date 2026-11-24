@@ -4,32 +4,31 @@ import QtQuick.Layouts 1.15
 import QtQuick.Dialogs 1.3
 import org.kde.kirigami 2.16 as Kirigami
 
-
 Dialog {
     id: customDialog
-    property string dialogIcon:""
-    property string dialogTitle:""
-    property bool dialogVisible:false
-    property string dialogMsg:""
-    property real dialogWidth:400
-    property bool btnAcceptVisible:true
-    property string btnAcceptText:""
-    property string btnDiscardText:""
-    property bool btnDiscardVisible:true
-    property string btnDiscardIcon:""
-    property string btnCancelText:""
-    property string btnCancelIcon:""
+    property string dialogIcon: ""
+    property string dialogTitle: ""
+    property bool dialogVisible: false
+    property string dialogMsg: ""
+    property real dialogWidth: 400
+    property bool btnAcceptVisible: true
+    property string btnAcceptText: ""
+    property string btnDiscardText: ""
+    property bool btnDiscardVisible: true
+    property string btnDiscardIcon: ""
+    property string btnCancelText: ""
+    property string btnCancelIcon: ""
 
     signal applyDialogClicked()
     signal discardDialogClicked()
     signal rejectDialogClicked()
 
-    visible:dialogVisible
-    title:customDialog.dialogTitle
-    modality:Qt.WindowModal
+    visible: dialogVisible
+    title: customDialog.dialogTitle
+    modality: Qt.WindowModal
 
     contentItem: Rectangle {
-        id:container
+        id: container
         color: "#ebeced"
         implicitWidth: customDialog.dialogWidth
         implicitHeight: 140
@@ -57,51 +56,46 @@ Dialog {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
             }
-
         }
 
-
         DialogButtonBox {
-            buttonLayout:DialogButtonBox.KdeLayout
-            anchors.bottom:parent.bottom
-            anchors.right:parent.right
+            buttonLayout: DialogButtonBox.KdeLayout
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
             anchors.margins: 10
 
             Button {
-                id:dialogApplyBtn
-                display:AbstractButton.TextBesideIcon
-                icon.name:"dialog-ok.svg"
+                id: dialogApplyBtn
+                display: AbstractButton.TextBesideIcon
+                icon.name: "dialog-ok.svg"
                 text: btnAcceptText
-                visible:customDialog.btnAcceptVisible
+                visible: customDialog.btnAcceptVisible
                 font.pointSize: 10
                 DialogButtonBox.buttonRole: DialogButtonBox.ApplyRole
                 onClicked: customDialog.applyDialogClicked()
-
-
             }
 
             Button {
-                id:dialogDiscardBtn
-                display:AbstractButton.TextBesideIcon
-                icon.name:customDialog.btnDiscardIcon
+                id: dialogDiscardBtn
+                display: AbstractButton.TextBesideIcon
+                icon.name: customDialog.btnDiscardIcon
                 text: customDialog.btnDiscardText
-                visible:customDialog.btnDiscardVisible
+                visible: customDialog.btnDiscardVisible
                 font.pointSize: 10
                 DialogButtonBox.buttonRole: DialogButtonBox.DestructiveRole
                 onClicked: customDialog.discardDialogClicked()
             }
 
             Button {
-                id:dialogCancelBtn
-                display:AbstractButton.TextBesideIcon
-                icon.name:customDialog.btnCancelIcon
+                id: dialogCancelBtn
+                display: AbstractButton.TextBesideIcon
+                icon.name: customDialog.btnCancelIcon
                 text: customDialog.btnCancelText
-                focus:true
+                focus: true
                 font.pointSize: 10
-                DialogButtonBox.buttonRole:DialogButtonBox.RejectRole
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
                 onClicked: customDialog.rejectDialogClicked()
             }
-
         }
     }
- }
+}

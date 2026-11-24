@@ -22,67 +22,69 @@ import copy
 
 class GuardManager(object):
 
-	MISSING_LIST_NAME_ERROR=-1
-	LIST_NAME_DUPLICATE=-2
-	SAVING_FILE_ERROR=-5
-	CHANGE_GUARDMODE_ERROR=-9
-	RESTARTING_DNSMASQ_ERROR=-10
-	READ_LIST_INFO_ERROR=-13
-	LOADING_FILE_ERROR=-16
-	REMOVING_LIST_ERROR=-19
-	ACTIVATING_LIST_ERROR=-20
-	DEACTIVATING_LIST_ERROR=-21
-	READ_GUARDMODE_ERROR=-23
-	READ_GUARDMODE_HEADERS_ERROR=-25
-	EMPTY_FILE_ERROR=-27
-	LOAD_FILE_SIZE_OFF_LIMITS_ERROR=-30
-	EDIT_FILE_SIZE_OFF_LIMITS_ERROR=-31
-	READ_FILE_ERROR=-34
-	EMPTY_LIST_ERROR=-35
+	MISSING_LIST_NAME_ERROR = -1
+	LIST_NAME_DUPLICATE = -2
+	SAVING_FILE_ERROR = -5
+	CHANGE_GUARDMODE_ERROR = -9
+	RESTARTING_DNSMASQ_ERROR = -10
+	READ_LIST_INFO_ERROR = -13
+	LOADING_FILE_ERROR = -16
+	REMOVING_LIST_ERROR = -19
+	ACTIVATING_LIST_ERROR = -20
+	DEACTIVATING_LIST_ERROR = -21
+	READ_GUARDMODE_ERROR = -23
+	READ_GUARDMODE_HEADERS_ERROR = -25
+	EMPTY_FILE_ERROR = -27
+	LOAD_FILE_SIZE_OFF_LIMITS_ERROR = -30
+	EDIT_FILE_SIZE_OFF_LIMITS_ERROR = -31
+	READ_FILE_ERROR = -34
+	EMPTY_LIST_ERROR = -35
+	ERROR_CHECKING_LIST = -39
 
-	ALL_CORRECT_CODE=0
-	LIST_CREATED_SUCCESSFUL=3
-	LIST_EDITED_SUCCESSFUL=4
-	CHANGE_GUARDMODE_SUCCESSFUL=8
-	READ_LIST_INFO_SUCCESSFUL=12
-	LOAD_FILE_SUCCESSFUL=15
-	CHANGES_APPLIED_SUCCESSFUL=18
-	READ_GUARDMODE_SUCCESSFUL=22
-	READ_GUARDMODE_HEADERS_SUCCESSFUL=24
-	READ_FILE_SUCCESSFUL=35
+	ALL_CORRECT_CODE = 0
+	LIST_CREATED_SUCCESSFUL = 3
+	LIST_EDITED_SUCCESSFUL = 4
+	CHANGE_GUARDMODE_SUCCESSFUL = 8
+	READ_LIST_INFO_SUCCESSFUL = 12
+	LOAD_FILE_SUCCESSFUL = 15
+	CHANGES_APPLIED_SUCCESSFUL = 18
+	READ_GUARDMODE_SUCCESSFUL = 22
+	READ_GUARDMODE_HEADERS_SUCCESSFUL = 24
+	READ_FILE_SUCCESSFUL = 35
 
-	KIRIGAMI_MSG_OK=0
-	KIRIGAMI_MSG_ERROR=1
-	KIRIGAMI_MSG_WARNING=2
-	KIRIGAMI_MSG_INFO=3
+	KIRIGAMI_MSG_OK = 0
+	KIRIGAMI_MSG_ERROR = 1
+	KIRIGAMI_MSG_WARNING = 2
+	KIRIGAMI_MSG_INFO = 3
 
 	def __init__(self):
 
 		super(GuardManager, self).__init__()
 
-		self.dbg=0
-		self.userValidated=True
-		self.limitLines=2500
-		self.limitFileSize=28000000
-		self.garbageFiles=[]
-		self.credentials=[]
-		self.guardMode="DisableMode"
-		self.listsConfig={}
-		self.listsConfigOrig={}
-		self.listsConfigData=[]
-		self.urlConfigData=[]
+		self.dbg = 0
+		self.userValidated = True
+		self.limitLines = 2500
+		self.limitFileSize = 28000000
+		self.garbageFiles = []
+		self.credentials = []
+		self.guardMode = "DisableMode"
+		self.listsConfig = {}
+		self.listsConfigOrig = {}
+		self.listsConfigData = []
+		self.urlConfigData = []
 		self._detectFlavour()
+		self._detectLang()
 		self.initValues()
 	
 	#def __init__	
 			
 	def _detectFlavour(self):
 		
-		self.is_server=""
+		self.is_server = ""
 
-		cmd='lliurex-version -v'
+		cmd = 'lliurex-version -v'
 		p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
-		result=p.communicate()[0]
+		result = p.communicate()[0]
 
 		if type(result) is bytes:
 			result=result.decode()
@@ -90,38 +92,65 @@ class GuardManager(object):
 
 		for item in flavours:
 			if 'adi' in item or "pro" in item:
-				self.is_server=True
+				self.is_server = True
 				break
 	
 	#def detect_flavour
+
+	def _detectLang(self):
+
+		self.sessiongLang="default"
+
+		tmpLang = os.environ.get("LANGUAGE","default")
+
+		if tmpLang != "":
+			tmpLang = tmpLang.split(":")
+
+		if tmpLang:
+			self.sessiongLang = tmpLang[0]
+		else:
+			currentLang = os.environ.get("LANG","default")
+			if 'ca' in currentLang:
+				self.sessiongLang = "ca@valencia"
+			else:
+				self.sessiongLang = "es"
+
+	#def _detectLang
 	
 	def createN4dClient(self,ticket):
 
-		ticket=ticket.replace('##U+0020##',' ')
-		tk=n4d.client.Ticket(ticket)
-		self.client=n4d.client.Client(ticket=tk,timeout=120)
+		ticket = ticket.replace('##U+0020##',' ')
+		tk  =n4d.client.Ticket(ticket)
+		self.client = n4d.client.Client(ticket=tk,timeout=120)
 
-		msgLog=f'Session user: {os.environ["USER"]}'
+		msgLog = f'Session user: {os.environ["USER"]}'
 		self._writeLog(msgLog)
 
 	#def create_n4dClient
 
+	def updateWhiteList(self):
+
+		self.client.LliurexGuardManagerNatFree.update_default_whitelists()
+
+	#def updateWhiteList
+
 	def _debug(self,function,msg):
 
-		if self.dbg==1:
+		if self.dbg == 1:
 			print("[LLIUREX_GUARD]: "+ str(function) + str(msg))
 
 	#def _debug
 
 	def initValues(self):
 
-		self.listToLoad=[]
-		self.listName=""
-		self.listDescription=""
-		self.currentListConfig={
+		self.listToLoad = []
+		self.listName = ""
+		self.listDescription = ""
+		self.readOnly = False
+		self.currentListConfig = {
 			"id":"",
-			"name":"",
-			"description":""
+			"name":{},
+			"description":{},
 		}
 		self.urlConfigData=[]
 		
@@ -156,73 +185,75 @@ class GuardManager(object):
 	
 	def changeGuardmode(self,mode):
 
-		response=self.client.LliurexGuardManagerNatFree.change_guardmode(mode)
+		response = self.client.LliurexGuardManagerNatFree.change_guardmode(mode)
 		
-		msg=f"LliureX Guard Mode changed to {mode}"
+		msg = f"LliureX Guard Mode changed to {mode}"
 		self._debug(msg,response)
-		msgLog=f"{msg}{response}"
+		msgLog = f"{msg}{response}"
 		self._writeLog(msgLog)
 
 		if isinstance(response, dict) and response.get('status'):
-			self.listsConfig={}
-			self.listsConfigOrig={}
-			self.listsConfigData=[]
+			self.listsConfig = {}
+			self.listsConfigOrig = {}
+			self.listsConfigData = []
 			return {
-				'status':True,
-				'code':GuardManager.CHANGE_GUARDMODE_SUCCESSFUL,
-				'type':GuardManager.KIRIGAMI_MSG_OK
+				'status': True,
+				'code': GuardManager.CHANGE_GUARDMODE_SUCCESSFUL,
+				'type': GuardManager.KIRIGAMI_MSG_OK
 			}
 		else:
-			errorData=response.get('data') if isinstance(response, dict) else response
+			errorData = response.get('data') if isinstance(response, dict) else response
 			return {
-				'status':False,
-				'code':GuardManager.CHANGE_GUARDMODE_ERROR,
-				'data':response.get('data'),
-				'type':GuardManager.KIRIGAMI_MSG_ERROR
+				'status': False,
+				'code': GuardManager.CHANGE_GUARDMODE_ERROR,
+				'data': response.get('data'),
+				'type': GuardManager.KIRIGAMI_MSG_ERROR
 			}		
 				
 	#def changeGuardmode 		
 
 	def readGuardmodeHeaders(self):
 
-		self.listsConfig={}
-		self.listsConfigOrig={}
-		self.listsConfigData=[]
+		self.listsConfig = {}
+		self.listsConfigOrig = {}
+		self.listsConfigData = []
 
-		response=self.client.LliurexGuardManagerNatFree.read_guardmode_headers()
+		response = self.client.LliurexGuardManagerNatFree.read_guardmode_headers()
 		
 		msg="LliureX Guard mode lists readed "
 		self._debug(msg,response)
-		msgLog=f"{msg}{response}"
+		msgLog = f"{msg}{response}"
 		self._writeLog(msgLog)
 		
 		if isinstance(response, dict) and response.get('status'):
-			self.listsConfig=response.get('data')
+			self.listsConfig = response.get('data')
 
 			if isinstance(self.listsConfig, dict):
 				for item in self.listsConfig:
 					if isinstance(self.listsConfig[item], dict):
+						itemId = self.listsConfig[item].get("id")
 						self.listsConfig[item]['remove'] = False
 						self.listsConfig[item]["replaced_to"] = ""
-						self.listsConfig[item]["tmpfile"] = ""			
+						self.listsConfig[item]["tmpfile"] = ""
 	
 			self.listsConfigOrig=copy.deepcopy(self.listsConfig)
+
 			self._getListsConfig()
 
 			return {
-				'status':True,
-				'code':GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,
-				'data':"",
-				'type':GuardManager.KIRIGAMI_MSG_OK
+				'status': True,
+				'code': GuardManager.READ_GUARDMODE_HEADERS_SUCCESSFUL,
+				'data': "",
+				'type': GuardManager.KIRIGAMI_MSG_OK
 			}	
 
 		else:
 			errorData=response.get('data') if isinstance(response, dict) else response
 			return {
-				'status':False,
-				'code':GuardManager.READ_GUARDMODE_HEADERS_ERROR,
-				'data':errorData,
-				'type':GuardManager.KIRIGAMI_MSG_ERROR
+				'status': False,
+				'code': GuardManager.READ_GUARDMODE_HEADERS_ERROR,
+				'data': errorData,
+				'type': GuardManager.KIRIGAMI_MSG_ERROR
 			}
 		
 	#def readGuardmodeHeaders
@@ -240,15 +271,19 @@ class GuardManager(object):
 			if not isinstance(configItem, dict):
 				continue
 
+			name = configItem.get("name")
+			description = configItem.get("description")
+
 			tmp = {
-				"order":item,
+				"order": item,
 				"id": configItem.get("id", ""),
-				"name": configItem.get("name", ""),
+				"name": name.get(self.sessiongLang,name.get("default")),
 				"entries": configItem.get("lines", 0),
-				"description": configItem.get("description", ""),
+				"description": description.get(self.sessiongLang,description.get("default")),
 				"activated": configItem.get("active", False),
-				"remove":configItem.get("remove", False),
-				"metaInfo":f'{configItem.get("name", "")}{configItem.get("description", "")}'
+				"remove": configItem.get("remove", False),
+				"readOnly": configItem.get("readOnly",False),
+				"metaInfo": f'{name.get(self.sessiongLang,name.get("default"))}{description.get(self.sessiongLang,description.get("default"))}'
 			}
 
 			self.listsConfigData.append(tmp)
@@ -257,10 +292,13 @@ class GuardManager(object):
 
 	def loadListConfig(self,listToLoad):
 
-		self.listToLoad=str(listToLoad)
-		self.currentListConfig=self.listsConfig.get(self.listToLoad)
-		self.listName=self.currentListConfig.get("name")
-		self.listDescription=self.currentListConfig.get("description")
+		self.listToLoad = str(listToLoad)
+		self.currentListConfig = self.listsConfig.get(self.listToLoad)
+		name = self.currentListConfig.get("name")
+		description = self.currentListConfig.get("description")
+		self.listName = name.get(self.sessiongLang,name.get("default"))
+		self.listDescription = description.get(self.sessiongLang,description.get("default"))
+		self.readOnly = self.currentListConfig.get("readOnly")
 
 		return self._readGuardModeList()
 
@@ -318,12 +356,12 @@ class GuardManager(object):
 				else:
 					tmpFile = readTmpFile.get('data').get("tmpFile") if isinstance(readTmpFile, dict) else ""
 				contet = None
-				readTmpFile=None
+				readTmpFile = None
 			else:
 				self._getUrlConfig(content)
 			
 			msgLog = f"{msg} successfully"
-			msgData={"tmpFile":tmpFile}
+			msgData = {"tmpFile":tmpFile}
 		else:
 			msgCode = GuardManager.READ_LIST_INFO_ERROR
 			msgType = GuardManager.KIRIGAMI_MSG_ERROR
@@ -479,11 +517,13 @@ class GuardManager(object):
 		if allLists:
 			for item in self.listsConfig:
 				if isinstance(self.listsConfig[item], dict):
-					self.listsConfig[item]["remove"] = True
+					if not self.listsConfig[item].get("readOnly"):
+						self.listsConfig[item]["remove"] = True
 		else:
 			key = str(listToRemove)
 			if key in self.listsConfig and isinstance(self.listsConfig[key], dict):
-				self.listsConfig[key]["remove"] = True
+				if not self.listsConfig[key].get("readOnly"):
+					self.listsConfig[key]["remove"] = True
 			else:
 				self._debug(f"Warning: Attempted to remove non-existing list ID: {key}")
 				return
@@ -522,8 +562,12 @@ class GuardManager(object):
 		else:
 			for item in self.listsConfigData:
 				if param in item and item[param] != value:
-					if param == "remove" or not item.get("remove", False):
-						item[param] = value
+					if not item.get("readOnly"):
+						if param == "remove" or not item.get("remove", False):
+							item[param] = value
+					else:
+						if param != "remove":
+							item[param] = value
 
 	#def _updateListsConfigData
 
@@ -592,6 +636,7 @@ class GuardManager(object):
 			self.listsConfig[order]["lines"] = ret.get("lines", 0)
 			self.listsConfig[order]["tmpfile"] = ret.get("tmpfile", "")
 			self.listsConfig[order]["edited"] = True
+			self.listsConfig[order]["readOnly"] = True if list_id.startswith('llxdefault_') else False
 
 			self._getListsConfig()
 		else:
@@ -678,40 +723,45 @@ class GuardManager(object):
 
 	def checkData(self, data, edit, loadedFile):
 
-		if str(data.get("name")).strip() == "":
-			return {"status": False, "code": GuardManager.MISSING_LIST_NAME_ERROR, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
+		try:
+			if str(data.get("name")).strip() == "":
+				return {"status": False, "code": GuardManager.MISSING_LIST_NAME_ERROR, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
-		checkDuplicates = True
-		if edit:
-			if data.get("listId") == self.currentListConfig.get("id"):
-				checkDuplicates = False
+			checkDuplicates = True
+			if edit:
+				if data.get("listId") == self.currentListConfig.get("id"):
+					checkDuplicates = False
 
-		if checkDuplicates:		
-			for item in self.listsConfig:
-				if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data.get("listId"):
-					return {"status": False, "code": GuardManager.LIST_NAME_DUPLICATE, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
+			if checkDuplicates:		
+				for item in self.listsConfig:
+					if isinstance(self.listsConfig[item], dict) and self.listsConfig[item].get("id") == data.get("listId"):
+						return {"status": False, "code": GuardManager.LIST_NAME_DUPLICATE, "data": "","type": GuardManager.KIRIGAMI_MSG_ERROR}
 
-		if loadedFile is not None:
-			p = Path(loadedFile)
-			if p.exists():
-				if p.stat().st_size > self.limitFileSize:
-					return {'status': False, 'code': GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR, 'data': '',"type":GuardManager.KIRIGAMI_MSG_ERROR}
+			if loadedFile is not None:
+				p = Path(loadedFile)
+				if p.exists():
+					if p.stat().st_size > self.limitFileSize:
+						return {'status': False, 'code': GuardManager.EDIT_FILE_SIZE_OFF_LIMITS_ERROR, 'data': '',"type":GuardManager.KIRIGAMI_MSG_ERROR}
 
-				if p.stat().st_size == 0:
-					return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
-
-				with p.open('r', encoding='utf-8') as fd:
-					first_char = fd.read(1)
-					if not first_char.strip():
+					if p.stat().st_size == 0:
 						return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
-			else:
-				return {'status': False, 'code': GuardManager.LOADING_FILE_ERROR, 'data': 'File does not exist',"type": GuardManager.KIRIGAMI_MSG_ERROR}
-		else:
-			if data.get("content") == 0:
-				return {'status': False, 'code': GuardManager.EMPTY_LIST_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}			
 
-		return {"status": True, "code": GuardManager.ALL_CORRECT_CODE, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
-			 			
+					with p.open('r', encoding='utf-8') as fd:
+						first_char = fd.read(1)
+						if not first_char.strip():
+							return {'status': False, 'code': GuardManager.EMPTY_FILE_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}
+				else:
+					return {'status': False, 'code': GuardManager.LOADING_FILE_ERROR, 'data': 'File does not exist',"type": GuardManager.KIRIGAMI_MSG_ERROR}
+			else:
+				if data.get("content") == 0:
+					return {'status': False, 'code': GuardManager.EMPTY_LIST_ERROR, 'data': '',"type": GuardManager.KIRIGAMI_MSG_ERROR}			
+
+			return {"status": True, "code": GuardManager.ALL_CORRECT_CODE, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
+				 			
+		except Exception as e:
+			return {"status": False, "code": GuardManager.ERROR_CHECKING_LIST, "data": "", "type": GuardManager.KIRIGAMI_MSG_OK}			
+
+
 	#def checkData
 	
 	def getListId(self, name):
@@ -742,7 +792,8 @@ class GuardManager(object):
 		for item in sourceKeys:
 			configItem = self.listsConfig.get(item)
 			if isinstance(configItem, dict):
-				name = configItem.get("name", "").lower()
+				name = configItem.get("name", "")
+				name = name.get(self.sessiongLang,name.get("default")).lower()
 				validItems.append((item, name))
 
 		validItems.sort(key=lambda x: x[1])
@@ -770,7 +821,7 @@ class GuardManager(object):
 		if len(changes) > 0:
 			for item in self.listsConfig:
 				if item in changes and isinstance(self.listsConfig[item], dict):	
-					if self.listsConfig[item].get("remove", False):
+					if self.listsConfig[item].get("remove", False) and not self.listsConfig[item].get("readOnly"):
 						listToRemove.append(self.listsConfig[item].get("id"))
 						continue
 
@@ -871,13 +922,7 @@ class GuardManager(object):
 			if not line:
 				return ""
 
-		if line.startswith("https://"):
-			line = line[8:]
-		elif line.startswith("http://"):
-			line = line[7:]
-
-		if "/" in line:
-			return ""
+		line = line.removeprefix("https://").removeprefix("http://").split("/",1)[0]
 
 		sanitizeItems = ["--", ".-", "-.", "0.", ".0", "0-", "-0"]
 		for item in sanitizeItems:
@@ -904,9 +949,9 @@ class GuardManager(object):
 		
 		if totalLists == 0:
 			return {
-				"allActivated":False, 
-				"allDesactivated":False, 
-				"enableStatusFilter":False
+				"allActivated": False, 
+				"allDesactivated": False, 
+				"enableStatusFilter": False
 			}
 
 		countActivated = sum(1 for item in self.listsConfig.values() if isinstance(item, dict) and item.get('active'))
@@ -927,9 +972,9 @@ class GuardManager(object):
 			enableStatusFilter = False
 
 		return {
-			"allActivated":allActivated, 
+			"allActivated": allActivated, 
 			"allDeactivated": allDeactivated, 
-			"enableStatusFilter":enableStatusFilter
+			"enableStatusFilter": enableStatusFilter
 		}
 
 	#def checkChangeStatusListsOption
@@ -937,7 +982,7 @@ class GuardManager(object):
 	def checkRemoveListsOption(self):
 
 		return any(
-			isinstance(item, dict) and not item.get("remove", False) 
+			isinstance(item, dict) and not item.get("remove", False) and not item.get("readOnly",False) 
 			for item in self.listsConfig.values()
 		)
 
@@ -979,7 +1024,7 @@ class GuardManager(object):
 
 	def getLastUrlId(self):
 
-		tmpId=[]
+		tmpId = []
 		for item in self.urlConfigData:
 			tmpId.append(item["urlId"])
 
