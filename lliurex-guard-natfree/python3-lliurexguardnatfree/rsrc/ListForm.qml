@@ -4,29 +4,27 @@ import QtQuick.Layouts 1.15
 import QtQuick.Dialogs 1.3
 import org.kde.kirigami 2.16 as Kirigami
 
+Rectangle {
+    color: "transparent"
 
-Rectangle{
-    color:"transparent"
-
-    Timer{
-        id:debounceTimer
-        interval:100
-        repeat:false
+    Timer {
+        id: debounceTimer
+        interval: 100
+        repeat: false
         property var callback
         onTriggered: if (callback) callback()
-
     }
 
-    ColumnLayout{
+    ColumnLayout {
         id: mainContent
-        anchors.fill:parent
-        anchors.leftMargin:5
-        anchors.rightMargin:15
-        anchors.bottomMargin:15
+        anchors.fill: parent
+        anchors.leftMargin: 5
+        anchors.rightMargin: 15
+        anchors.bottomMargin: 15
         spacing: 15
 
-        Text{ 
-            text:listStackBridge.readOnly
+        Text { 
+            text: listStackBridge.readOnly
                     ? i18nd("lliurex-guard-natfree","Check list")
                     : i18nd("lliurex-guard-natfree","Edit list")
             font.pointSize: 16
@@ -34,161 +32,158 @@ Rectangle{
 
         Kirigami.InlineMessage {
             id: messageLabel
-            visible:listStackBridge.showListFormMessage.show
-            text:getMessageText()
-            type:getTypeMessage()
-            Layout.fillWidth:true
+            visible: listStackBridge.showListFormMessage.show
+            text: getMessageText()
+            type: getTypeMessage()
+            Layout.fillWidth: true
         }
 
-        GridLayout{
-            id:optionsGrid
-            columns:2
-            rowSpacing:10
+        GridLayout {
+            id: optionsGrid
+            columns: 2
+            rowSpacing: 10
             columnSpacing:10
-            Layout.topMargin:5
+            Layout.topMargin: 5
             Layout.alignment: Qt.AlignHCenter
 
-            Text{
-                id:name
-                text:i18nd("lliurex-guard-natfree","Name:")
-                Layout.alignment:Qt.AlignRight | Qt.AlignVCenter
+            Text {
+                id: name
+                text: i18nd("lliurex-guard-natfree","Name:")
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
             }
 
-            TextField{
-                id:nameEntry
-                text:listStackBridge.listName
-                horizontalAlignment:TextInput.AlignLeft
-                Layout.preferredWidth:400
+            TextField {
+                id: nameEntry
+                text: listStackBridge.listName
+                horizontalAlignment: TextInput.AlignLeft
+                Layout.preferredWidth: 400
                 readOnly: listStackBridge.readOnly ? true : false
                 onTextChanged: {
-                    if (activeFocus){
+                    if (activeFocus) {
                         debounceTimer.callback= ()=>listStackBridge.updateListName(nameEntry.text)
                         debounceTimer.restart()
                     }
                 }
             }
 
-            Text{
-                id:description
-                text:i18nd("lliurex-guard-natfree","Description: ")
-                Layout.alignment:Qt.AlignRight
+            Text {
+                id: description
+                text: i18nd("lliurex-guard-natfree","Description: ")
+                Layout.alignment: Qt.AlignRight
             }
 
-            TextField{
-                id:descriptionEntry
-                text:listStackBridge.listDescription
-                horizontalAlignment:TextInput.AlignLeft
-                Layout.preferredWidth:400
+            TextField {
+                id: descriptionEntry
+                text: listStackBridge.listDescription
+                horizontalAlignment: TextInput.AlignLeft
+                Layout.preferredWidth: 400
                 readOnly: listStackBridge.readOnly ? true : false
 
                 onTextChanged: {
-                    if (activeFocus){
+                    if (activeFocus) {
                         debounceTimer.callback= ()=> listStackBridge.updateListDescription(descriptionEntry.text)
                         debounceTimer.restart()
                     }
                 }
             }
 
-            Text{
-                id:listContentText
-                text:i18nd("lliurex-guard-natfree","Relationship of urls and domains:")
-                Layout.alignment:Qt.AlignRight
-                visible:!listStackBridge.showUrlsList
+            Text {
+                id: listContentText
+                text: i18nd("lliurex-guard-natfree","Relationship of urls and domains:")
+                Layout.alignment: Qt.AlignRight
+                visible: !listStackBridge.showUrlsList
             }
 
-            Button{
-                id:openFileBtn
-                visible:!listStackBridge.showUrlsList
-                display:AbstractButton.TextBesideIcon
-                icon.name:"dialog-edit"
-                text:i18nd("lliurex-guard-natfree","Clic to see/edit the list")
-                Layout.alignment:Qt.AlignLeft
-                enabled:true
-                onClicked:listStackBridge.openListFile()
+            Button {
+                id: openFileBtn
+                visible: !listStackBridge.showUrlsList
+                display: AbstractButton.TextBesideIcon
+                icon.name: "dialog-edit"
+                text: i18nd("lliurex-guard-natfree","Clic to see/edit the list")
+                Layout.alignment: Qt.AlignLeft
+                enabled: true
+                onClicked: listStackBridge.openListFile()
             }
-       
         }
 
-        ListContent{
-            id:listContent
-            listModel:listStackBridge.urlModel
-            Layout.fillHeight:true
-            Layout.fillWidth:true
-            visible:listStackBridge.showUrlsList
-            Layout.rightMargin:10
+        ListContent {
+            id: listContent
+            listModel: listStackBridge.urlModel
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            visible: listStackBridge.showUrlsList
+            Layout.rightMargin: 10
             Layout.bottomMargin:10
         }
 
-        Item{
-            Layout.fillHeight:true
+        Item {
+            Layout.fillHeight: true
         }
 
-        RowLayout{
-            id:btnBox
+        RowLayout {
+            id: btnBox
             Layout.alignment: Qt.AlignRight
-            spacing:10
+            spacing: 10
 
             Button {
-                id:applyBtn
-                visible:true
-                display:AbstractButton.TextBesideIcon
-                icon.name:"document-save"
-                text:i18nd("lliurex-guard-natfree","Save")
-                enabled:listStackBridge.arePendingChangesInList
-                onClicked:{
+                id: applyBtn
+                visible: true
+                display: AbstractButton.TextBesideIcon
+                icon.name: "document-save"
+                text: i18nd("lliurex-guard-natfree","Save")
+                enabled: listStackBridge.arePendingChangesInList
+                onClicked: {
                     closeTimer.stop()
                     listStackBridge.saveListChanges()
-                    
                 }
             }
+            
             Button {
-                id:cancelBtn
-                visible:true
-                display:AbstractButton.TextBesideIcon
-                icon.name:"dialog-cancel"
-                text:i18nd("lliurex-guard-natfree","Cancel")
-                enabled:listStackBridge.arePendingChangesInList
-                onClicked:{
-                   listStackBridge.cancelListChanges()
+                id: cancelBtn
+                visible: true
+                display: AbstractButton.TextBesideIcon
+                icon.name: "dialog-cancel"
+                text: i18nd("lliurex-guard-natfree","Cancel")
+                enabled: listStackBridge.arePendingChangesInList
+                onClicked: {
+                    listStackBridge.cancelListChanges()
                 }
-                
             }
         }
     }
 
-    ChangesDialog{
-        id:settingsChangesDialog
-        dialogIcon:"/usr/share/icons/breeze/status/64/dialog-warning.svg"
-        dialogTitle:"LliureX-Guard"+" - "+i18nd("lliurex-guard-natfree","List edition")
-        dialogVisible:listStackBridge.showChangesInListDialog
-        dialogMsg:i18nd("lliurex-guard-natfree","The are pending changes to save.\nDo you want save the changes or discard them?")
-        dialogWidth:400
-        btnAcceptVisible:true
-        btnAcceptText:i18nd("lliurex-guard-natfree","Apply")
-        btnDiscardText:i18nd("lliurex-guard-natfree","Discard")
-        btnDiscardIcon:"delete"
-        btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard-natfree","Cancel")
-        btnCancelIcon:"dialog-cancel"
-        Connections{
-            target:settingsChangesDialog
-            function onApplyDialogClicked(){
+    ChangesDialog { 
+        id: settingsChangesDialog
+        dialogIcon: "/usr/share/icons/breeze/status/64/dialog-warning.svg"
+        dialogTitle: "LliureX-Guard" + " - " + i18nd("lliurex-guard-natfree","List edition")
+        dialogVisible: listStackBridge.showChangesInListDialog
+        dialogMsg: i18nd("lliurex-guard-natfree","The are pending changes to save.\nDo you want save the changes or discard them?")
+        dialogWidth: 400
+        btnAcceptVisible: true
+        btnAcceptText: i18nd("lliurex-guard-natfree","Apply")
+        btnDiscardText: i18nd("lliurex-guard-natfree","Discard")
+        btnDiscardIcon: "delete"
+        btnDiscardVisible: true
+        btnCancelText: i18nd("lliurex-guard-natfree","Cancel")
+        btnCancelIcon: "dialog-cancel"
+        Connections {
+            target: settingsChangesDialog
+            function onApplyDialogClicked() {
                 listStackBridge.manageChangesInListDialog("Apply")
             }
-            function onDiscardDialogClicked(){
+            function onDiscardDialogClicked() {
                 listStackBridge.manageChangesInListDialog("Discard")           
             }
-            function onRejectDialogClicked(){
+            function onRejectDialogClicked() {
                 closeTimer.stop()
                 listStackBridge.manageChangesInListDialog("Cancel")       
             }
-
         }
-   }
+    }
 
-   function getMessageText(){
+    function getMessageText() { 
 
-        switch (listStackBridge.showListFormMessage.msgCode){
+        switch (listStackBridge.showListFormMessage.msgCode) {
                 
             case -1:
                return i18nd("lliurex-guard-natfree","You must indicate a name for the list")
@@ -219,9 +214,9 @@ Rectangle{
         }
     }
 
-    function getTypeMessage(){
+    function getTypeMessage() {
 
-        switch (listStackBridge.showListFormMessage.type){
+         switch (listStackBridge.showListFormMessage.type) {
             case 0:
                 return Kirigami.MessageType.Positive
             case 1:
@@ -233,5 +228,4 @@ Rectangle{
                 return Kirigami.MessageType.Information
         }
     }
-   
 }

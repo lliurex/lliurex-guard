@@ -4,7 +4,7 @@ import QtQml.Models 2.8
 import QtQuick.Layouts 1.15
 import org.kde.kirigami 2.16 as Kirigami
 
-ItemDelegate{
+ItemDelegate {
 
     id: listFilterItem
     property int listOrder
@@ -17,58 +17,57 @@ ItemDelegate{
     property bool readOnly
     property string metaInfo
 
-    enabled:true
-    height:80
+    enabled: true
+    height: 80
     width: listFilterItem.ListView.view?listFilterItem.ListView.width-10:0
-    hoverEnabled:true
+    hoverEnabled: true
 
-    leftPadding:15
-    rightPadding:10
+    leftPadding: 15
+    rightPadding: 10
 
-    onHoveredChanged:{
-        if (listFilterItem.ListView.view){
-            if (hovered && !optionsMenu.opened){
-                listFilterItem.ListView.view.currentIndex=index
+    onHoveredChanged: {
+        if (listFilterItem.ListView.view) {
+            if (hovered && !optionsMenu.opened) {
+                listFilterItem.ListView.view.currentIndex = index
             }
-        }else if (!hovered && !optionsMenu.opened && listFilterItem.ListView.view.currentIndex===index){
-            listFilterItem.ListView.view.currentIndex=-1
+        }else if (!hovered && !optionsMenu.opened && listFilterItem.ListView.view.currentIndex === index){
+            listFilterItem.ListView.view.currentIndex = -1
         }
     }
 
     background: Rectangle {
-        x:5
-        y:5
-        width:parent.width-5
-        height:parent.height-5
+        x: 5
+        y: 5
+        width: parent.width - 5
+        height: parent.height - 5
 
-        color:{
-            if (listRemove){
+        color: {
+            if (listRemove) {
                 Qt.hsla(Kirigami.Theme.disabledTextColor.hslHue, 
-                    Kirigami.Theme.disabledTextColor.hslSaturation, 
-                    Kirigami.Theme.disabledTextColor.hslLightness, 
+                Kirigami.Theme.disabledTextColor.hslSaturation, 
+                Kirigami.Theme.disabledTextColor.hslLightness, 
                     0.45)
             }else{
                 if (listFilterItem.hovered || optionsMenu.opened){
                     Qt.hsla(Kirigami.Theme.highlightColor.hslHue, 
                     Kirigami.Theme.highlightColor.hslSaturation, 
-                    Kirigami.Theme.highlightColor.hslLightness, 
-                    0.15)
+                    Kirigami.Theme.highlightColor.hslLightness, 0.15)
                 }else{
                     "transparent"
                 }
             }
         }
 
-        radius:6
-        border.width:1
-        border.color:{
-            if (listFilterItem.hovered || optionsMenu.opened){
-                if (listRemove){
+        radius: 6
+        border.width: 1
+        border.color: {
+            if (listFilterItem.hovered || optionsMenu.opened) {
+                if (listRemove) {
                     Kirigami.Theme.disabledTextColor
-                }else{
+                }else {
                     Kirigami.Theme.highlightColor
                 }
-            }else{            
+            }else {
                 "transparent"
             }
         }
@@ -76,54 +75,53 @@ ItemDelegate{
 
     contentItem:RowLayout {
         id: filtertem
-        spacing:20
+        spacing: 20
 
-        ColumnLayout{
-            id:description
-            spacing:10
-            Layout.fillWidth:true
-            Layout.alignment:Qt.AlignVCenter
-            Layout.preferredWidth:300
+        ColumnLayout {
+            id: description
+            spacing: 10
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 300
 
-            Text{
-                id:nameText
-                text:listName
+            Text {
+                id: nameText
+                text: listName
                 font.pointSize: 12
-                horizontalAlignment:Text.AlignLeft
-                elide:Text.ElideMiddle
-                Layout.fillWidth:true
+                horizontalAlignment: Text.AlignLeft
+                elide: Text.ElideMiddle
+                Layout.fillWidth: true
             }
 
-            Text{
-                id:descriptionText
-                text:listDescription
+            Text {
+                id: descriptionText
+                text: listDescription
                 font.pointSize: 10
-                horizontalAlignment:Text.AlignLeft
-                elide:Text.ElideMiddle
-                Layout.fillWidth:true
+                horizontalAlignment: Text.AlignLeft
+                elide: Text.ElideMiddle
+                Layout.fillWidth: true
             }
-
         }
 
-        Text{
-            id:entriesText
-            text:listEntries+" "+i18nd("lliurex-guard-natfree","entries")
+        Text {
+            id: entriesText
+            text: listEntries + " " + i18nd("lliurex-guard-natfree","entries")
             font.pointSize: 12
-            Layout.alignment:Qt.AlignVCenter
-            Layout.fillWidth:true
-            Layout.preferredWidth:190
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+            Layout.preferredWidth: 190
         }
 
-        Kirigami.Icon{
-            id:listState
-            source:{
-                if (listRemove){
+        Kirigami.Icon {
+            id: listState
+            source: {
+                if (listRemove) {
                     "delete"
-                }else{
-                    if (listActivated){
-                       "security-high"
-                    }else{
-                       "security-low" 
+                }else {
+                    if (listActivated) {
+                        "security-high"
+                    }else {
+                        "security-low" 
                     }
                 }
             }
@@ -132,55 +130,55 @@ ItemDelegate{
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Button{
-            id:manageListBtn
-            display:AbstractButton.IconOnly
-            icon.name:"configure"
+        Button {
+            id: manageListBtn
+            display: AbstractButton.IconOnly
+            icon.name: "configure"
             Layout.alignment: Qt.AlignVCenter
-            visible:listFilterItem.hovered || optionsMenu.opened
+            visible: listFilterItem.hovered || optionsMenu.opened
             ToolTip.delay: 1000
             ToolTip.timeout: 3000
             ToolTip.visible: hovered
-            ToolTip.text:i18nd("lliurex-guard-natfree","Click to manage this list")
+            ToolTip.text: i18nd("lliurex-guard-natfree","Click to manage this list")
             onClicked:optionsMenu.open()
 
-            Connections{
+            Connections {
                 target:guardLists
-                function onCurrentIndexChanged(){
-                    if (!listFilterItem.ListView.isCurrentItem && optionsMenu.opened){
+                function onCurrentIndexChanged() {
+                    if (!listFilterItem.ListView.isCurrentItem && optionsMenu.opened) {
                         optionsMenu.close()
                     }
                 }
             }
 
-            Menu{
-                id:optionsMenu
+            Menu {
+                id: optionsMenu
                 y: manageListBtn.height
-                x:-(optionsMenu.width-manageListBtn.width/2)
+                x: -(optionsMenu.width - manageListBtn.width / 2)
 
-                MenuItem{
-                    icon.name:listActivated?"lliurex-guard-natfree-disable-mode":"security-high"
-                    text:listActivated?i18nd("lliurex-guard-natfree","Disable list"):i18nd("lliurex-guard-natfree","Enable list")
-                    enabled:listRemove?false:true
-                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":false,"active":!listActivated,"listId":listOrder})
+                MenuItem {
+                    icon.name: listActivated ? "lliurex-guard-natfree-disable-mode" : "security-high"
+                    text: listActivated 
+                        ? i18nd("lliurex-guard-natfree","Disable list")
+                        : i18nd("lliurex-guard-natfree","Enable list")
+                    enabled: listRemove?false:true
+                    onClicked: guardOptionsStackBridge.changeListStatus({"allLists":false,"active":!listActivated,"listId":listOrder})
+                }
+
+                MenuItem {
+                    icon.name: readOnly ? "document-preview-archive" : "document-edit"
+                    text: readOnly ? i18nd("lliurex-guard-natfree","Check list") : 18nd("lliurex-guard-natfree","Edit list")
+                    enabled: listRemove ? false : true
+                    onClicked: listStackBridge.loadList(listOrder)
                 }
 
                 MenuItem{
-                    icon.name: readOnly
-                                ?"document-preview-archive"
-                                :"document-edit"
-                    text:readOnly
-                            ?i18nd("lliurex-guard-natfree","Check list")
-                            :i18nd("lliurex-guard-natfree","Edit list")
-                    enabled:listRemove?false:true
-                    onClicked:listStackBridge.loadList(listOrder)
-                }
-                
-                MenuItem{
-                    icon.name:listRemove?"restoration":"delete"
-                    text:listRemove?i18nd("lliurex-guard-natfree","Restore the list"):i18nd("lliurex-guard-natfree","Delete the list")
+                    icon.name: listRemove ? "restoration" : "delete"
+                    text: listRemove ? i18nd("lliurex-guard-natfree","Restore the list") : i18nd("lliurex-guard-natfree","Delete the list")
                     visible: !readOnly
-                    onClicked:listRemove?guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder}):guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
+                    onClicked: listRemove
+                                ? guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder})
+                                : guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
                 }
             }
         }
