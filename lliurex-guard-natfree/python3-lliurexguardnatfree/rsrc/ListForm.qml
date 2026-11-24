@@ -26,7 +26,9 @@ Rectangle{
         spacing: 15
 
         Text{ 
-            text:i18nd("lliurex-guard-natfree","Edit list")
+            text:listStackBridge.readOnly
+                    ? i18nd("lliurex-guard-natfree","Check list")
+                    : i18nd("lliurex-guard-natfree","Edit list")
             font.pointSize: 16
         }
 

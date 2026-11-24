@@ -1,0 +1,10 @@
+#NAME: Essential
+#NAME[es]: Esencial
+#NAME[ca@valencia]: Essencial
+#DESCRIPTION: List of essential url
+#DESCRIPTION[es]: Lista de url esenciales
+#DESCRIPTION[ca@valencia]: Relació d'adreces web essencials
+server=/ldapad.edu.gva.es
+server=/lliurex.net
+server=/lliurex.gva.es
+server=/svnlliurexnet.gva.es

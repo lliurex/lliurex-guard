@@ -116,11 +116,20 @@ ItemDelegate{
 
         Kirigami.Icon{
             id:listState
-            source:listActivated?"security-high":"security-low"
+            source:{
+                if (listRemove){
+                    "delete"
+                }else{
+                    if (listActivated){
+                       "security-high"
+                    }else{
+                       "security-low" 
+                    }
+                }
+            }
             Layout.preferredWidth: 32
             Layout.preferredHeight: 32
             Layout.alignment: Qt.AlignVCenter
-
         }
 
         Button{
