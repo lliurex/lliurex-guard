@@ -57,6 +57,14 @@
                 "admins",
 		"teachers"
             ]
+        },
+        "update_default_whitelists":{
+            "allowed_groups":[
+                "sudo",
+                "admins",
+                "teachers"
+            ]
+
         }
     }
 }
