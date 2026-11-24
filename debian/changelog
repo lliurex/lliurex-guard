@@ -1,3 +1,11 @@
+lliurex-guard (5.20.8) jammy; urgency=medium
+
+  * Added script to shutdown lliurex-guard-natfree when user logout
+  * Added support to manage default whitelist in readonly mode
+  * Changed list status icon when it is selected for delete
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 24 Nov 2026 14:52:03 +0100
+
 lliurex-guard (5.20.7) jammy; urgency=medium
 
   * New version for natfree-model
