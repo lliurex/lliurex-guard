@@ -167,7 +167,9 @@ ItemDelegate {
 
                 MenuItem {
                     icon.name: readOnly ? "document-preview-archive" : "document-edit"
-                    text: readOnly ? i18nd("lliurex-guard-natfree","Check list") : 18nd("lliurex-guard-natfree","Edit list")
+                    text: readOnly 
+                            ? i18nd("lliurex-guard-natfree","Check list")
+                            : i18nd("lliurex-guard-natfree","Edit list")
                     enabled: listRemove ? false : true
                     onClicked: listStackBridge.loadList(listOrder)
                 }
