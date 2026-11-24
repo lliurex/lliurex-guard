@@ -23,7 +23,7 @@ class LliurexGuardManagerNatFreeClient:
 	def __init__(self):
 
 		self.core=n4dcore.Core.get_core()
-		self.default_white_list_path=Path("/usr/share/lliurex-guard-natfree/data/llxdefault_white_list.list")
+		self.default_white_list_path=Path("/usr/share/lliurex-guard-natfree/whitelists/llxdefault_white_list.list")
 		self.mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard-natfree.conf")
 		self.standalone_mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard.conf")
 		self.conf_dir=Path("/etc/lliurex-guard-natfree")
