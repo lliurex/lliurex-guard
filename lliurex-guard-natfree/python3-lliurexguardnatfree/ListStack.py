@@ -720,12 +720,13 @@ class Bridge(QObject):
 
 		self.showListFormMessage= {"show":False, "msgCode":"", "type":""}
 		self.core.mainStack.showPopUp = {"show":True, "msgCode":WAITING_SAVE_CHANGES}
-		print(self.currentListConfig)
+
 		dataToCheck = {
 			"listId":self.currentListConfig.get("id"),
 			"name": self.currentListConfig.get("name").get("default"),
 			"content":len(self.contentOfList)
 		}
+		
 		self._checkThread = QThread()
 		self._workerCheck = CheckListWorker(self.guardManager,dataToCheck,self.edit,self.fileToLoad)
 		self._workerCheck.moveToThread(self._checkThread)
