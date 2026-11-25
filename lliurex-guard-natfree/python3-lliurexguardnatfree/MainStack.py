@@ -232,5 +232,3 @@ class Bridge(QObject):
 #class Bridge
 
 from . import Core
-
-

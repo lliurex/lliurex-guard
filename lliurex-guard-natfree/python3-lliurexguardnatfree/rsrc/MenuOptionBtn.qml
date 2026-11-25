@@ -25,7 +25,6 @@ Item {
         background: Rectangle {
             color: control.hovered ? "#add8e6" : "transparent"
         }
-
         onClicked: menuItem.menuOptionClicked()
     }
 }

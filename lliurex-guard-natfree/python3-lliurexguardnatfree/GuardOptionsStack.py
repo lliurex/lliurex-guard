@@ -534,9 +534,6 @@ class Bridge(QObject):
 	@Slot(dict)
 	def restoreLists(self,data):
 
-		if hasattr(data,'toVariant'):
-			data = data.toVariant()
-
 		self.showMainMessage = {"show":False, "msgCode":"", "type":"", "data":""}
 		self.restoreAllLists = data.get("allLists")
 

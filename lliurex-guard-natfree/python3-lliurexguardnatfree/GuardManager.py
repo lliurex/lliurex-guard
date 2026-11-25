@@ -107,13 +107,15 @@ class GuardManager(object):
 			tmpLang = tmpLang.split(":")
 
 		if tmpLang:
-			self.sessiongLang = tmpLang[0]
+			currentLang = tmpLang[0]
 		else:
 			currentLang = os.environ.get("LANG","default")
-			if 'ca' in currentLang:
-				self.sessiongLang = "ca@valencia"
-			else:
-				self.sessiongLang = "es"
+
+		if 'ca' in currentLang:
+			self.sessiongLang = "ca@valencia"
+		else:
+			self.sessiongLang = "es"
+	
 
 	#def _detectLang
 	

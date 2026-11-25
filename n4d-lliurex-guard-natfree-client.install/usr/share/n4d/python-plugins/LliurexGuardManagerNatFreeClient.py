@@ -48,7 +48,7 @@ class LliurexGuardManagerNatFreeClient:
 		self.disable_whitelist_filter = "#"+self.whitelist_filter
 		self.list_tmpfile = []
 		self.list_to_active = []
-		self.server_download_u rl = "http://server/lliurex-guard-natfree/"
+		self.server_download_url = "http://server/lliurex-guard-natfree/"
 		self.guardmanager_var = {}
 		self.local_guardmode = "DisableMode"
 		

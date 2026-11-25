@@ -11,5 +11,4 @@ Comment[ca@valencia]=Permet configurar els continguts webs que podran ser access
 Icon=lliurex-guard-natfree
 Category=System
 ScriptPath=lliurex-guard-natfree.zmd
-Replaces=lliurex-guard
 Groups=admins;admin;sudo;teachers;

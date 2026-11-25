@@ -11,25 +11,25 @@ Popup {
 
     property alias dialogIcon: iconInternal.source 
     property alias dialogMsg: dialogText.text
-    property int dialogWidth:400
-    
-    property alias btnAcceptVisible:dialogApplyBtn.visible
-    property alias btnAcceptText:dialogApplyBtn.text
+    property int dialogWidth: 400
 
-    property alias btnDiscardText:dialogDiscardBtn.text
-    property alias btnDiscardVisible:dialogDiscardBtn.visible
-    property alias btnDiscardIcon:dialogDiscardBtn.icon.name
+    property alias btnAcceptVisible: dialogApplyBtn.visible
+    property alias btnAcceptText: dialogApplyBtn.text
 
-    property alias btnCancelText:dialogCancelBtn.text
-    property alias btnCancelIcon:dialogCancelBtn.icon.name
+    property alias btnDiscardText: dialogDiscardBtn.text
+    property alias btnDiscardVisible: dialogDiscardBtn.visible
+    property alias btnDiscardIcon: dialogDiscardBtn.icon.name
+
+    property alias btnCancelText: dialogCancelBtn.text
+    property alias btnCancelIcon: dialogCancelBtn.icon.name
 
     signal dialogApplyClicked
     signal discardDialogClicked
     signal rejectDialogClicked
 
-    modal:true
-    anchors.centerIn:Overlay.overlay
-    closePolicy:Popup.NoAutoClose
+    modal: true
+    anchors.centerIn: Overlay.overlay
+    closePolicy: Popup.NoAutoClose
 
     background: Rectangle {
         color: "#ebeced"
@@ -38,9 +38,8 @@ Popup {
         radius: 5
     }
 
-
     contentItem: Rectangle {
-        id:container
+        id: container
         color: "#ebeced"
         implicitWidth: customDialog.dialogWidth
         implicitHeight: 140
@@ -57,7 +56,7 @@ Popup {
                 Layout.preferredWidth: Kirigami.Units.iconSizes.huge
                 Layout.preferredHeight: Kirigami.Units.iconSizes.huge
             }
-            
+
             Text {
                 id: dialogText
                 font.pointSize: 10
@@ -67,7 +66,7 @@ Popup {
                 color: "#31363b"
             }
         }
-        
+
         RowLayout {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
@@ -77,7 +76,7 @@ Popup {
             Button {
                 id: dialogApplyBtn
                 icon.name: "dialog-ok"
-                onClicked: dialogApplyClicked() 
+                onClicked: dialogApplyClicked()
             }
 
             Button {

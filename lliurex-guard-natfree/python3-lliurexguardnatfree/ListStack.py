@@ -347,7 +347,7 @@ class Bridge(QObject):
 
 	#def readOnly
 
-	ſProperty(QObject, constant=True)
+	@Property(QObject, constant=True)
 	def urlModel(self):
 
 		return self._urlModel
@@ -610,9 +610,6 @@ class Bridge(QObject):
 	@Slot(dict)
 	def manageEditUrlBtn(self,oldValue):
 
-		if hasattr(oldValue,'toVariant'):
-			oldValue = oldValue.toVariant()
-
 		self.showListFormMessage = {"show":False, "msgCode":"", "type":""}
 		self.enableUrlEdition = True
 		self.urlToEditIndex = oldValue.get("urlIndex")
@@ -798,5 +795,3 @@ class Bridge(QObject):
 #class Bridge
 
 from . import Core
-
-

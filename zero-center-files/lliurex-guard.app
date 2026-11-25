@@ -10,7 +10,6 @@ Comment[ca_ES@valencia]=Permet configurar els continguts webs que podran ser acc
 Comment[ca@valencia]=Permet configurar els continguts webs que podran ser accessibles
 Icon=lliurex-guard
 Category=System
-ReplacedWith=lliurex-guard-natfree
 ScriptPath=lliurex-guard.zmd
 Groups=admins;admin;sudo;teachers;
 

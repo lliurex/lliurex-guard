@@ -2,11 +2,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import org.kde.plasma.core as PlasmaCore
 
 ApplicationWindow {
-
+    id: mainWindow
     property bool closing: false
-    id:mainWindow
     visible: true
     title: "LliureX-Guard-Natfree"
     property int margin: 1
@@ -14,16 +14,17 @@ ApplicationWindow {
     height: mainLayout.implicitHeight + 2 * margin
     minimumWidth: 800 + 2 * margin
     minimumHeight: 650 + 2 * margin
+
     Component.onCompleted: {
-        x = Screen.width / 2  - minimumWidth/2
-        y = Screen.height / 2 - minimumHeight/2
+        x = Screen.width / 2  - minimumWidth / 2
+        y = Screen.height / 2 - minimumHeight / 2
     }
 
     onClosing: (close) => {
-        close.accepted = closing;
+        close.accepted = closing
         if (!closing) {
-            mainStackBridge.closeLliureXGuard();
-            closeTimer.start();
+            mainStackBridge.closeLliureXGuard()
+            closeTimer.start()
         }
     }
 
@@ -33,9 +34,9 @@ ApplicationWindow {
         repeat: true
         onTriggered: {
             if (mainStackBridge.closeGui) {
-                stop();
-                mainWindow.closing = true;
-                mainWindow.close();
+                stop()
+                mainWindow.closing = true
+                mainWindow.close()
             }
         }
     }
@@ -44,15 +45,15 @@ ApplicationWindow {
         id: mainLayout
         anchors.fill: parent
 
-        Rectangle{
+        Rectangle {
             color: "#000000"
             Layout.fillWidth: true
             Layout.preferredHeight: 120
 
-            Image{
-                id:banner
+            Image {
+                id: banner
                 source: "lliurex-guard_banner.png"
-                asynchronous:true
+                asynchronous: false
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
             }
@@ -62,22 +63,21 @@ ApplicationWindow {
             id: mainView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight:550
+            Layout.minimumHeight: 550
 
-
-            property int currentIndex:mainStackBridge.currentStack
-            initialItem:loadView
-            onCurrentIndexChanged:{
-                switch (currentIndex){
+            property int currentIndex: mainStackBridge.currentStack
+            initialItem: loadView
+            onCurrentIndexChanged: {
+                switch (currentIndex) {
                     case 0:
                         mainView.replace(loadView)
-                        break;
+                        break
                     case 1:
                         mainView.replace(menuView)
-                        break;
+                        break
                     case 2:
                         mainView.replace(listView)
-                        break;
+                        break
                 }
             }
 
@@ -89,6 +89,7 @@ ApplicationWindow {
                     duration: 60
                 }
             }
+
             replaceExit: Transition {
                 NumberAnimation { 
                     property: "opacity"
@@ -98,31 +99,30 @@ ApplicationWindow {
                 }
             }
 
-           Component{
-               id:loadView
-               LoadWaiting{
-                   id:loadWaiting
-               }
-           }
-           Component{
-               id:menuView
-               MainOptions{
-                   id:mainOptions
-               }
-           }
-           Component{
-               id:listView
-               ListOptions{
-                   id:listOptions
-               }
-           }
+            Component {
+                id: loadView
+                LoadWaiting {
+                    id: loadWaiting
+                }
+            }
+
+            Component {
+                id: menuView
+                MainOptions {
+                    id: mainOptions
+                }
+            }
+
+            Component {
+                id: listView
+                ListOptions {
+                    id: listOptions
+                }
+            }
         }
-
     }
 
-    CustomPopUp{
-        id:waitingPopUp
+    CustomPopUp {
+        id: waitingPopUp
     }
-
 }
-
