@@ -1,3 +1,11 @@
+lliurex-guard (5.30.5) noble; urgency=medium
+
+  * Added script to shutdown lliurex-guard-natfree when user logout
+  * Added support to manage default white list in readonly mode
+  * Changed list status icon when it is selected for delete
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 25 Nov 2026 13:44:01 +0100
+
 lliurex-guard (5.30.4) noble; urgency=medium
 
   * Refactorized stand-alone version
