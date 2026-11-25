@@ -19,19 +19,20 @@ class LliurexGuardManagerNatFree:
 
 	def __init__(self):
 
-		self.core=n4dcore.Core.get_core()
-		self.conf_dir=Path("/etc/lliurex-guard-natfree")
-		self.standalone_mode_file_path=Path("/etc/dnsmasq.d/lliurex-guard.conf")
-		self.blacklist_dir=self.conf_dir / "blacklist"
-		self.blacklist_disable_dir=self.conf_dir / "blacklist.d"
-		self.blacklist_redirection="169.254.254.254"
-		self.whitelist_dir=self.conf_dir / "whitelist"
-		self.whitelist_disable_dir=self.conf_dir / "whitelist.d"
-		self.whitelist_redirection="server=/"
-		self.list_tmpfile=[]
-		self.shared_folder=Path("/var/www/lliurex-guard-natfree")
-		self.resolvconf_path=Path("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
-		self.network_plugin_path=Path("/usr/share/n4d/python-plugins/NetworkManager")
+		self.core = n4dcore.Core.get_core()
+		self.conf_dir = Path("/etc/lliurex-guard-natfree")
+		self.default_whithelist_dir = Path("/usr/share/lliurex-guard-natfree/whitelists")
+		self.standalone_mode_file_path = Path("/etc/dnsmasq.d/lliurex-guard.conf")
+		self.blacklist_dir = self.conf_dir / "blacklist"
+		self.blacklist_disable_dir = self.conf_dir / "blacklist.d"
+		self.blacklist_redirection = "169.254.254.254"
+		self.whitelist_dir = self.conf_dir / "whitelist"
+		self.whitelist_disable_dir = self.conf_dir / "whitelist.d"
+		self.whitelist_redirection = "server=/"
+		self.list_tmpfile = []
+		self.shared_folder = Path("/var/www/lliurex-guard-natfree")
+		self.resolvconf_path = Path("/etc/systemd/resolved.conf.d/lliurex-dnsmasq.conf")
+		self.network_plugin_path = Path("/usr/share/n4d/python-plugins/NetworkManager")
 	
 		#def __init__
 
@@ -40,15 +41,16 @@ class LliurexGuardManagerNatFree:
 		if self._is_server():
 			self._remove_standalone_config()
 			if self._create_guardmode_conf_dir():
+				self._sync_default_whitelist()
 				self._startup()
 
 	#def startup
 
 	def _startup(self):
 
-		self.internal_variable=self.core.get_variable("LLIUREXGUARD_NATFREE").get('return',None)
+		self.internal_variable = self.core.get_variable("LLIUREXGUARD_NATFREE").get('return',None)
 
-		if self.internal_variable==None:
+		if self.internal_variable is None:
 			try:
 				self._initialize_variable()
 				self.core.set_variable("LLIUREXGUARD_NATFREE",self.internal_variable)
@@ -60,14 +62,14 @@ class LliurexGuardManagerNatFree:
 	def read_guardmode(self):
 		
 		try:
-			self.guardMode=self.internal_variable.get("mode")
+			self.guardMode = self.internal_variable.get("mode")
 			self._set_variables()
-			result={'status':True,'msg':"Guard Mode read successfully",'data':self.guardMode}
+			result = {'status': True, 'msg': "Guard Mode read successfully", 'data': self.guardMode}
 			return n4d.responses.build_successful_call_response(result)
 	
 		except Exception as e:
 			print(f"[LliurexGuardManagerNatFree]: Unable to read Guard Mode: {e}")
-			result={'status':False,'msg':"Unable to read Guard Mode",'data':str(e)}
+			result = {'status': False, 'msg':"Unable to read Guard Mode", 'data': str(e)}
 			return n4d.responses.build_successful_call_response(result)
 	
 	#def read_guard_mode
@@ -85,7 +87,7 @@ class LliurexGuardManagerNatFree:
 	
 	#def _set_variables
 
-	def change_guardmode(self, mode_to_set: str):
+	def change_guardmode(self, mode_to_set:str):
 
 		variable = copy.deepcopy(self.internal_variable)
 		variable["mode"] = mode_to_set
@@ -93,9 +95,11 @@ class LliurexGuardManagerNatFree:
 
 		try:
 			self.shared_folder.mkdir(parents=False, exist_ok=True)
+			index_file = self.shared_folder / "index.html"
+			index_file.touch()
 
 			for file in self.shared_folder.iterdir():
-				if file.is_file():
+				if file.is_file() and file.name != "index.html":
 					file.unlink()
 
 			if mode_to_set in ("BlackMode", "WhiteMode"):
@@ -151,7 +155,7 @@ class LliurexGuardManagerNatFree:
 
 	#def read_guardmode_headers
 
-	def read_guardmode_list(self, listId: str, active: bool):
+	def read_guardmode_list(self, listId:str, active:bool):
 
 		path_dir = self.active_path if active else self.disable_path
 		alt_dir = self.disable_path if active else self.active_path
@@ -204,7 +208,7 @@ class LliurexGuardManagerNatFree:
 	
 	#def read_guardmode_list
 
-	def remove_guardmode_list(self, list_to_manage: list) :
+	def remove_guardmode_list(self, list_to_manage:list) :
 
 		active_dir = self.active_path
 		disable_dir = self.disable_path
@@ -212,6 +216,9 @@ class LliurexGuardManagerNatFree:
 		try:
 			for item in list_to_manage:
 				filename = f"{item}.list"
+				if filename.startswith("llxdefault_"):
+					continue
+
 				active_file = active_dir / filename
 				disable_file = disable_dir / filename
 
@@ -235,13 +242,13 @@ class LliurexGuardManagerNatFree:
 
 	#def remove_guardmode_list
 	
-	def activate_guardmode_list(self,list_to_manage:list):
+	def activate_guardmode_list(self, list_to_manage:list):
 
-		result=self._move_guardmode_list(list_to_manage,self.active_path,self.disable_path)
+		result = self._move_guardmode_list(list_to_manage, self.active_path, self.disable_path)
 
 		if result.get('status'):
-			result={'status':True,'msg':"list_to_manage activated successfully"}
-			ret=self.change_guardmode(self.guardMode)
+			result = {'status': True, 'msg': "list_to_manage activated successfully"}
+			ret = self.change_guardmode(self.guardMode)
 			final_response = result if ret.get("status") else ret.get("return")
 			return n4d.responses.build_successful_call_response(final_response)
 		else:
@@ -249,7 +256,7 @@ class LliurexGuardManagerNatFree:
 	
 	#def activate_guardmode_list
 	
-	def deactivate_guardmode_list(self, list_to_manage: list):
+	def deactivate_guardmode_list(self, list_to_manage:list):
 
 		result = self._move_guardmode_list(list_to_manage, self.disable_path, self.active_path)
 
@@ -262,10 +269,17 @@ class LliurexGuardManagerNatFree:
 			return n4d.responses.build_successful_call_response(result)
 
 	#def deactivate_guardmode_list
+
+	def update_default_whitelists (self):
+
+		self._sync_default_whitelist()
+		return n4d.responses.build_successful_call_response()
+
+	#def update_default_whitelists
 	
 	def _initialize_variable(self):
 		
-		self.internal_variable={
+		self.internal_variable = {
 			"mode":"DisableMode",
 			"list_to_config":[]
 		}
@@ -287,12 +301,61 @@ class LliurexGuardManagerNatFree:
 			for directory in directories:
 				directory.mkdir(parents=True, exist_ok=True)
 
+			if self.shared_folder.exists():
+				index_file = self.shared_folder / "index.html"
+				index_file.touch()
+
 			return True 
 		except OSError as e:
 			print(f"[LliurexGuardManagerNatFreeClient]: Error creating guardmode configuration directories: {e}")
 			return False
 
 	#def _create_guardmode_conf_dir
+
+	def _sync_default_whitelist(self):
+
+		if not self.default_whithelist_dir.is_dir():
+			return
+
+		valid_files = set()
+		target_dirs = (
+			self.whitelist_dir,
+			self.whitelist_disable_dir,
+			self.shared_folder
+		)
+
+		for list_file in self.default_whithelist_dir.iterdir():
+
+			if not list_file.is_file():
+				continue
+
+			file_name = list_file.name
+			valid_files.add(file_name)
+
+			active_whitelist = self.whitelist_dir / file_name
+			shared_list = self.shared_folder / file_name
+
+			if active_whitelist.exists():
+				shutil.copy2(list_file, active_whitelist)
+				if self.shared_folder.is_dir() and shared_list.exists():
+					shutil.copy2(list_file, shared_list)
+			else:
+				shutil.copy2(list_file, self.whitelist_disable_dir / file_name)
+
+		for directory in target_dirs:
+			if not directory.is_dir():
+				continue
+
+			for target_file in directory.iterdir():
+				if (
+					target_file.is_file()
+					and target_file.name.startswith("llxdefault_")
+					and target_file.name not in valid_files
+				):
+					target_file.unlink()
+
+
+	#def _sync_default_whitelist
 
 	def _is_server(self):
 
@@ -325,9 +388,10 @@ class LliurexGuardManagerNatFree:
 						tmp = {
 							"id": file_path.stem,
 							"active": folder not in (self.blacklist_disable_dir, self.whitelist_disable_dir),
-							"name": "",
-							"description": "",
-							"lines": 0
+							"name": {},
+							"description": {},
+							"lines": 0,
+							"readOnly": True if file_path.stem.startswith("llxdefault_") else False	
 						}
 
 						lines = file_path.read_text(encoding="utf-8").splitlines()
@@ -335,17 +399,31 @@ class LliurexGuardManagerNatFree:
 
 						for line in lines:
 							line = line.strip()
-							if "NAME" in line and ":" in line:
-								tmp["name"] = line.split(":", 1)[1].strip()
+							if "NAME[es]:" in line:
+								tmp["name"]["es"] = line.split(":", 1)[1].strip()
 								match_count += 1
-							elif "DESCRIPTION" in line and ":" in line:
-								tmp["description"] = line.split(":", 1)[1].strip()
+							elif "NAME[ca@valencia]:" in line:
+								tmp["name"]["ca@valencia"] = line.split(":", 1)[1].strip()
 								match_count += 1
-
-							if match_count == 2:
-								tmp["lines"] = max(0, len(lines) - 2)
+							elif "NAME:" in line:
+								tmp["name"]["default"] = line.split(":", 1)[1].strip()
+								match_count += 1								
+							elif "DESCRIPTION[es]:" in line:
+								tmp["description"]["es"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							elif "DESCRIPTION[ca@valencia]:" in line:
+								tmp["description"]["ca@valencia"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							elif "DESCRIPTION:" in line:
+								tmp["description"]["default"] = line.split(":", 1)[1].strip()
+								match_count += 1
+							else:
 								break
+							if match_count >= 2:
+								tmp["lines"] = max(0, len(lines) - match_count)
+						
 						files_headers.append(tmp)
+			
 			return {'status': True, 'msg': "list_to_manage read successfully", 'data': files_headers}
 
 		except Exception as e: 
@@ -409,8 +487,8 @@ class LliurexGuardManagerNatFree:
 					print(f"[LliurexGuardManagerNatFree]: Warning, could not chown to root: {e}")
 
 				output_lines = [
-					f"#NAME:{item['name']}",
-					f"#DESCRIPTION:{item['description']}"
+					f"#NAME:{item.get('name').get('default')}",
+					f"#DESCRIPTION:{item.get('description').get('default')}"
 					]
 
 				for line in lines:
@@ -421,11 +499,7 @@ class LliurexGuardManagerNatFree:
 					if self.redirection in line:
 						output_lines.append(line)
 					else:
-						if "https" in line:
-							line = line.replace("https://", "")
-						else:
-							line = line.replace("http://", "")
-
+						line = line.removeprefix("https://").removeprefix("http://")
 						if len(line.split("/")) == 1:
 							if self.guardMode == "BlackMode":
 								output_lines.append(f"address=/{line}/{self.redirection}")
@@ -463,7 +537,7 @@ class LliurexGuardManagerNatFree:
 	def _disable_dnsmasq_service(self):
 
 		try:
-			is_active=(
+			is_active = (
 				subprocess.run(["systemctl","is-active","dnsmasq"],
 					stdout=subprocess.PIPE,
 					stderr=subprocess.PIPE,
@@ -475,7 +549,7 @@ class LliurexGuardManagerNatFree:
 			if is_active:
 				subprocess.run(["systemctl","stop","dnsmasq"],check=True)
 
-			is_enable=(
+			is_enable = (
 				subprocess.run(["systemctl","is-enabled","dnsmasq"],
 					stdout=subprocess.PIPE,
 					stderr=subprocess.PIPE,

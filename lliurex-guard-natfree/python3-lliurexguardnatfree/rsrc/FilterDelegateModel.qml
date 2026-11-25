@@ -2,40 +2,40 @@ import QtQuick
 import QtQml.Models
 
 DelegateModel {
-	id:filterModel
+	id: filterModel
 	property var externalTimer: null
 	property string role
 	property string search
 	property string statusFilter
-	property var visibleElements:[]
+	property var visibleElements: []
 
-	onRoleChanged:if (externalTimer) externalTimer.restart()
-	onSearchChanged:if (externalTimer) externalTimer.restart()
-	onStatusFilterChanged:if (externalTimer) externalTimer.restart()
+	onRoleChanged: if (externalTimer) externalTimer.restart()
+	onSearchChanged: if (externalTimer) externalTimer.restart()
+	onStatusFilterChanged: if (externalTimer) externalTimer.restart()
 
 	groups: [
-		DelegateModelGroup{
-			id:allItems
-			name:"all"
-			includeByDefault:true
-			onCountChanged:Qt.callLater(update)
+		DelegateModelGroup {
+			id: allItems
+			name: "all"
+			includeByDefault: true
+			onCountChanged: Qt.callLater(update)
 		},
-		DelegateModelGroup{
-			id:visibleItems
-			name:"visible"
+		DelegateModelGroup {
+			id: visibleItems
+			name: "visible"
 		}
 	]
 
-	filterOnGroup:"visible"
+	filterOnGroup: "visible"
 
-	function update(){
+	function update() {
 
-		if (!filterModel.model){
-			visibleElements=[]
+		if (!filterModel.model) {
+			visibleElements = []
 			return
 		}
-		
-	   	let count = allItems.count
+
+		let count = allItems.count
 		if (count === 0) {
 			visibleElements = []
 			return
@@ -47,36 +47,35 @@ DelegateModel {
 
 		for (let index = 0; index < count; index++) {
 			let item = allItems.get(index).model
-            let matchesSearch = true
-            if (role && item[role] !== undefined) {
-                matchesSearch = String(item[role]).toLowerCase().includes(searchLower)
-            } else if (searchLower !== "") {
-                matchesSearch = false
-            }
+			let matchesSearch = true
+			if (role && item[role] !== undefined) {
+				matchesSearch = String(item[role]).toLowerCase().includes(searchLower)
+			} else if (searchLower !== "") {
+				matchesSearch = false
+			}
 
-            let matchesStatus = true
-            if (statusFilter !== "all") {
-                let currentStatus = item["activated"]
-                switch(statusFilter) {
-                    case "active":
-                        matchesStatus = (currentStatus == true)
-                        break
-                    case "disable":
-                        matchesStatus = (currentStatus == false)
-                        break
-                 }
-            }
+			let matchesStatus = true
+			
+			if (statusFilter !== "all") {
+				let currentStatus = item["activated"]
+				switch(statusFilter) {
+					case "active":
+						matchesStatus = (currentStatus == true)
+						break
+					case "disable":
+						matchesStatus = (currentStatus == false)
+						break
+				}
+			}
+			let isItemVisible = item["isVisible"] !== undefined ? item["isVisible"] : true
 
-            let isItemVisible = item["isVisible"] !== undefined ? item["isVisible"] : true
+			if (matchesSearch && matchesStatus && isItemVisible) {
+				allItems.setGroups(index,1,["all","visible"])
+				localVisibleElements.push(index)
+			} 
+		}
 
-            if (matchesSearch && matchesStatus && isItemVisible) {
-                allItems.setGroups(index,1,["all","visible"])
-                localVisibleElements.push(index)
-            } 
-        }
-
-        visibleElements = localVisibleElements
-
+		visibleElements = localVisibleElements
 	}
 	Component.onCompleted: if (externalTimer) externalTimer.restart()
 }

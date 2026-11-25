@@ -2,16 +2,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-
 Popup {
-    id:popUpWaiting
-    width:570
-    height:80
+    id: popUpWaiting
+    width: 570
+    height: 80
     anchors.centerIn: Overlay.overlay
-    modal:true
-    focus:true
-    visible:mainStackBridge.showPopUp.show
-    closePolicy:Popup.NoAutoClose
+    modal: true
+    focus: true
+    visible: mainStackBridge.showPopUp.show
+    closePolicy: Popup.NoAutoClose
 
     background: Rectangle {
         color: palette.window
@@ -23,27 +22,26 @@ Popup {
         anchors.centerIn: parent
         spacing: 10
 
-        Image{
-            id:spinnerImage
+        Image {
+            id: spinnerImage
             source: "loading.png"
             Layout.preferredWidth: 24
             Layout.preferredHeight: 24
             Layout.alignment: Qt.AlignHCenter
             fillMode: Image.PreserveAspectFit
-            smooth:false
-            antialiasing:false
-
-            rotation:0
+            smooth: false
+            antialiasing: false
+            rotation: 0
         }
-            
-        Timer{
-            id:rotationTimer
-            running:(spinnerImage!==null && popUpWaiting!==null) && spinnerImage.visible && popUpWaiting.visible
-            repeat:true
-            interval:100
 
-            onTriggered:{
-                spinnerImage.rotation=(spinnerImage.rotation+330)%360
+        Timer {
+            id: rotationTimer
+            running: (spinnerImage !== null && popUpWaiting !== null) && spinnerImage.visible && popUpWaiting.visible
+            repeat: true
+            interval: 100
+
+            onTriggered: {
+                spinnerImage.rotation = (spinnerImage.rotation + 330) % 360
             }
         }
 
@@ -57,8 +55,9 @@ Popup {
         }
     }
 
-    function getTextMessage(){
-        switch (mainStackBridge.showPopUp.msgCode){
+    function getTextMessage() {
+
+        switch (mainStackBridge.showPopUp.msgCode) {
             case 7:
                 return i18nd("lliurex-guard-natfree","Changing Lliurex Guard mode. Wait a moment...")
             case 11:
@@ -78,7 +77,7 @@ Popup {
             case 27:
                 return i18nd("lliurex-guard-natfree","Updating white list dns. Wait a moment...")
             default:
-                return ""
+            return ""
         }
     }
 }

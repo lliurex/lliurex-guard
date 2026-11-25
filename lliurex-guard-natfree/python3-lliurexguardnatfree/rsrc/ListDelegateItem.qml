@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 
 ItemDelegate{
-
     id: listFilterItem
     property int listOrder
     property string listId
@@ -13,54 +12,55 @@ ItemDelegate{
     property string listDescription
     property bool listActivated
     property bool listRemove
+    property bool readOnly
     property string metaInfo
 
-    enabled:true
-    height:80
-    width: listFilterItem.ListView.view?listFilterItem.ListView.width-10:0
-    hoverEnabled:true
+    enabled: true
+    height: 80
+    width: listFilterItem.ListView.view ? listFilterItem.ListView.width - 10 : 0
+    hoverEnabled: true
 
-    leftPadding:15
-    rightPadding:10
+    leftPadding: 15
+    rightPadding: 10
 
-    onHoveredChanged:{
+    onHoveredChanged: {
         if (listFilterItem.ListView.view){
-            if (hovered && !optionsMenu.opened){
-                listFilterItem.ListView.view.currentIndex=index
+            if (hovered && !optionsMenu.opened) {
+                listFilterItem.ListView.view.currentIndex = index
             }
-        }else if (!hovered && !optionsMenu.opened && listFilterItem.ListView.view.currentIndex===index){
-            listFilterItem.ListView.view.currentIndex=-1
+        }else if (!hovered && !optionsMenu.opened && listFilterItem.ListView.view.currentIndex === index) {
+            listFilterItem.ListView.view.currentIndex = -1
         }
     }
 
     background: Rectangle {
-        x:5
-        y:5
-        width:parent.width-5
-        height:parent.height-5
+        x: 5
+        y: 5
+        width: parent.width - 5
+        height: parent.height - 5
 
-        color:{
-            if (listRemove){
+        color: {
+            if (listRemove) {
                 Qt.alpha(Kirigami.Theme.disabledTextColor,0.45)
             }else{
                 if (listFilterItem.hovered || optionsMenu.opened){
-                   Qt.alpha(Kirigami.Theme.highlightColor,0.15)
+                    Qt.alpha(Kirigami.Theme.highlightColor,0.15)
                 }else{
                     "transparent"
                 }
             }
         }
 
-        radius:6
-        border.width:1
-        border.color:{
-            if (listFilterItem.hovered || optionsMenu.opened){
-                if (listRemove){
+        radius: 6
+        border.width: 1
+        border.color: {
+            if (listFilterItem.hovered || optionsMenu.opened) {
+                if (listRemove) {
                     Kirigami.Theme.disabledTextColor
-                }else{
+                }else {
                     Kirigami.Theme.highlightColor
                 }
-            }else{            
+            }else {
                 "transparent"
             }
         }
@@ -68,97 +68,113 @@ ItemDelegate{
 
     contentItem:RowLayout {
         id: filtertem
-        spacing:20
+        spacing: 20
 
-        ColumnLayout{
-            id:description
-            spacing:10
-            Layout.fillWidth:true
-            Layout.alignment:Qt.AlignVCenter
-            Layout.preferredWidth:300
+        ColumnLayout {
+            id: description
+            spacing: 10
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 300
 
-            Text{
-                id:nameText
-                text:listName
+            Text {
+                id: nameText
+                text: listName
                 font.pointSize: 12
-                horizontalAlignment:Text.AlignLeft
-                elide:Text.ElideMiddle
-                Layout.fillWidth:true
+                horizontalAlignment: Text.AlignLeft
+                elide: Text.ElideMiddle
+                Layout.fillWidth: true
             }
 
-            Text{
-                id:descriptionText
-                text:listDescription
+            Text {
+                id: descriptionText
+                text: listDescription
                 font.pointSize: 10
-                horizontalAlignment:Text.AlignLeft
-                elide:Text.ElideMiddle
-                Layout.fillWidth:true
+                horizontalAlignment: Text.AlignLeft
+                elide: Text.ElideMiddle
+                Layout.fillWidth: true
             }
-
         }
 
-        Text{
+        Text {
             id:entriesText
-            text:listEntries+" "+i18nd("lliurex-guard-natfree","entries")
+            text: listEntries + " " + i18nd("lliurex-guard-natfree","entries")
             font.pointSize: 12
-            Layout.alignment:Qt.AlignVCenter
-            Layout.fillWidth:true
-            Layout.preferredWidth:190
-        }
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+            Layout.preferredWidth: 190
 
-        Kirigami.Icon{
-            id:listState
-            source:listActivated?"security-high":"security-low"
+        }
+        Kirigami.Icon {
+            id: listState
+            source:{
+                if (listRemove) {
+                    return "delete"
+                }
+                if (listActivated ){
+                    "security-high"
+                } else {
+                    "security-low"
+                }
+            }
             Layout.preferredWidth: 32
             Layout.preferredHeight: 32
             Layout.alignment: Qt.AlignVCenter
-
         }
 
-        Button{
-            id:manageListBtn
-            display:AbstractButton.IconOnly
-            icon.name:"configure"
+        Button {
+            id: manageListBtn
+            display: AbstractButton.IconOnly
+            icon.name: "configure"
             Layout.alignment: Qt.AlignVCenter
             visible:listFilterItem.hovered || optionsMenu.opened
             ToolTip.delay: 1000
             ToolTip.timeout: 3000
             ToolTip.visible: hovered
-            ToolTip.text:i18nd("lliurex-guard-natfree","Click to manage this list")
-            onClicked:optionsMenu.open()
+            ToolTip.text: i18nd("lliurex-guard-natfree","Click to manage this list")
+            onClicked: optionsMenu.open()
 
-            Connections{
-                target:guardLists
-                function onCurrentIndexChanged(){
+            Connections {
+                target: guardLists
+                function onCurrentIndexChanged() {
                     if (!listFilterItem.ListView.isCurrentItem && optionsMenu.opened){
                         optionsMenu.close()
                     }
                 }
             }
 
-            Menu{
-                id:optionsMenu
+            Menu {
+                id: optionsMenu
                 y: manageListBtn.height
-                x:-(optionsMenu.width-manageListBtn.width/2)
+                x: -(optionsMenu.width - manageListBtn.width / 2)
 
-                MenuItem{
-                    icon.name:listActivated?"lliurex-guard-natfree-disable-mode":"security-high"
-                    text:listActivated?i18nd("lliurex-guard-natfree","Disable list"):i18nd("lliurex-guard-natfree","Enable list")
-                    enabled:listRemove?false:true
-                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":false,"active":!listActivated,"listId":listOrder})
+                MenuItem {
+                    icon.name: listActivated ? "lliurex-guard-natfree-disable-mode" : "security-high"
+                    text: listActivated
+                            ? i18nd("lliurex-guard-natfree","Disable list")
+                            : i18nd("lliurex-guard-natfree","Enable list")
+                    enabled: listRemove ? false : true
+                    onClicked: guardOptionsStackBridge.changeListStatus({"allLists":false,"active":!listActivated,"listId":listOrder})
                 }
 
-                MenuItem{
-                    icon.name:"document-edit.svg"
-                    text:i18nd("lliurex-guard-natfree","Edit list")
-                    enabled:listRemove?false:true
-                    onClicked:listStackBridge.loadList(listOrder)
+                MenuItem {
+                    icon.name: readOnly ? "document-preview-archive" : "document-edit"
+                    text: readOnly 
+                            ? i18nd("lliurex-guard-natfree","Check list")
+                            : i18nd("lliurex-guard-natfree","Edit list")
+                    enabled: listRemove ? false : true
+                    onClicked: listStackBridge.loadList(listOrder)
                 }
-                
-                MenuItem{
-                    icon.name:listRemove?"restoration":"delete"
-                    text:listRemove?i18nd("lliurex-guard-natfree","Restore the list"):i18nd("lliurex-guard-natfree","Delete the list")
-                    onClicked:listRemove?guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder}):guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
+
+                MenuItem {
+                    icon.name: listRemove ? "restoration" : "delete"
+                    text: listRemove
+                            ? i18nd("lliurex-guard-natfree","Restore the list")
+                            : i18nd("lliurex-guard-natfree","Delete the list")
+                    visible : !readOnly
+                    onClicked: listRemove
+                            ? guardOptionsStackBridge.restoreLists({"allLists":false,"listId":listOrder})
+                            : guardOptionsStackBridge.removeLists({"allLists":false,"listId":listOrder})
                 }
             }
         }

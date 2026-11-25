@@ -5,353 +5,322 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 import org.kde.kirigami as Kirigami
 
-Rectangle{
-    id:rectLayout
-    color:"transparent"
+Rectangle {
+    id: rectLayout
+    color: "transparent"
 
-    ColumnLayout{
+    ColumnLayout {
         id: mainContent
-        anchors.top:parent.top
-        anchors.left:parent.left
-        anchors.right:parent.right
-        anchors.bottom:btnBox.top
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: btnBox.top
 
-        anchors.leftMargin:5
-        anchors.rightMargin:15
-        anchors.bottomMargin:25
+        anchors.leftMargin: 5
+        anchors.rightMargin: 15
+        anchors.bottomMargin: 25
         spacing: 10
 
-        Text{ 
-            text:i18nd("lliurex-guard-natfree","Current configuration")
+        Text {
+            text: i18nd("lliurex-guard-natfree","Current configuration")
             font.pointSize: 16
         }
 
         Kirigami.InlineMessage {
             id: messageLabel
-            visible:guardOptionsStackBridge.showMainMessage.show
-            text:getTextMessage()
-            type:getTypeMessage()
-            Layout.fillWidth:true
+            visible: guardOptionsStackBridge.showMainMessage.show
+            text: getTextMessage()
+            type: getTypeMessage()
+            Layout.fillWidth: true
         }
 
-        GuardLists{
-            id:guardLists
-            listsModel:guardOptionsStackBridge.listsModel
-            Layout.fillHeight:true
-            Layout.fillWidth:true
-       }
-       
+        GuardLists {
+            id: guardLists
+            listsModel: guardOptionsStackBridge.listsModel
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
     }
-    
-    RowLayout{
-        id:btnBox
+
+    RowLayout {
+        id: btnBox
         anchors.bottom: parent.bottom
-        anchors.fill:parent.fill
-        anchors.bottomMargin:15
-        spacing:10
+        anchors.fill: parent.fill
+        anchors.bottomMargin: 15
+        spacing: 10
 
         Button {
-            id:newBtn
-            visible:true
-            display:AbstractButton.TextBesideIcon
-            icon.name:"list-add"
-            text:i18nd("lliurex-guard-natfree","New List")
-            onClicked:editMenu.open()
-            enabled:{
-                if (guardOptionsStackBridge.guardMode!="DisableMode"){
-                    true
-                }else{
-                    false
+            id: newBtn
+            visible: true
+            display: AbstractButton.TextBesideIcon
+            icon.name: "list-add"
+            text: i18nd("lliurex-guard-natfree","New List")
+            onClicked: editMenu.open()
+            enabled: guardOptionsStackBridge.guardMode != "DisableMode" ? true: false
+
+            Menu {
+                id: editMenu
+                y: -height - 5
+                x: newBtn.width / 2
+
+                MenuItem {
+                    icon.name: "document-edit"
+                    text: i18nd("lliurex-guard-natfree","Add custom list")
+                    onClicked: listStackBridge.addNewList("")
+                }
+
+                MenuItem {
+                    icon.name: "document-import"
+                    text: i18nd("lliurex-guard-natfree","Add custom list from file")
+                    onClicked: loadFileDialog.open()
                 }
             }
-
-            Menu{
-                id:editMenu
-                y: -height - 5
-                x: newBtn.width/2
-
-                MenuItem{
-                    icon.name:"document-edit"
-                    text:i18nd("lliurex-guard-natfree","Add custom list")
-                    onClicked:listStackBridge.addNewList("")
-                }
-
-                MenuItem{
-                    icon.name:"document-import"
-                    text:i18nd("lliurex-guard-natfree","Add custom list from file")
-                    onClicked:loadFileDialog.open()
-                }
-            } 
         }
 
         Button {
-            id:actionsBtn
-            visible:true
-            display:AbstractButton.TextBesideIcon
-            icon.name:"configure"
-            text:i18nd("lliurex-guard-natfree","Global Options")
-            enabled:guardOptionsStackBridge.enableGlobalOptions
-            onClicked:actionsMenu.open()
-            
-            Menu{
-                id:actionsMenu
+            id: actionsBtn
+            visible: true
+            display: AbstractButton.TextBesideIcon
+            icon.name: "configure"
+            text: i18nd("lliurex-guard-natfree","Global Options")
+            enabled: guardOptionsStackBridge.enableGlobalOptions
+            onClicked: actionsMenu.open()
+
+            Menu {
+                id: actionsMenu
                 y: -height - 5
-                x: actionsBtn.width/2
+                x: actionsBtn.width / 2
 
-                MenuItem{
-                    icon.name:"security-high"
-                    text:i18nd("lliurex-guard-natfree","Enable all list")
-                    enabled:!guardOptionsStackBridge.enableListsStatusOptions.allActivated
-                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":true,"listId":""})
+                MenuItem {
+                    icon.name: "security-high"
+                    text: i18nd("lliurex-guard-natfree","Enable all list")
+                    enabled: !guardOptionsStackBridge.enableListsStatusOptions.allActivated
+                    onClicked: guardOptionsStackBridge.changeListStatus({"allLists":true,"active":true,"listId":""})
                 }
 
-                MenuItem{
-                    icon.name:"lliurex-guard-natfree-disable-mode"
-                    text:i18nd("lliurex-guard-natfree","Disable all lists")
-                    enabled:!guardOptionsStackBridge.enableListsStatusOptions.allDeactivated
-                    onClicked:guardOptionsStackBridge.changeListStatus({"allLists":true,"active":false,"listId":""})
-
+                MenuItem {
+                    icon.name: "lliurex-guard-natfree-disable-mode"
+                    text: i18nd("lliurex-guard-natfree","Disable all lists")
+                    enabled: !guardOptionsStackBridge.enableListsStatusOptions.allDeactivated
+                    onClicked: guardOptionsStackBridge.changeListStatus({"allLists":true,"active":false,"listId":""})
                 }
-                MenuItem{
-                    icon.name:"delete"
-                    text:i18nd("lliurex-guard-natfree","Delete all lists")
-                    enabled:guardOptionsStackBridge.enableRemoveListsOption
-                    onClicked:guardOptionsStackBridge.removeLists({"allLists":true,"listId":""})
+
+                MenuItem {
+                    icon.name: "delete"
+                    text: i18nd("lliurex-guard-natfree","Delete all lists")
+                    enabled: guardOptionsStackBridge.enableRemoveListsOption
+                    onClicked: guardOptionsStackBridge.removeLists({"allLists":true,"listId":""})
                 }
                 MenuItem{
                     icon.name:"restoration"
                     text:i18nd("lliurex-guard-natfree","Restore all lists")
                     enabled:guardOptionsStackBridge.enableRestoreListsOption
-                    onClicked:guardOptionsStackBridge.restoreLists({"allLists":true,"listId":""})
+                    onClicked: guardOptionsStackBridge.restoreLists({"allLists":true,"listId":""})
                 }
             }
-           
-        }
-        Button {
-            id:modeBtn
-            visible:true
-            display:AbstractButton.TextBesideIcon
-            icon.name:{
-                switch(guardOptionsStackBridge.guardMode){
-                    case "BlackMode":
-                        "security-high"
-                        break
-                    case "WhiteMode":
-                        "lliurex-guard-natfree-white-mode"
-                        break
-                    case "DisableMode":
-                        "lliurex-guard-natfree-disable-mode"
-                        break
-                }
-            }
-            text:{
-                switch(guardOptionsStackBridge.guardMode){
-                    case "BlackMode":
-                        i18nd("lliurex-guard-natfree","Black List mode")
-                        break;
-                    case "WhiteMode":
-                        i18nd("lliurex-guard-natfree","White list mode")
-                        break;
-                    case "DisableMode":
-                        i18nd("lliurex-guard-natfree","Lliurex Guard is disabled")
-                        break
-                }
-            }
-            enabled:!guardOptionsStackBridge.arePendingChanges
-            Layout.rightMargin:rectLayout.width-(actionsBtn.width+modeBtn.width+newBtn.width+applyBtn.width+40)
-            onClicked:modeMenu.open()
-
-            Menu{
-               id:modeMenu
-               y: -height - 5
-               x: modeBtn.width/2
-
-               MenuItem{
-                   icon.name:"security-high"
-                   text:i18nd("lliurex-guard-natfree","Activate BackList mode")
-                   visible:{
-                        if (guardOptionsStackBridge.guardMode=="BlackMode"){
-                            false
-                        }else{
-                            true
-                        }
-                    }
-                    onClicked:guardOptionsStackBridge.changeGuardMode("BlackMode")
-               }
-
-               MenuItem{
-                    icon.name:"lliurex-guard-natfree-white-mode"
-                    text:i18nd("lliurex-guard-natfree","Activate WhiteList mode")
-                    visible:{
-                        if (guardOptionsStackBridge.guardMode=="WhiteMode"){
-                            false
-                        }else{
-                            true
-                        }
-                    }
-                    onClicked:guardOptionsStackBridge.changeGuardMode("WhiteMode")
-               }
-
-               MenuItem{
-                    icon.name:"lliurex-guard-natfree-disable-mode"
-                    text:i18nd("lliurex-guard-natfree","Disable LliureX-Guard")
-                    visible:{
-                        if (guardOptionsStackBridge.guardMode=="DisableMode"){
-                            false
-                        }else{
-                            true
-                        }
-                    }
-                    onClicked:guardOptionsStackBridge.changeGuardMode("DisableMode")
-               }
-            }
-
         }
 
         Button {
-            id:applyBtn
-            visible:true
-            enabled:guardOptionsStackBridge.arePendingChanges
-            display:AbstractButton.TextBesideIcon
-            icon.name:"dialog-ok"
-            text:i18nd("lliurex-guard-natfree","Apply")
-            onClicked:guardOptionsStackBridge.applyChanges()
+            id: modeBtn
+            visible: true
+            display: AbstractButton.TextBesideIcon
+            icon.name: {
+                switch(guardOptionsStackBridge.guardMode) {
+                    case "BlackMode":
+                            "security-high"
+                            break
+                    case "WhiteMode":
+                            "lliurex-guard-natfree-white-mode"
+                            break
+                    case "DisableMode":
+                            "lliurex-guard-natfree-disable-mode"
+                            break
+                }
+            }
+            text: {
+                switch(guardOptionsStackBridge.guardMode) {
+                    case "BlackMode":
+                            i18nd("lliurex-guard-natfree","Black List mode")
+                            break
+                    case "WhiteMode":
+                            i18nd("lliurex-guard-natfree","White list mode")
+                            break
+                    case "DisableMode":
+                            i18nd("lliurex-guard-natfree","Lliurex Guard is disabled")
+                            break
+                }
+            }
+            enabled: !guardOptionsStackBridge.arePendingChanges
+            Layout.rightMargin: rectLayout.width - (actionsBtn.width + modeBtn.width + newBtn.width + applyBtn.width + 40)
+            onClicked: modeMenu.open()
+
+            Menu {
+                id: modeMenu
+                y: -height - 5
+                x: modeBtn.width / 2
+
+                MenuItem {
+                    icon.name: "security-high"
+                    text: i18nd("lliurex-guard-natfree","Activate BackList mode")
+                    visible: guardOptionsStackBridge.guardMode == "BlackMode" ? false : true
+                    onClicked: guardOptionsStackBridge.changeGuardMode("BlackMode")
+                }
+
+                MenuItem {
+                    icon.name: "lliurex-guard-natfree-white-mode"
+                    text: i18nd("lliurex-guard-natfree","Activate WhiteList mode")
+                    visible: guardOptionsStackBridge.guardMode == "WhiteMode" ? false : true
+                    onClicked: guardOptionsStackBridge.changeGuardMode("WhiteMode")
+                }
+
+                MenuItem {
+                    icon.name: "lliurex-guard-natfree-disable-mode"
+                    text: i18nd("lliurex-guard-natfree","Disable LliureX-Guard")
+                    visible: guardOptionsStackBridge.guardMode == "DisableMode" ? false : true
+                    onClicked: guardOptionsStackBridge.changeGuardMode("DisableMode")
+                }
+            }
         }
-        
+
+        Button {
+            id: applyBtn
+            visible: true
+            enabled: guardOptionsStackBridge.arePendingChanges
+            display: AbstractButton.TextBesideIcon
+            icon.name: "dialog-ok"
+            text: i18nd("lliurex-guard-natfree","Apply")
+            onClicked: guardOptionsStackBridge.applyChanges()
+        }
     }
 
-    FileDialog{
+    FileDialog {
         id:loadFileDialog
-        currentFolder:StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
-        nameFilters:["Test files (*txt)"]
-        onAccepted:{
-            var selectedPath=""
-            selectedPath=loadFileDialog.selectedFile.toString()
-            selectedPath=selectedPath.replace(/^(file:\/{2})/,"")
+        currentFolder: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
+        nameFilters: ["Test files (*txt)"]
+        onAccepted: {
+            var selectedPath = ""
+            selectedPath = loadFileDialog.selectedFile.toString()
+            selectedPath = selectedPath.replace(/^(file:\/{2})/,"")
             listStackBridge.addNewList(selectedPath)
         }
-      
-    } 
+    }
 
     ChangesDialog{
-        id:changeModeDialog
+        id: changeModeDialog
         dialogIcon:"dialog-warning"
-        dialogMsg:{
-            switch(guardOptionsStackBridge.showChangeModeDialog.modeToChange){
+        dialogMsg: {
+            switch(guardOptionsStackBridge.showChangeModeDialog.modeToChange) {
                 case "BlackMode":
                     i18nd("lliurex-guard-natfree","Do yo want to change to black list mode?\nIf you activate this mode, you will not be able to access the urls contained in the active lists")
-                    break;
+                    break
                 case "WhiteMode":
                     i18nd("lliurex-guard-natfree","Do yo want to change to white list mode?\nIf you activate this mode, you can only access the urls contained in the active lists")
-                    break;
+                    break
                 case "DisableMode":
                     i18nd("lliurex-guard-natfree","Do you want to deactivate LliureX Guard?\nIf you deactivate it, no filter will be applied")
-                    break;
+                    break
                 default:
                     ""
                     break
             }
         }
-        dialogVisible:guardOptionsStackBridge.showChangeModeDialog.show
-        dialogWidth:650
-        btnAcceptVisible:false
-        btnAcceptText:""
-        btnDiscardText:i18nd("lliurex-guard-natfree","Accept")
-        btnDiscardIcon:"dialog-ok"
-        btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard-natfree","Cancel")
-        btnCancelIcon:"dialog-cancel"
-        Connections{
-           target:changeModeDialog
-           function onDiscardDialogClicked(){
+        dialogVisible: guardOptionsStackBridge.showChangeModeDialog.show
+        dialogWidth: 650
+        btnAcceptVisible: false
+        btnAcceptText: ""
+        btnDiscardText: i18nd("lliurex-guard-natfree","Accept")
+        btnDiscardIcon: "dialog-ok"
+        btnDiscardVisible: true
+        btnCancelText: i18nd("lliurex-guard-natfree","Cancel")
+        btnCancelIcon: "dialog-cancel"
+        Connections {
+            target: changeModeDialog
+            function onDiscardDialogClicked() {
                 guardOptionsStackBridge.manageChangeModeDialog('Accept')         
-           }
-           function onRejectDialogClicked(){
+            }
+            function onRejectDialogClicked() {
                 guardOptionsStackBridge.manageChangeModeDialog('Cancel')       
-           }
-
+            }
         }
-    } 
+    }
 
-    ChangesDialog{
-        id:pendingChangesDialog
-        dialogIcon:"dialog-warning"
-        dialogMsg:i18nd("lliurex-guard-natfree","There are pendin changes to apply.\nDo you want to apply the changes or discard them?")
-        dialogVisible:guardOptionsStackBridge.showPendingChangesDialog
-        dialogWidth:500
-        btnAcceptVisible:true
-        btnAcceptText:i18nd("lliurex-guard-natfree","Apply")
-        btnDiscardText:i18nd("lliurex-guard-natfree","Discard")
-        btnDiscardIcon:"delete"
-        btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard-natfree","Cancel")
-        btnCancelIcon:"dialog-cancel"
-        Connections{
-           target:pendingChangesDialog
-           function onDialogApplyClicked(){
+    ChangesDialog {
+        id: pendingChangesDialog
+        dialogIcon: "dialog-warning"
+        dialogMsg: i18nd("lliurex-guard-natfree","There are pendin changes to apply.\nDo you want to apply the changes or discard them?")
+        dialogVisible: guardOptionsStackBridge.showPendingChangesDialog
+        dialogWidth: 500
+        btnAcceptVisible: true
+        btnAcceptText: i18nd("lliurex-guard-natfree","Apply")
+        btnDiscardText: i18nd("lliurex-guard-natfree","Discard")
+        btnDiscardIcon: "delete"
+        btnDiscardVisible: true
+        btnCancelText: i18nd("lliurex-guard-natfree","Cancel")
+        btnCancelIcon: "dialog-cancel"
+        Connections {
+            target: pendingChangesDialog
+            function onDialogApplyClicked() {
                 guardOptionsStackBridge.managePendingChangesDialog("Apply")
-           }
-           function onDiscardDialogClicked(){
+            }
+            function onDiscardDialogClicked() {
                 guardOptionsStackBridge.managePendingChangesDialog('Discard')         
-           }
-           function onRejectDialogClicked(){
+            }
+            function onRejectDialogClicked() {
                 closeTimer.stop()
                 guardOptionsStackBridge.managePendingChangesDialog('Cancel')       
-           }
-
+            }
         }
-    } 
+    }
 
-    ChangesDialog{
-        id:removeListsDialog
-        dialogIcon:"dialog-warning"
-        dialogMsg:guardOptionsStackBridge.showRemoveListsDialog.removeAll?i18nd("lliurex-guard-natfree","Do you want select alls list to be remove?"):i18nd("lliurex-guard-natfree","Do you want select the list to be remove?")
-        dialogVisible:guardOptionsStackBridge.showRemoveListsDialog.show
-        dialogWidth:500
-        btnAcceptVisible:false
-        btnAcceptText:""
-        btnDiscardText:i18nd("lliurex-guard-natfree","Yes")
-        btnDiscardIcon:"dialog-ok"
-        btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard-natfree","No")
-        btnCancelIcon:"dialog-cancel"
-        Connections{
-           target:removeListsDialog
-           function onDiscardDialogClicked(){
-                guardOptionsStackBridge.manageRemoveListsDialog('Apply')         
-           }
-           function onRejectDialogClicked(){
+    ChangesDialog {
+        id: removeListsDialog
+        dialogIcon: "dialog-warning"
+        dialogMsg: guardOptionsStackBridge.showRemoveListsDialog.removeAll?i18nd("lliurex-guard-natfree","Do you want select alls list to be remove?"):i18nd("lliurex-guard-natfree","Do you want select the list to be remove?")
+        dialogVisible: guardOptionsStackBridge.showRemoveListsDialog.show
+        dialogWidth: 500
+        btnAcceptVisible: false
+        btnAcceptText: ""
+        btnDiscardText: i18nd("lliurex-guard-natfree","Yes")
+        btnDiscardIcon: "dialog-ok"
+        btnDiscardVisible: true
+        btnCancelText: i18nd("lliurex-guard-natfree","No")
+        btnCancelIcon: "dialog-cancel"
+        Connections {
+            target: removeListsDialog
+            function onDiscardDialogClicked() {
+                guardOptionsStackBridge.manageRemoveListsDialog('Apply')
+            }
+            function onRejectDialogClicked() {
                 guardOptionsStackBridge.manageRemoveListsDialog('Cancel')       
-           }
-
+            }
         }
-    } 
-    ChangesDialog{
-        id:restoreListsDialog
-        dialogIcon:"dialog-warning"
-        dialogMsg:i18nd("lliurex-guard-natfree","Do you want select alls list to be restore?")
-        dialogVisible:guardOptionsStackBridge.showRestoreListsDialog
-        dialogWidth:500
-        btnAcceptVisible:false
-        btnAcceptText:""
-        btnDiscardText:i18nd("lliurex-guard-natfree","Yes")
-        btnDiscardIcon:"dialog-ok"
-        btnDiscardVisible:true
-        btnCancelText:i18nd("lliurex-guard-natfree","No")
-        btnCancelIcon:"dialog-cancel"
-        Connections{
-           target:restoreListsDialog
-           function onDiscardDialogClicked(){
+    }
+
+    ChangesDialog {
+        id: restoreListsDialog
+        dialogIcon: "dialog-warning"
+        dialogMsg: i18nd("lliurex-guard-natfree","Do you want select alls list to be restore?")
+        dialogVisible: guardOptionsStackBridge.showRestoreListsDialog
+        dialogWidth: 500
+        btnAcceptVisible: false
+        btnAcceptText: ""
+        btnDiscardText: i18nd("lliurex-guard-natfree","Yes")
+        btnDiscardIcon: "dialog-ok"
+        btnDiscardVisible: true
+        btnCancelText: i18nd("lliurex-guard-natfree","No")
+        btnCancelIcon: "dialog-cancel"
+        Connections {
+            target:restoreListsDialog
+            function onDiscardDialogClicked() {
                 guardOptionsStackBridge.manageRestoreListsDialog('Apply')         
-           }
-           function onRejectDialogClicked(){
-                guardOptionsStackBridge.manageRestoreListsDialog('Cancel')       
-           }
-
+            }
+            function onRejectDialogClicked() {
+                guardOptionsStackBridge.manageRestoreListsDialog('Cancel')
+            }
         }
     } 
 
-    function getTextMessage(){
+    function getTextMessage() {
         switch (guardOptionsStackBridge.showMainMessage.msgCode){
             case -5:
                 return i18nd("lliurex-guard-natfree","Error saving the changes of the list:")+" "+guardOptionsStackBridge.showMainMessage.data
@@ -399,7 +368,7 @@ Rectangle{
 
     function getTypeMessage(){
 
-        switch (guardOptionsStackBridge.showMainMessage.type){
+        switch (guardOptionsStackBridge.showMainMessage.type) {
             case 0:
                 return Kirigami.MessageType.Positive
             case 1:
@@ -409,8 +378,6 @@ Rectangle{
             case 3:
             default:
                 return Kirigami.MessageType.Information
-
         }
     }
-
-} 
+}

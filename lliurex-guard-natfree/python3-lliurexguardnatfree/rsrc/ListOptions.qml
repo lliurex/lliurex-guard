@@ -2,100 +2,97 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-
-RowLayout{
+RowLayout {
     id: listGrid
-    spacing:10
+    spacing: 10
 
-    ColumnLayout{
-        Layout.fillHeight:true
-        spacing:5
+    ColumnLayout {
+        Layout.fillHeight: true
+        spacing: 5
 
         MenuOptionBtn {
-            id:goBackBtn
-            optionText:i18nd("lliurex-guard-natfree","Home")
-            optionPointSize:14
-            optionIcon:"go-previous"
-            enabled:listStackBridge.enableForm
-            Connections{
-                function onMenuOptionClicked(){
-                    listStackBridge.goHome();
+            id: goBackBtn
+            optionText: i18nd("lliurex-guard-natfree","Home")
+            optionPointSize: 14
+            optionIcon: "go-previous"
+            enabled: listStackBridge.enableForm
+            Connections {
+                function onMenuOptionClicked() {
+                    listStackBridge.goHome()
                     closeTimer.stop()
                 }
             }
-        }  
-        Rectangle{
-            width:130
-            Layout.fillHeight:true
+        }
+
+        Rectangle {
+            width: 130
+            Layout.fillHeight: true
             border.color: palette.mid
-            ColumnLayout{
-               anchors.fill:parent
-               spacing:0
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 0
 
                 MenuOptionBtn {
-                    id:infoItem
-                    optionText:i18nd("lliurex-guard-natfree","List")
-                    optionIcon:"view-list-details"
-                 }
+                    id: infoItem
+                    optionText: i18nd("lliurex-guard-natfree","List")
+                    optionIcon: "view-list-details"
+                }
 
-                 Item{
-                    Layout.fillHeight:true
-                 }
-
+                Item {
+                    Layout.fillHeight: true
+                }
             }
         }
     }
 
     StackView {
         id: manageView
-        Layout.fillWidth:true
+        Layout.fillWidth: true
         Layout.fillHeight: true
-        
-        property int currentOption:listStackBridge.listCurrentOption
 
-        initialItem:listView
+        property int currentOption: listStackBridge.listCurrentOption
 
-        onCurrentOptionChanged:{
-            switch(currentOption){
+        initialItem: listView
+
+        onCurrentOptionChanged: {
+            switch(currentOption) {
                 case 0:
                     manageView.replace(emptyView)
                 case 1:
-                    manageView.replace(listView)
+                manageView.replace(listView)
             }
-
         }
 
         replaceEnter: Transition {
             PropertyAnimation {
                 property: "opacity"
                 from: 0
-                to:1
+                to: 1
                 duration: 60
             }
         }
+
         replaceExit: Transition {
             PropertyAnimation {
                 property: "opacity"
                 from: 1
-                to:0
+                to: 0
                 duration: 60
             }
         }
-        
-        Component{
-            id:emptyView
-            Item{
-                id:emptyPanel
+
+        Component {
+            id: emptyView
+            Item {
+                id: emptyPanel
             }
         }
-        
-        Component{
-            id:listView
-            ListForm{
-                id:listForm
+
+        Component {
+            id: listView
+            ListForm {
+                id: listForm
             }
         }
-        
     }
 }
-
